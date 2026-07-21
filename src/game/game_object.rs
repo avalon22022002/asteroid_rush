@@ -1,5 +1,7 @@
 use macroquad::prelude::*;
 
+use crate::game::rendering::Drawable;
+
 /// A type that exposes a human-readable name.
 pub trait HasName {
     /// Returns this object's display name.
@@ -37,12 +39,6 @@ pub trait HasBoundingBox {
         let (x, y) = mouse_position();
         self.contains_point(Vec2::new(x, y))
     }
-}
-
-/// A type that can render its current state.
-pub trait Drawable {
-    /// Renders the object's current state. Called once per frame.
-    fn draw(&self);
 }
 
 /// Base trait implemented by all game entities.
