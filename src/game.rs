@@ -1,10 +1,10 @@
-use macroquad::prelude::*;
-
-use crate::game::rendering::{Drawable, StateUpdatable};
 pub mod utils;
-pub mod game_object;
+pub mod object;
 pub mod rendering;
 pub mod background;
+
+use macroquad::prelude::*;
+use crate::game::rendering::{Drawable, StateUpdatable};
 
 pub struct Game {
     background: background::Background,
