@@ -1,13 +1,13 @@
 use macroquad::prelude::*;
 
-use crate::game::rendering::{Drawable, StateUpdatable};
+use crate::game::{rendering::{Drawable, StateUpdatable}, utils::ordered};
 
 pub struct Star {
-   pub x: f32,
-   pub y: f32,
-   pub size: f32,
-   pub speed: f32,
-   pub brightness: f32,
+    x: f32,
+    y: f32,
+    size: f32,
+    speed: f32,
+    brightness: f32,
 }
 
 impl Star {
@@ -27,6 +27,25 @@ impl Star {
         (
             Star::new(0.0, 0.0, 1.0, 10.0, 0.3),
             Star::new(screen_width(), screen_height(), 3.0, 40.0, 1.0),
+        )
+    }
+
+    /// Generates a random star with each field drawn uniformly from the
+    /// range between the matching field in `lower` and `upper` (order
+    /// doesn't matter — each field is normalized independently).
+    pub fn random_between_range(lower: &Star, upper: &Star) -> Star {
+        let (x_lo, x_hi) = ordered(lower.x, upper.x);
+        let (y_lo, y_hi) = ordered(lower.y, upper.y);
+        let (size_lo, size_hi) = ordered(lower.size, upper.size);
+        let (speed_lo, speed_hi) = ordered(lower.speed, upper.speed);
+        let (brightness_lo, brightness_hi) = ordered(lower.brightness, upper.brightness);
+
+        Star::new(
+            rand::gen_range(x_lo, x_hi),
+            rand::gen_range(y_lo, y_hi),
+            rand::gen_range(size_lo, size_hi),
+            rand::gen_range(speed_lo, speed_hi),
+            rand::gen_range(brightness_lo, brightness_hi),
         )
     }
 
