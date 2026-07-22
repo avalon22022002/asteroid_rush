@@ -1,13 +1,14 @@
-use asteroid_rush::game::{self, rendering::Drawable, game_window_conf};
+use asteroid_rush::game::{self, game_window_conf, rendering::{Drawable, StateUpdatable}};
 use macroquad::prelude::*;
 
 #[macroquad::main(game_window_conf)]
 async fn main() {
-    println!("stationary star field!"); // make it moving
+    println!("Moving star field!");
 
-    let bg= game::background::Background::new();
-     loop {    
+    let mut bg= game::background::Background::new();
+     loop {  
         bg.draw();
+        bg.update_state(());
 
         next_frame().await;
      }

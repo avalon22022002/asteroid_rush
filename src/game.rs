@@ -1,5 +1,5 @@
 use macroquad::prelude::*;
-
+pub mod utils;
 pub mod game_object;
 pub mod rendering;
 pub mod background;
