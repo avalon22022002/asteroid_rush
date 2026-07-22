@@ -57,12 +57,13 @@ impl Default for Star {
 
 impl Drawable for Star {
     fn draw(&self) {
-        draw_circle(
-            self.x,
-            self.y,
-            self.size,
-            Color::new(1.0, 1.0, 1.0, self.brightness),
-        );
+        let color = Color::new(1.0, 1.0, 1.0, self.brightness);
+        let spike_length = self.size * 1.5;
+        let spike_width = (self.size * 0.4).max(1.0);
+
+        draw_line(self.x - spike_length, self.y, self.x + spike_length, self.y, spike_width, color);
+        draw_line(self.x, self.y - spike_length, self.x, self.y + spike_length, spike_width, color);
+        draw_circle(self.x, self.y, self.size , color);
     }
 }
 
