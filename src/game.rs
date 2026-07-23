@@ -1,6 +1,7 @@
 pub mod utils;
 pub mod object;
 pub mod rendering;
+pub mod interaction;
 pub mod background;
 pub mod ui;
 

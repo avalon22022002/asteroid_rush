@@ -1,20 +1,25 @@
 use macroquad::{prelude::*};
 
-use crate::game::{rendering::Drawable,rendering::StateUpdatable, BASE_WIDTH};
+use crate::game::{BASE_WIDTH, interaction::Interactive, utils, object::HasId, rendering::{Drawable, StateUpdatable}};
 
 pub struct Button {
+    id: u64,
     bounds: Rect,
     label: String,
     color: Color,
     font_size: u16,
     hovered: bool,
     clicked: bool,
-    on_click: Option<Box<dyn FnMut()>>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Events{
+    Clicked,
 }
 
 impl Button {
-   pub fn new(bounds: Rect, label: String, color: Color, font_size:  u16, on_click: Option<Box<dyn FnMut()>>)-> Self{
-        Self { bounds, label, color, font_size, hovered: false, clicked: false, on_click }
+   pub fn new(bounds: Rect, label: String, color: Color, font_size:  u16)-> Self{
+        Self { id: utils::get_next_unique_id(), bounds, label, color, font_size, hovered: false, clicked: false }
     }
 
     /// Returns `true` if the mouse cursor is currently within the button's bounds.
@@ -33,18 +38,14 @@ impl Button {
 }
 
 impl StateUpdatable<()> for Button {
+    /// Refreshes `hovered`/`clicked` from the current mouse state. This only
+    /// updates the button's own state for rendering — it does not decide what
+    /// a click *means*. Consumers read `poll_event` (via `Interactive`) after
+    /// this to react to the click, keeping Button decoupled from whatever
+    /// action it triggers.
     fn update_state(&mut self, _args: ()) {
-        // update state if mouse pressed
         self.hovered = self.is_mouse_over();
         self.clicked = self.is_clicked_via_mouse();
-
-        if self.clicked {
-            // call on_click function
-            if let Some(on_click_fn)=&mut self.on_click  {
-                on_click_fn();
-            }
-        }
-        
     }
 }
 
@@ -130,5 +131,21 @@ impl Drawable for Button {
                 ..Default::default()
             },
         );
+    }
+}
+
+impl Interactive for Button{
+    type Event = Option<Events>;
+    fn poll_event(&self) -> Self::Event {
+        if self.clicked {
+            return Some(Events::Clicked)
+        }
+        return None;
+    }
+}
+
+impl HasId for Button {
+    fn id(&self) -> u64 {
+        self.id
     }
 }
