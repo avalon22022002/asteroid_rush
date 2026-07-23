@@ -4,7 +4,7 @@ use asteroid_rush::game::{
    window_conf,
    interaction::Interactive,
    rendering::{Drawable, StateUpdatable}, 
-   ui::button::Events,
+   ui::components::{button::Button, button::Events},
    object::{HasId}
 };
 
@@ -14,7 +14,7 @@ async fn main() {
     
 
     let mut game= game::Game::new();
-    let mut b=game::ui::button::Button::new(
+    let mut b=Button::new(
       Rect::new(20.0,20.0,100.0,50.0),
       "Click Me".to_string(), 
       BLUE, 
