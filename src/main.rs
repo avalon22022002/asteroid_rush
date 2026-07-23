@@ -9,7 +9,7 @@ use asteroid_rush::game::{
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    println!("Moving star field!");
+    println!("Moving star field with Home Page!");
 
 
     let mut game= game::Game::new();

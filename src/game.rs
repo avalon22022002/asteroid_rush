@@ -26,7 +26,7 @@ impl Game {
 
     fn window_conf()-> Conf {
          Conf {
-            window_title: "Space Shooter Classic".to_owned(),
+            window_title: "AstroRush: Space Shooter Classic".to_owned(),
             window_width: BASE_WIDTH as i32,
             window_height: BASE_HEIGHT as i32,
             ..Default::default()

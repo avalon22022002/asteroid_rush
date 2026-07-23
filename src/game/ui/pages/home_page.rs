@@ -3,7 +3,10 @@ use macroquad::prelude::*;
 use crate::game::{
     interaction::Interactive,
     rendering::{Drawable, StateUpdatable},
-    ui::components::button::{Button, Events as ButtonEvent},
+    ui::components::{
+        button::{Button, Events as ButtonEvent},
+        title::Title,
+    },
     BASE_HEIGHT, BASE_WIDTH,
 };
 
@@ -15,6 +18,7 @@ pub enum HomePageEvent {
 }
 
 pub struct HomePage {
+    title: Title,
     new_game_button: Button,
     exit_button: Button,
 }
@@ -29,6 +33,13 @@ impl HomePage {
         let exit_y = new_game_y + button_height + gap;
 
         Self {
+            title: Title::new(
+                "AstroRush: Space Shooter Classic".to_string(),
+                32,
+                Vec2::new(x+40.0, 100.0),
+                SKYBLUE,
+                None,
+            ),
             new_game_button: Button::new(
                 Rect::new(x, new_game_y, button_width, button_height),
                 "New Game".to_string(),
@@ -49,6 +60,7 @@ impl HomePage {
 
 impl Drawable for HomePage {
     fn draw(&self) {
+        self.title.draw();
         self.new_game_button.draw();
         self.exit_button.draw();
     }
