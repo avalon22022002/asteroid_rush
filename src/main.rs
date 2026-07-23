@@ -3,37 +3,32 @@ use asteroid_rush::game::{
    self,
    window_conf,
    interaction::Interactive,
-   rendering::{Drawable, StateUpdatable}, 
-   ui::components::{button::Button, button::Events},
-   object::{HasId}
+   rendering::{Drawable, StateUpdatable},
+   ui::pages::home_page::{HomePage, HomePageEvent},
 };
 
 #[macroquad::main(window_conf)]
 async fn main() {
     println!("Moving star field!");
-    
+
 
     let mut game= game::Game::new();
-    let mut b=Button::new(
-      Rect::new(20.0,20.0,100.0,50.0),
-      "Click Me".to_string(), 
-      BLUE, 
-      30
-   );
-   
-     loop {  
-        game.draw();
+    let mut home_page = HomePage::new();
+
+     loop {
         game.update_state(());
-   
-        b.draw();
-        b.update_state(());
-        match b.poll_event() {
-            Some(event) => {
-               if event == Events::Clicked {
-                  println!("Button With Id {} is clicked", b.id())
-               }
-            },
-            None => {},
+        game.draw();
+
+        home_page.update_state(());
+        home_page.draw();
+        match home_page.poll_event() {
+            Some(HomePageEvent::NewGame) => {
+               println!("New Game clicked");
+            }
+            Some(HomePageEvent::Exit) => {
+               std::process::exit(0);
+            }
+            None => {}
         }
 
         next_frame().await;

@@ -8,6 +8,7 @@ pub struct Button {
     label: String,
     color: Color,
     font_size: u16,
+    accent_color: Option<Color>,
     hovered: bool,
     clicked: bool,
 }
@@ -18,8 +19,11 @@ pub enum Events{
 }
 
 impl Button {
-   pub fn new(bounds: Rect, label: String, color: Color, font_size:  u16)-> Self{
-        Self { id: utils::get_next_unique_id(), bounds, label, color, font_size, hovered: false, clicked: false }
+    /// `accent_color` sets the color of the button's bottom accent bar, e.g.
+    /// green to mark a confirming action or red for a destructive one. Pass
+    /// `None` to fall back to a subtle dark bezel shine.
+   pub fn new(bounds: Rect, label: String, color: Color, font_size:  u16, accent_color: Option<Color>)-> Self{
+        Self { id: utils::get_next_unique_id(), bounds, label, color, font_size, accent_color, hovered: false, clicked: false }
     }
 
     /// Returns `true` if the mouse cursor is currently within the button's bounds.
@@ -108,7 +112,7 @@ impl Drawable for Button {
             self.bounds.y + self.bounds.h - accent_height,
             self.bounds.w,
             accent_height,
-            Color::new(0.0, 0.0, 0.0, 0.25),
+            self.accent_color.unwrap_or(Color::new(0.0, 0.0, 0.0, 0.25)),
         );
 
         draw_rectangle_lines(
