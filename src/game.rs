@@ -2,9 +2,15 @@ pub mod utils;
 pub mod object;
 pub mod rendering;
 pub mod background;
+pub mod ui;
 
 use macroquad::prelude::*;
 use crate::game::rendering::{Drawable, StateUpdatable};
+
+/// Base window size the game is designed at. UI elements scale their visuals
+/// relative to this so proportions hold up if the window is resized.
+pub const BASE_WIDTH: f32 = 605.0;
+pub const BASE_HEIGHT: f32 = 455.0;
 
 pub struct Game {
     background: background::Background,
@@ -20,8 +26,8 @@ impl Game {
     fn window_conf()-> Conf {
          Conf {
             window_title: "Space Shooter Classic".to_owned(),
-            window_width: 605,
-            window_height: 455,
+            window_width: BASE_WIDTH as i32,
+            window_height: BASE_HEIGHT as i32,
             ..Default::default()
         }
     }
