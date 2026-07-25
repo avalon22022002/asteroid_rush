@@ -15,3 +15,16 @@ pub trait Interactive {
     /// Should not mutate anything outside `self`.
     fn poll_event(&self) -> Self::Event;
 }
+
+/// Implemented by anything that reacts to an `Interactive` element's event
+/// for the current frame — the counterpart to `Interactive::poll_event`.
+/// `Interactive` only reports *what happened*; `EventHandler` decides *what
+/// to do about it* (play a sound, mutate game state, trigger a transition,
+/// etc). Bound to `Interactive` so it reuses the same `Event` type rather
+/// than redeclaring it.
+pub trait EventHandler: Interactive {
+    /// React to the event reported for this frame. Typically called right
+    /// after `poll_event` (e.g. from within `StateUpdatable::update_state`),
+    /// so implementors can assume `self`'s state is already up to date.
+    fn handle_event(&mut self, event: Self::Event);
+}

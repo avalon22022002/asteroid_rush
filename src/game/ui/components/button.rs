@@ -1,6 +1,6 @@
 use macroquad::{prelude::*};
 
-use crate::game::{BASE_WIDTH, interaction::Interactive, utils, object::HasId, rendering::{Drawable, StateUpdatable}};
+use crate::game::{BASE_WIDTH, interaction::{Interactive,EventHandler}, utils, object::HasId, rendering::{Drawable, StateUpdatable}};
 
 pub struct Button {
     id: u64,
@@ -38,6 +38,10 @@ impl Button {
     /// fires once per click rather than every frame the button is held down.
     fn is_clicked_via_mouse(&self) -> bool {
         self.is_mouse_over() && is_mouse_button_pressed(MouseButton::Left)
+    }
+
+    fn play_click_sound(){
+        
     }
 }
 
@@ -138,6 +142,12 @@ impl Drawable for Button {
     }
 }
 
+impl HasId for Button {
+    fn id(&self) -> u64 {
+        self.id
+    }
+}
+
 impl Interactive for Button{
     type Event = Option<Events>;
     fn poll_event(&self) -> Self::Event {
@@ -148,8 +158,8 @@ impl Interactive for Button{
     }
 }
 
-impl HasId for Button {
-    fn id(&self) -> u64 {
-        self.id
+impl EventHandler for Button{
+    fn handle_event(&mut self, event: Self::Event) {
+        
     }
 }
