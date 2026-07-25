@@ -1,12 +1,13 @@
-pub mod utils;
+pub mod audio;
+pub mod background;
+pub mod interaction;
 pub mod object;
 pub mod rendering;
-pub mod interaction;
-pub mod background;
 pub mod ui;
+pub mod utils;
 
-use macroquad::prelude::*;
 use crate::game::rendering::{Drawable, StateUpdatable};
+use macroquad::prelude::*;
 
 /// Base window size the game is designed at. UI elements scale their visuals
 /// relative to this so proportions hold up if the window is resized.
@@ -18,14 +19,14 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new()->Self{
-        Self{
-            background: background::Background::new()
+    pub fn new() -> Self {
+        Self {
+            background: background::Background::new(),
         }
     }
 
-    fn window_conf()-> Conf {
-         Conf {
+    fn window_conf() -> Conf {
+        Conf {
             window_title: "AstroRush: Space Shooter Classic".to_owned(),
             window_width: BASE_WIDTH as i32,
             window_height: BASE_HEIGHT as i32,
@@ -34,7 +35,6 @@ impl Game {
     }
 }
 
-
 impl Drawable for Game {
     fn draw(&self) {
         // draw background
@@ -42,14 +42,12 @@ impl Drawable for Game {
     }
 }
 
-impl StateUpdatable<()> for Game{
+impl StateUpdatable<()> for Game {
     fn update_state(&mut self, data: ()) {
-        // update background state  
+        // update background state
         self.background.update_state(data);
-    
     }
 }
-
 
 /// Free function required by `#[macroquad::main(window_conf)]` — the macro expects
 /// a top-level function it can call directly, so this just delegates to `Game::window_conf()`.
