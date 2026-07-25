@@ -1,14 +1,35 @@
-use asteroid_rush::game::{self, game_window_conf, rendering::{Drawable, StateUpdatable}};
 use macroquad::prelude::*;
+use asteroid_rush::game::{
+   self,
+   window_conf,
+   interaction::Interactive,
+   rendering::{Drawable, StateUpdatable},
+   ui::pages::home_page::{HomePage, HomePageEvent},
+};
 
-#[macroquad::main(game_window_conf)]
+#[macroquad::main(window_conf)]
 async fn main() {
-    println!("Moving star field!");
+    println!("Moving star field with Home Page!");
 
-    let mut bg= game::background::Background::new();
-     loop {  
-        bg.draw();
-        bg.update_state(());
+
+    let mut game= game::Game::new();
+    let mut home_page = HomePage::new();
+
+     loop {
+        game.update_state(());
+        game.draw();
+
+        home_page.update_state(());
+        home_page.draw();
+        match home_page.poll_event() {
+            Some(HomePageEvent::NewGame) => {
+               println!("New Game clicked");
+            }
+            Some(HomePageEvent::Exit) => {
+               std::process::exit(0);
+            }
+            None => {}
+        }
 
         next_frame().await;
      }

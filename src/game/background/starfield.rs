@@ -1,6 +1,4 @@
-use macroquad::prelude::*;
-
-use crate::game::{rendering::Drawable, rendering::StateUpdatable, utils::ordered, background::starfield::star::*};
+use crate::game::{rendering::Drawable, rendering::StateUpdatable, background::starfield::star::*};
 
 pub mod star;
 
@@ -18,22 +16,8 @@ impl Starfield{
     pub fn new(star_count: usize, limits: Option<(Star, Star)>) -> Starfield {
         let (lower_limits, upper_limits) = limits.unwrap_or_else(Star::default_bounds);
 
-        let (x_lo, x_hi) = ordered(lower_limits.x, upper_limits.x);
-        let (y_lo, y_hi) = ordered(lower_limits.y, upper_limits.y);
-        let (size_lo, size_hi) = ordered(lower_limits.size, upper_limits.size);
-        let (speed_lo, speed_hi) = ordered(lower_limits.speed, upper_limits.speed);
-        let (brightness_lo, brightness_hi) = ordered(lower_limits.brightness, upper_limits.brightness);
-
         let stars = (0..star_count)
-            .map(|_| {
-                Star::new(
-                    rand::gen_range(x_lo, x_hi),
-                    rand::gen_range(y_lo, y_hi),
-                    rand::gen_range(size_lo, size_hi),
-                    rand::gen_range(speed_lo, speed_hi),
-                    rand::gen_range(brightness_lo, brightness_hi),
-                )
-            })
+            .map(|_| Star::random_between_range(&lower_limits, &upper_limits))
             .collect();
 
         return Starfield { stars }
