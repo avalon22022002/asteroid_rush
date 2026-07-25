@@ -1,2 +1,2 @@
 # Cargo build artifacts
-# /target/ # should be covered by root's .gitignore
+/target/
