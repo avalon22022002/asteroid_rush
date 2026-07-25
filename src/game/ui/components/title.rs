@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 
-use crate::game::{rendering::Drawable, BASE_WIDTH};
+use crate::game::{BASE_WIDTH, rendering::Drawable};
 
 /// A single line of static heading text, e.g. a page's title screen heading.
 pub struct Title {
@@ -14,8 +14,20 @@ pub struct Title {
 impl Title {
     /// `font` renders the title with a loaded custom font instead of
     /// macroquad's built-in default; pass `None` to use the default.
-    pub fn new(text: String, font_size: u16, position: Vec2, color: Color, font: Option<Font>) -> Self {
-        Self { text, font_size, position, color, font }
+    pub fn new(
+        text: String,
+        font_size: u16,
+        position: Vec2,
+        color: Color,
+        font: Option<Font>,
+    ) -> Self {
+        Self {
+            text,
+            font_size,
+            position,
+            color,
+            font,
+        }
     }
 }
 

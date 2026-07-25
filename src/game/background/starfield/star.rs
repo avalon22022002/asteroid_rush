@@ -1,6 +1,9 @@
 use macroquad::prelude::*;
 
-use crate::game::{rendering::{Drawable, StateUpdatable}, utils::ordered};
+use crate::game::{
+    rendering::{Drawable, StateUpdatable},
+    utils::ordered,
+};
 
 pub struct Star {
     x: f32,
@@ -52,7 +55,7 @@ impl Star {
     /// Advances the star downward by `speed * dt`. Once it drifts past the
     /// bottom edge it wraps back to the top at a fresh random `x`, so the
     /// field keeps scrolling indefinitely instead of running out of stars.
-    pub fn update_star_position(&mut self){
+    pub fn update_star_position(&mut self) {
         let dt = get_frame_time();
         self.y += self.speed * dt;
         if self.y > screen_height() {
@@ -80,14 +83,27 @@ impl Drawable for Star {
         let spike_length = self.size * 1.5;
         let spike_width = (self.size * 0.4).max(1.0);
 
-        draw_line(self.x - spike_length, self.y, self.x + spike_length, self.y, spike_width, color);
-        draw_line(self.x, self.y - spike_length, self.x, self.y + spike_length, spike_width, color);
-        draw_circle(self.x, self.y, self.size , color);
+        draw_line(
+            self.x - spike_length,
+            self.y,
+            self.x + spike_length,
+            self.y,
+            spike_width,
+            color,
+        );
+        draw_line(
+            self.x,
+            self.y - spike_length,
+            self.x,
+            self.y + spike_length,
+            spike_width,
+            color,
+        );
+        draw_circle(self.x, self.y, self.size, color);
     }
 }
 
 impl StateUpdatable<()> for Star {
-
     fn update_state(&mut self, _data: ()) {
         // update star position
         self.update_star_position();

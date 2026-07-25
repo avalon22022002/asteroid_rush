@@ -1,13 +1,13 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    interaction::Interactive,
+    BASE_HEIGHT, BASE_WIDTH,
+    interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{
-        button::{Button, Events as ButtonEvent},
+        button::{Button, ButtonEvents},
         title::Title,
     },
-    BASE_HEIGHT, BASE_WIDTH,
 };
 
 /// Choices the player can make from the title screen.
@@ -36,7 +36,7 @@ impl HomePage {
             title: Title::new(
                 "AstroRush: Space Shooter Classic".to_string(),
                 32,
-                Vec2::new(x+40.0, 100.0),
+                Vec2::new(x + 40.0, 100.0),
                 SKYBLUE,
                 None,
             ),
@@ -79,12 +79,27 @@ impl Interactive for HomePage {
     /// Checks both buttons for a click this frame. If both somehow fire on
     /// the same frame, New Game takes priority over Exit.
     fn poll_event(&self) -> Self::Event {
-        if let Some(ButtonEvent::Clicked) = self.new_game_button.poll_event() {
+        if let Some(ButtonEvents::Clicked) = self.new_game_button.poll_event() {
             return Some(HomePageEvent::NewGame);
         }
-        if let Some(ButtonEvent::Clicked) = self.exit_button.poll_event() {
+        if let Some(ButtonEvents::Clicked) = self.exit_button.poll_event() {
             return Some(HomePageEvent::Exit);
         }
         None
+    }
+}
+
+impl SelfEventHandler for HomePage {
+    /// Fans out to each button's own self-contained feedback (e.g. its click
+    /// sound) — the same delegation `draw`/`update_state` already do above.
+    /// `HomePageEvent` (the `event` param) is app-level and means nothing to
+    /// a `Button`, so it's unused here: each child instead re-derives and
+    /// handles *its own* event, independently of any priority ordering
+    /// `poll_event` applies when deciding what the click means for the page.
+    fn handle_self_event(&mut self, _event: Self::Event) {
+        self.new_game_button
+            .handle_self_event(self.new_game_button.poll_event());
+        self.exit_button
+            .handle_self_event(self.exit_button.poll_event());
     }
 }
