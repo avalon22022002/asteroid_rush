@@ -6,8 +6,8 @@ use crate::game::{
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{
+        banner::{Banner, BannerKind},
         button::{Button, ButtonEvents},
-        title::Title,
     },
 };
 
@@ -19,7 +19,7 @@ pub enum HomePageEvent {
 }
 
 pub struct HomePage {
-    title: Title,
+    main_banner: Banner,
     new_game_button: Button,
     exit_button: Button,
     ship: Ship,
@@ -35,11 +35,10 @@ impl HomePage {
         let exit_y = new_game_y + button_height + gap;
 
         Self {
-            title: Title::new(
-                "AstroRush: Space Shooter Classic".to_string(),
-                32,
-                Vec2::new(x + 40.0, 100.0),
-                SKYBLUE,
+            main_banner: Banner::new(
+                BannerKind::HomePageMain,
+                Vec2::new(x, 50.0),
+                Vec2::new(450.0, 111.0),
                 None,
             ),
             new_game_button: Button::new(
@@ -66,7 +65,7 @@ impl HomePage {
 
 impl Drawable for HomePage {
     fn draw(&self) {
-        self.title.draw();
+        self.main_banner.draw();
         self.new_game_button.draw();
         self.exit_button.draw();
         self.ship.draw();
