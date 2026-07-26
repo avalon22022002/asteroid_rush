@@ -6,8 +6,8 @@ use crate::game::{
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{
+        banner::{Banner, BannerKind},
         button::{Button, ButtonEvents},
-        title::Title,
     },
 };
 
@@ -19,7 +19,7 @@ pub enum HomePageEvent {
 }
 
 pub struct HomePage {
-    title: Title,
+    main_banner: Banner,
     new_game_button: Button,
     exit_button: Button,
     ship: Ship,
@@ -27,37 +27,34 @@ pub struct HomePage {
 
 impl HomePage {
     pub fn new() -> Self {
-        let button_width = BASE_WIDTH * 0.46;
-        let button_height = BASE_HEIGHT * 0.13;
+        let button_width = BASE_WIDTH * 0.5;
+        let button_height = BASE_HEIGHT * 0.2;
         let gap = 10.0;
         let x = 20.0;
         let new_game_y = BASE_HEIGHT * 0.40;
         let exit_y = new_game_y + button_height + gap;
 
         Self {
-            title: Title::new(
-                "AstroRush: Space Shooter Classic".to_string(),
-                32,
-                Vec2::new(x + 40.0, 100.0),
-                SKYBLUE,
+            main_banner: Banner::new(
+                BannerKind::HomePageMain,
+                Vec2::new(x, 50.0),
+                Vec2::new(450.0, 111.0),
                 None,
             ),
             new_game_button: Button::new(
                 Rect::new(x, new_game_y, button_width, button_height),
                 "New Game".to_string(),
-                BLUE,
                 30,
-                Some(GREEN),
+                None,
             ),
             exit_button: Button::new(
                 Rect::new(x, exit_y, button_width, button_height),
                 "Exit".to_string(),
-                BLUE,
                 30,
-                Some(RED),
+                None,
             ),
             ship: Ship::new(
-                Vec2::new(BASE_WIDTH - 300.0, 120.0),
+                Vec2::new(BASE_WIDTH - 300.0, 180.0),
                 Vec2::new(236.0, 300.0),
                 ShipKind::Sentinel,
                 "Sentinel".to_string(),
@@ -68,7 +65,7 @@ impl HomePage {
 
 impl Drawable for HomePage {
     fn draw(&self) {
-        self.title.draw();
+        self.main_banner.draw();
         self.new_game_button.draw();
         self.exit_button.draw();
         self.ship.draw();
