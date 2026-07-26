@@ -2,6 +2,7 @@ use macroquad::prelude::*;
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
+    entities::ship::{Ship, ShipKind},
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{
@@ -21,6 +22,7 @@ pub struct HomePage {
     title: Title,
     new_game_button: Button,
     exit_button: Button,
+    ship: Ship,
 }
 
 impl HomePage {
@@ -54,6 +56,12 @@ impl HomePage {
                 30,
                 Some(RED),
             ),
+            ship: Ship::new(
+                Vec2::new(BASE_WIDTH - 300.0, 120.0),
+                Vec2::new(236.0, 300.0),
+                ShipKind::Sentinel,
+                "Sentinel".to_string(),
+            ),
         }
     }
 }
@@ -63,6 +71,7 @@ impl Drawable for HomePage {
         self.title.draw();
         self.new_game_button.draw();
         self.exit_button.draw();
+        self.ship.draw();
     }
 }
 
@@ -70,6 +79,7 @@ impl StateUpdatable<()> for HomePage {
     fn update_state(&mut self, _args: ()) {
         self.new_game_button.update_state(());
         self.exit_button.update_state(());
+        self.ship.update_state(());
     }
 }
 
