@@ -3,6 +3,8 @@ use std::sync::OnceLock;
 
 use macroquad::audio::{self, Sound};
 
+const LOG_PREFIX: &str = "[audio]";
+
 /// Identifies a sound effect the game can play. Add a variant here and an
 /// entry in `sound_sources` to register a new sound.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -11,19 +13,23 @@ pub enum AudioName {
     ButtonHover,
 }
 
-/// Maps each `AudioName` to its embedded asset bytes. `include_bytes!` bakes
-/// the files in at compile time, so a missing/renamed asset fails the build
-/// instead of surfacing as a runtime error — and it helps in wasm/web
-/// builds, which can't do plain file-system reads.
-fn sound_sources() -> [(AudioName, &'static [u8]); 2] {
+/// Maps each `AudioName` to its embedded asset bytes, alongside the path
+/// it was embedded from (kept as a plain string too, purely so load logs
+/// can name the file). `include_bytes!` bakes the files in at compile time,
+/// so a missing/renamed asset fails the build instead of surfacing as a
+/// runtime error — and it helps in wasm/web builds, which can't do plain
+/// file-system reads.
+fn sound_sources() -> [(AudioName, &'static str, &'static [u8]); 2] {
     [
         (
             AudioName::ButtonClick,
-            include_bytes!("../../assets/audio/button/button-click.wav"),
+            "assets/audio/ui/click.wav",
+            include_bytes!("../../assets/audio/ui/click.wav"),
         ),
         (
             AudioName::ButtonHover,
-            include_bytes!("../../assets/audio/button/button-hover.wav"),
+            "assets/audio/ui/hover.wav",
+            include_bytes!("../../assets/audio/ui/hover.wav"),
         ),
     ]
 }
@@ -36,21 +42,21 @@ static SOUNDS: OnceLock<HashMap<AudioName, Sound>> = OnceLock::new();
 /// (e.g. the top of `main`, before the game loop starts) so `play` has
 /// something to play.
 pub async fn load_sounds() {
-    println!("[audio] loading...");
+    println!("{LOG_PREFIX} loading...");
 
     let mut map = HashMap::new();
-    for (name, bytes) in sound_sources() {
-        println!("[audio] loading {name:?}...");
+    for (name, path, bytes) in sound_sources() {
+        println!("{LOG_PREFIX} loading {name:?} ({path})...");
 
         let sound = audio::load_sound_from_bytes(bytes)
             .await
-            .unwrap_or_else(|e| panic!("failed to decode sound {name:?}: {e}"));
+            .unwrap_or_else(|e| panic!("failed to decode sound {name:?} ({path}): {e}"));
 
         map.insert(name, sound);
     }
     let _ = SOUNDS.set(map);
 
-    println!("[audio] load complete");
+    println!("{LOG_PREFIX} load complete");
 }
 
 /// Plays the given sound effect once. No-ops instead of panicking if

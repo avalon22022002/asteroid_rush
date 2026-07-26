@@ -1,5 +1,7 @@
 use macroquad::texture::Texture2D;
 
+const LOG_PREFIX: &str = "[animation]";
+
 /// A sequence of sprite frames played back at a fixed rate, looping.
 pub struct Animation {
     frames: Vec<Texture2D>,
@@ -44,27 +46,44 @@ impl Animation {
         &self.frames[self.current]
     }
 
-    /// Decodes each byte slice as an image frame and builds an `Animation`
-    /// from them. Panics if a frame's bytes aren't a valid image — pair with
-    /// `include_bytes!` at the call site so a missing/renamed PNG fails the
-    /// build instead of surfacing as a runtime error.
+    /// Decodes each `(path, bytes)` pair as an image frame and builds an
+    /// `Animation` from them. `path` is only used for load logging — pass
+    /// the same path given to `include_bytes!` at the call site so log
+    /// output (and the panic message, if the bytes aren't a valid image)
+    /// names the actual file. `include_bytes!` bakes the file in at compile
+    /// time, so a missing/renamed PNG fails the build instead of surfacing
+    /// as a runtime error.
     ///
     /// # Example
     ///
     /// ```ignore
     /// let alive_animation = Animation::load(
     ///     &[
-    ///         include_bytes!("../../../assets/ships/vanguard/alive_0.png"),
-    ///         include_bytes!("../../../assets/ships/vanguard/alive_1.png"),
+    ///         (
+    ///             "assets/ships/vanguard/alive_0.png",
+    ///             include_bytes!("../../../assets/ships/vanguard/alive_0.png"),
+    ///         ),
+    ///         (
+    ///             "assets/ships/vanguard/alive_1.png",
+    ///             include_bytes!("../../../assets/ships/vanguard/alive_1.png"),
+    ///         ),
     ///     ],
     ///     8.0,
     /// );
     /// ```
-    pub fn load(frame_bytes: &[&[u8]], fps: f32) -> Self {
-        let frames = frame_bytes
+    pub fn load(frames: &[(&str, &[u8])], fps: f32) -> Self {
+        println!("{LOG_PREFIX} loading {} frame(s)...", frames.len());
+
+        let frames = frames
             .iter()
-            .map(|bytes| Texture2D::from_file_with_format(bytes, None))
+            .map(|(path, bytes)| {
+                println!("{LOG_PREFIX} loading {path}...");
+                Texture2D::from_file_with_format(bytes, None)
+            })
             .collect();
+
+        println!("{LOG_PREFIX} load complete");
+
         Self::new(frames, fps)
     }
 }
