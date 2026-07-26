@@ -54,22 +54,47 @@ impl ShipKind {
             ShipKind::Sentinel => {
                 let alive = Animation::load(
                     &[
-                        include_bytes!("../../../assets/animations/ships/sentinel/sentinel_00.png"),
-                        include_bytes!("../../../assets/animations/ships/sentinel/sentinel_01.png"),
-                        include_bytes!("../../../assets/animations/ships/sentinel/sentinel_02.png"),
-                        include_bytes!("../../../assets/animations/ships/sentinel/sentinel_03.png"),
-                        include_bytes!("../../../assets/animations/ships/sentinel/sentinel_04.png"),
-                        include_bytes!("../../../assets/animations/ships/sentinel/sentinel_05.png"),
-                        include_bytes!("../../../assets/animations/ships/sentinel/sentinel_06.png"),
-                        include_bytes!("../../../assets/animations/ships/sentinel/sentinel_07.png"),
+                        (
+                            "assets/animations/ships/sentinel/sentinel_00.png",
+                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_00.png"),
+                        ),
+                        (
+                            "assets/animations/ships/sentinel/sentinel_01.png",
+                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_01.png"),
+                        ),
+                        (
+                            "assets/animations/ships/sentinel/sentinel_02.png",
+                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_02.png"),
+                        ),
+                        (
+                            "assets/animations/ships/sentinel/sentinel_03.png",
+                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_03.png"),
+                        ),
+                        (
+                            "assets/animations/ships/sentinel/sentinel_04.png",
+                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_04.png"),
+                        ),
+                        (
+                            "assets/animations/ships/sentinel/sentinel_05.png",
+                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_05.png"),
+                        ),
+                        (
+                            "assets/animations/ships/sentinel/sentinel_06.png",
+                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_06.png"),
+                        ),
+                        (
+                            "assets/animations/ships/sentinel/sentinel_07.png",
+                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_07.png"),
+                        ),
                     ],
                     12.0,
                 );
                 // No dedicated death sprite set yet — freeze on the last
                 // alive frame as a placeholder until one's added.
                 let dead = Animation::load(
-                    &[include_bytes!(
-                        "../../../assets/animations/ships/sentinel/sentinel_07.png"
+                    &[(
+                        "assets/animations/ships/sentinel/sentinel_07.png",
+                        include_bytes!("../../../assets/animations/ships/sentinel/sentinel_07.png"),
                     )],
                     1.0,
                 );
