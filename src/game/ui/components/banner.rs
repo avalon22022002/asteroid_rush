@@ -11,6 +11,8 @@ const LOG_PREFIX: &str = "[banner]";
 pub enum BannerKind {
     /// The home page's main title banner ("AstroRush: Space Shooter Classic").
     HomePageMain,
+    /// The level selection page's main title banner.
+    LevelSelectionPageMain,
 }
 
 impl BannerKind {
@@ -20,11 +22,18 @@ impl BannerKind {
     fn default_texture(self) -> Texture2D {
         match self {
             BannerKind::HomePageMain => {
-                println!(
-                    "{LOG_PREFIX} loading {self:?} (assets/ui/text/home_page_title.png)..."
-                );
+                println!("{LOG_PREFIX} loading {self:?} (assets/ui/text/home_page_title.png)...");
                 Texture2D::from_file_with_format(
                     include_bytes!("../../../../assets/ui/text/home_page_title.png"),
+                    None,
+                )
+            }
+            BannerKind::LevelSelectionPageMain => {
+                println!(
+                    "{LOG_PREFIX} loading {self:?} (assets/ui/text/level_selection_page_title.png)..."
+                );
+                Texture2D::from_file_with_format(
+                    include_bytes!("../../../../assets/ui/text/level_selection_page_title.png"),
                     None,
                 )
             }

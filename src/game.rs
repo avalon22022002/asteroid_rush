@@ -1,8 +1,8 @@
 pub mod audio;
 pub mod background;
+pub mod entities;
 pub mod interaction;
 pub mod object;
-pub mod entities;
 pub mod rendering;
 pub mod ui;
 pub mod utils;

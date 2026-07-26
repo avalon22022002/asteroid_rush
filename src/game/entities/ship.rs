@@ -1,19 +1,19 @@
 use macroquad::prelude::*;
 
 use crate::game::{
+    BASE_HEIGHT, BASE_WIDTH,
     entities::animation::Animation,
     rendering::{Drawable, StateUpdatable},
-    BASE_HEIGHT, BASE_WIDTH,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ShipKind{
+pub enum ShipKind {
     // Allrounder: 1 Gun, Medium Health, Medium Speed
     Vanguard,
     // Defender: 3 Guns, High Health, Slow
     Sentinel,
     // Attacker: 3 Guns, Low Health, Fast
-    Viper
+    Viper,
 }
 
 impl ShipKind {
@@ -56,35 +56,51 @@ impl ShipKind {
                     &[
                         (
                             "assets/animations/ships/sentinel/sentinel_00.png",
-                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_00.png"),
+                            include_bytes!(
+                                "../../../assets/animations/ships/sentinel/sentinel_00.png"
+                            ),
                         ),
                         (
                             "assets/animations/ships/sentinel/sentinel_01.png",
-                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_01.png"),
+                            include_bytes!(
+                                "../../../assets/animations/ships/sentinel/sentinel_01.png"
+                            ),
                         ),
                         (
                             "assets/animations/ships/sentinel/sentinel_02.png",
-                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_02.png"),
+                            include_bytes!(
+                                "../../../assets/animations/ships/sentinel/sentinel_02.png"
+                            ),
                         ),
                         (
                             "assets/animations/ships/sentinel/sentinel_03.png",
-                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_03.png"),
+                            include_bytes!(
+                                "../../../assets/animations/ships/sentinel/sentinel_03.png"
+                            ),
                         ),
                         (
                             "assets/animations/ships/sentinel/sentinel_04.png",
-                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_04.png"),
+                            include_bytes!(
+                                "../../../assets/animations/ships/sentinel/sentinel_04.png"
+                            ),
                         ),
                         (
                             "assets/animations/ships/sentinel/sentinel_05.png",
-                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_05.png"),
+                            include_bytes!(
+                                "../../../assets/animations/ships/sentinel/sentinel_05.png"
+                            ),
                         ),
                         (
                             "assets/animations/ships/sentinel/sentinel_06.png",
-                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_06.png"),
+                            include_bytes!(
+                                "../../../assets/animations/ships/sentinel/sentinel_06.png"
+                            ),
                         ),
                         (
                             "assets/animations/ships/sentinel/sentinel_07.png",
-                            include_bytes!("../../../assets/animations/ships/sentinel/sentinel_07.png"),
+                            include_bytes!(
+                                "../../../assets/animations/ships/sentinel/sentinel_07.png"
+                            ),
                         ),
                     ],
                     12.0,
@@ -114,7 +130,7 @@ pub struct ShipStats {
     gun_count: u8,
     fire_damage: f32,
 }
-pub struct Ship{
+pub struct Ship {
     pos: Vec2,
     size: Vec2,
     kind: ShipKind,
@@ -128,7 +144,16 @@ pub struct Ship{
 impl Ship {
     pub fn new(pos: Vec2, size: Vec2, kind: ShipKind, description: String) -> Self {
         let (alive_animation, dead_animation) = kind.default_animations();
-        Self { pos, size, kind, ship_stats: kind.base_stats(), description, alive_animation, dead_animation, is_alive: true }
+        Self {
+            pos,
+            size,
+            kind,
+            ship_stats: kind.base_stats(),
+            description,
+            alive_animation,
+            dead_animation,
+            is_alive: true,
+        }
     }
 
     /// Moves the ship by this frame's arrow-key input at `ship_stats.speed`
@@ -136,8 +161,10 @@ impl Ship {
     /// `BASE_WIDTH`x`BASE_HEIGHT` bounds.
     fn apply_movement(&mut self, dt: f32) {
         let dir = movement_input();
-        self.pos = (self.pos + dir * self.ship_stats.speed * dt)
-            .clamp(Vec2::ZERO, Vec2::new(BASE_WIDTH - self.size.x, BASE_HEIGHT - self.size.y));
+        self.pos = (self.pos + dir * self.ship_stats.speed * dt).clamp(
+            Vec2::ZERO,
+            Vec2::new(BASE_WIDTH - self.size.x, BASE_HEIGHT - self.size.y),
+        );
     }
 
     /// The animation that reflects the ship's current `is_alive` state.

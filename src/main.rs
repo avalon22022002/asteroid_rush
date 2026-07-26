@@ -29,7 +29,7 @@ async fn main() {
             Some(PageEvents::HomePageEvent(HomePageEvent::Exit)) => {
                 std::process::exit(0);
             }
-            None => {}
+            _ => {}
         }
         page_manager.handle_self_event(page_event);
         next_frame().await;
