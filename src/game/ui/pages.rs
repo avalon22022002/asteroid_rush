@@ -1,12 +1,17 @@
 use crate::game::{
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
-    ui::pages::{home_page::HomePageEvent, level_selection_page::LevelSelectionPage},
+    ui::pages::{
+        home_page::HomePageEvent,
+        level_selection_page::{LevelSelectionPage, LevelSelectionPageEvent},
+    },
 };
 use home_page::HomePage;
 
 pub mod home_page;
 pub mod level_selection_page;
+
+const LOG_PREFIX: &str = "[pages]";
 
 pub enum Pages {
     HomePage(HomePage),
@@ -76,10 +81,26 @@ impl SelfEventHandler for PageManager {
                 let home_page_event = home_page.poll_event();
                 home_page.handle_self_event(home_page_event);
                 if let Some(HomePageEvent::NewGame) = home_page_event {
+                    println!("{LOG_PREFIX}[HomePage] New Game clicked");
                     self.current_page = Pages::LevelSelectionPage(LevelSelectionPage::new())
                 }
             }
-            Pages::LevelSelectionPage(_level_selection_page) => {}
+            Pages::LevelSelectionPage(level_selection_page) => {
+                let level_selection_page_event = level_selection_page.poll_event();
+                level_selection_page.handle_self_event(level_selection_page_event);
+                match level_selection_page_event {
+                    Some(LevelSelectionPageEvent::Level1Selected) => {
+                        println!("{LOG_PREFIX}[LevelSelectionPage] Level 1 clicked");
+                    }
+                    Some(LevelSelectionPageEvent::Level2Selected) => {
+                        println!("{LOG_PREFIX}[LevelSelectionPage] Level 2 clicked");
+                    }
+                    Some(LevelSelectionPageEvent::Level3Selected) => {
+                        println!("{LOG_PREFIX}[LevelSelectionPage] Level 3 clicked");
+                    }
+                    None => {}
+                }
+            }
         }
     }
 }

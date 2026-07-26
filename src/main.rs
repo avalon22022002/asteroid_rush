@@ -23,9 +23,7 @@ async fn main() {
         page_manager.draw();
         let page_event = page_manager.poll_event();
         match page_event {
-            Some(PageEvents::HomePageEvent(HomePageEvent::NewGame)) => {
-                println!("New Game clicked");
-            }
+            Some(PageEvents::HomePageEvent(HomePageEvent::NewGame)) => {}
             Some(PageEvents::HomePageEvent(HomePageEvent::Exit)) => {
                 std::process::exit(0);
             }
