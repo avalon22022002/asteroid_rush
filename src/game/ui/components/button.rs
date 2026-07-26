@@ -1,7 +1,8 @@
+use std::sync::OnceLock;
+
 use macroquad::prelude::*;
 
 use crate::game::{
-    BASE_WIDTH,
     audio::{self, AudioName},
     interaction::{Interactive, SelfEventHandler},
     object::HasId,
@@ -9,15 +10,16 @@ use crate::game::{
     utils,
 };
 
+const LOG_PREFIX: &str = "[button]";
+
 /// # Example
 ///
 /// ```ignore
 /// let mut new_game_button = Button::new(
 ///     Rect::new(20.0, 100.0, 200.0, 48.0),
 ///     "New Game".to_string(),
-///     BLUE,
 ///     30,
-///     Some(GREEN),
+///     None, // use the default button-background.png art
 /// );
 ///
 /// loop {
@@ -47,9 +49,8 @@ pub struct Button {
     id: u64,
     bounds: Rect,
     label: String,
-    color: Color,
     font_size: u16,
-    accent_color: Option<Color>,
+    texture: Texture2D,
     is_mouse_over: bool,
     was_hovered: bool,
     clicked: bool,
@@ -71,27 +72,37 @@ pub enum ButtonEvents {
 }
 
 impl Button {
-    /// `accent_color` sets the color of the button's bottom accent bar, e.g.
-    /// green to mark a confirming action or red for a destructive one. Pass
-    /// `None` to fall back to a subtle dark bezel shine.
-    pub fn new(
-        bounds: Rect,
-        label: String,
-        color: Color,
-        font_size: u16,
-        accent_color: Option<Color>,
-    ) -> Self {
+    /// `texture` is the background art drawn across `bounds`. Pass `None` to
+    /// use the shared default (`assets/ui/button/button-background.png`), or
+    /// `Some(..)` to give this button its own art.
+    pub fn new(bounds: Rect, label: String, font_size: u16, texture: Option<Texture2D>) -> Self {
         Self {
             id: utils::get_next_unique_id(),
             bounds,
             label,
-            color,
             font_size,
-            accent_color,
+            texture: texture.unwrap_or_else(|| Self::default_texture().clone()),
             is_mouse_over: false,
             was_hovered: false,
             clicked: false,
         }
+    }
+
+    /// The background art every `Button` falls back to when `Button::new` is
+    /// given `None` for `texture`. Loaded once and cloned per button —
+    /// cloning a `Texture2D` is cheap, it's just a handle to the same GPU
+    /// texture.
+    fn default_texture() -> &'static Texture2D {
+        static DEFAULT_TEXTURE: OnceLock<Texture2D> = OnceLock::new();
+        DEFAULT_TEXTURE.get_or_init(|| {
+            println!(
+                "{LOG_PREFIX} loading default texture (assets/ui/button/button-background.png)..."
+            );
+            Texture2D::from_file_with_format(
+                include_bytes!("../../../../assets/ui/button/button-background.png"),
+                None,
+            )
+        })
     }
 
     /// Returns `true` if the mouse cursor is currently within the button's bounds.
@@ -142,89 +153,35 @@ impl StateUpdatable<()> for Button {
 
 impl Drawable for Button {
     fn draw(&self) {
-        let scale = screen_width() / BASE_WIDTH;
-        let border_thickness = 2.0 * scale;
-        let accent_height = 4.0 * scale;
-
-        let max_font_from_height = (self.bounds.h * 0.55) as u16;
-        let mut font_size =
-            (self.font_size.min(max_font_from_height) as f32 * scale).round() as u16;
-        font_size = font_size.max(8);
-
-        loop {
-            let ts = measure_text(&self.label, None, font_size, 1.0);
-            if ts.width <= self.bounds.w - 8.0 * scale || font_size <= 8 {
-                break;
-            }
-            font_size -= 1;
-        }
-
-        let shadow_offset = 3.0 * scale;
-        draw_rectangle(
-            self.bounds.x + shadow_offset,
-            self.bounds.y + shadow_offset,
-            self.bounds.w,
-            self.bounds.h,
-            Color::new(0.0, 0.0, 0.0, 0.35),
-        );
-
-        let base_color = if self.clicked {
-            Color::new(
-                (self.color.r - 0.15).max(0.0),
-                (self.color.g - 0.15).max(0.0),
-                (self.color.b - 0.15).max(0.0),
-                self.color.a,
-            )
+        // Tints the background art for interaction feedback: darker while
+        // held down, brighter on hover, unchanged (pure white multiplier)
+        // otherwise.
+        let tint = if self.clicked {
+            Color::new(0.8, 0.8, 0.8, 1.0)
         } else if self.is_mouse_over {
-            Color::new(
-                (self.color.r + 0.15).min(1.0),
-                (self.color.g + 0.15).min(1.0),
-                (self.color.b + 0.15).min(1.0),
-                self.color.a,
-            )
+            Color::new(1.2, 1.2, 1.2, 1.0)
         } else {
-            self.color
+            WHITE
         };
-        draw_rectangle(
+
+        draw_texture_ex(
+            &self.texture,
             self.bounds.x,
             self.bounds.y,
-            self.bounds.w,
-            self.bounds.h,
-            base_color,
+            tint,
+            DrawTextureParams {
+                dest_size: Some(self.bounds.size()),
+                ..Default::default()
+            },
         );
 
-        draw_rectangle(
-            self.bounds.x,
-            self.bounds.y,
-            self.bounds.w,
-            accent_height,
-            Color::new(1.0, 1.0, 1.0, 0.25),
-        );
-
-        draw_rectangle(
-            self.bounds.x,
-            self.bounds.y + self.bounds.h - accent_height,
-            self.bounds.w,
-            accent_height,
-            self.accent_color.unwrap_or(Color::new(0.0, 0.0, 0.0, 0.25)),
-        );
-
-        draw_rectangle_lines(
-            self.bounds.x,
-            self.bounds.y,
-            self.bounds.w,
-            self.bounds.h,
-            border_thickness,
-            WHITE,
-        );
-
-        let ts = measure_text(&self.label, None, font_size, 1.0);
+        let ts = measure_text(&self.label, None, self.font_size, 1.0);
         draw_text_ex(
             &self.label,
             self.bounds.x + (self.bounds.w - ts.width) / 2.0,
             self.bounds.y + self.bounds.h / 2.0 + ts.offset_y / 2.0,
             TextParams {
-                font_size,
+                font_size: self.font_size,
                 color: WHITE,
                 ..Default::default()
             },
