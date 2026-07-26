@@ -2,7 +2,7 @@ use asteroid_rush::game::{
     self,
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
-    ui::pages::home_page::{HomePage, HomePageEvent},
+    ui::pages::{PageEvents, PageManager, home_page::HomePageEvent},
     window_conf,
 };
 use macroquad::prelude::*;
@@ -12,26 +12,24 @@ async fn main() {
     println!("Moving star field with Home Page!");
 
     let mut game = game::Game::new();
-    let mut home_page = HomePage::new();
+    let mut page_manager = PageManager::new();
     game::audio::load_sounds().await;
 
     loop {
         game.update_state(());
         game.draw();
 
-        home_page.update_state(());
-        home_page.draw();
-        let home_page_event = home_page.poll_event();
-        match home_page_event {
-            Some(HomePageEvent::NewGame) => {
-                println!("New Game clicked");
-            }
-            Some(HomePageEvent::Exit) => {
+        page_manager.update_state(());
+        page_manager.draw();
+        let page_event = page_manager.poll_event();
+        match page_event {
+            Some(PageEvents::HomePageEvent(HomePageEvent::NewGame)) => {}
+            Some(PageEvents::HomePageEvent(HomePageEvent::Exit)) => {
                 std::process::exit(0);
             }
-            None => {}
+            _ => {}
         }
-        home_page.handle_self_event(home_page_event);
+        page_manager.handle_self_event(page_event);
         next_frame().await;
     }
 }

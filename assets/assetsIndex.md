@@ -4,6 +4,7 @@ Holds assets in form of png images, audio files
 Most of the pngs were obtained by 
 - AI models like Gemini, ChatGPT, Claude
 - PNG background removers like 
+    - https://www.photoroom.com/tools/background-remover
     - https://www.remove.bg/upload
 - Sprite Editors like 
     - https://ezgif.com/sprite-cutter
