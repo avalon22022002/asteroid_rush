@@ -42,7 +42,7 @@ static SOUNDS: OnceLock<HashMap<AudioName, Sound>> = OnceLock::new();
 /// (e.g. the top of `main`, before the game loop starts) so `play` has
 /// something to play.
 pub async fn load_sounds() {
-    println!("{LOG_PREFIX} loading...");
+    println!("{LOG_PREFIX} loading audios...");
 
     let mut map = HashMap::new();
     for (name, path, bytes) in sound_sources() {

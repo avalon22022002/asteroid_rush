@@ -72,7 +72,7 @@ impl Animation {
     /// );
     /// ```
     pub fn load(frames: &[(&str, &[u8])], fps: f32) -> Self {
-        println!("{LOG_PREFIX} loading {} frame(s)...", frames.len());
+        println!("{LOG_PREFIX} loading {} animation frame(s)...", frames.len());
 
         let frames = frames
             .iter()
