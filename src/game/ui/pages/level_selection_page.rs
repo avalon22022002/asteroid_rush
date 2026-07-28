@@ -2,6 +2,7 @@ use macroquad::prelude::*;
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
+    entities::asteroidfield::AsteroidField,
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{
@@ -22,8 +23,8 @@ pub struct LevelSelectionPage {
     level_1_button: Button,
     level_2_button: Button,
     level_3_button: Button,
-    // TODO:  we should later on have Asteroid field here
-    // where selecting each level changes the speed of asteroids
+    // TODO: selecting each level should change the speed of asteroids
+    asteroid_field: AsteroidField,
 }
 
 impl LevelSelectionPage {
@@ -61,12 +62,14 @@ impl LevelSelectionPage {
                 30,
                 None,
             ),
+            asteroid_field: AsteroidField::new(15, None),
         }
     }
 }
 
 impl Drawable for LevelSelectionPage {
     fn draw(&self) {
+        self.asteroid_field.draw();
         self.main_banner.draw();
         self.level_1_button.draw();
         self.level_2_button.draw();
@@ -76,6 +79,7 @@ impl Drawable for LevelSelectionPage {
 
 impl StateUpdatable<()> for LevelSelectionPage {
     fn update_state(&mut self, _args: ()) {
+        self.asteroid_field.update_state(());
         self.level_1_button.update_state(());
         self.level_2_button.update_state(());
         self.level_3_button.update_state(());
