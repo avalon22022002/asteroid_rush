@@ -24,9 +24,7 @@ async fn main() {
         let page_event = page_manager.poll_event();
         match page_event {
             Some(PageEvents::HomePageEvent(HomePageEvent::NewGame)) => {}
-            Some(PageEvents::HomePageEvent(HomePageEvent::Exit)) => {
-                std::process::exit(0);
-            }
+            Some(PageEvents::HomePageEvent(HomePageEvent::Exit)) => {}
             _ => {}
         }
         page_manager.handle_self_event(page_event);

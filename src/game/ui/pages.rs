@@ -80,9 +80,16 @@ impl SelfEventHandler for PageManager {
             Pages::HomePage(home_page) => {
                 let home_page_event = home_page.poll_event();
                 home_page.handle_self_event(home_page_event);
-                if let Some(HomePageEvent::NewGame) = home_page_event {
-                    println!("{LOG_PREFIX}[HomePage] New Game clicked");
-                    self.current_page = Pages::LevelSelectionPage(LevelSelectionPage::new())
+                match home_page_event {
+                    Some(HomePageEvent::NewGame) => {
+                        println!("{LOG_PREFIX}[HomePage] New Game clicked");
+                        self.current_page = Pages::LevelSelectionPage(LevelSelectionPage::new())
+                    }
+                    Some(HomePageEvent::Exit) => {
+                        println!("{LOG_PREFIX}[HomePage] Exit clicked. Exiting...");
+                        std::process::exit(0);
+                    }
+                    _ => {}
                 }
             }
             Pages::LevelSelectionPage(level_selection_page) => {
