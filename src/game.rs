@@ -1,4 +1,4 @@
-pub mod audio;
+pub mod asset_repository;
 pub mod background;
 pub mod entities;
 pub mod interaction;
