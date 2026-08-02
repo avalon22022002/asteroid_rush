@@ -3,7 +3,13 @@ use std::sync::OnceLock;
 use macroquad::prelude::*;
 
 use crate::game::{
-    audio::{self, AudioName},
+    asset_repository::{
+        AssetRepository,
+        audio_repository::{
+            AudioRepository,
+            audio::AudioName::{self},
+        },
+    },
     interaction::{Interactive, SelfEventHandler},
     object::HasId,
     rendering::{Drawable, StateUpdatable},
@@ -207,7 +213,7 @@ impl Interactive for Button {
         } else if self.is_mouse_over {
             return Some(ButtonEvents::Hovering);
         }
-        return None;
+        None
     }
 }
 
@@ -215,10 +221,14 @@ impl SelfEventHandler for Button {
     fn handle_self_event(&mut self, event: Self::Event) {
         if let Some(ButtonEvents::Clicked) = event {
             // play audio click sound
-            audio::play(AudioName::ButtonClick);
+            AudioRepository::get_instance()
+                .get_asset(AudioName::ButtonClick)
+                .play();
         } else if let Some(ButtonEvents::HoverStarted) = event {
             // play audio hover sound
-            audio::play(AudioName::ButtonHover);
+            AudioRepository::get_instance()
+                .get_asset(AudioName::ButtonHover)
+                .play();
         }
     }
 }

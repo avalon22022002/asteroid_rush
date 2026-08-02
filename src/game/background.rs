@@ -11,6 +11,12 @@ pub struct Background {
     star_field: Starfield,
 }
 
+impl Default for Background {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Background {
     pub fn new() -> Self {
         Background {

@@ -25,6 +25,12 @@ pub struct HomePage {
     ship: Ship,
 }
 
+impl Default for HomePage {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl HomePage {
     pub fn new() -> Self {
         let button_width = BASE_WIDTH * 0.5;

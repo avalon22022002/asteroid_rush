@@ -12,24 +12,32 @@ pub enum AudioName {
 #[derive(Debug)]
 pub struct Audio {
     identifier: AudioName,
-    sound: Sound
+    sound: Sound,
 }
 
 impl Audio {
-    pub fn new(identifier: AudioName, sound: Sound)-> Audio {
-        return Audio { identifier, sound };
+    pub fn new(identifier: AudioName, sound: Sound) -> Audio {
+        Audio { identifier, sound }
     }
 
     pub async fn decode_sound(audio_name: AudioName) -> Result<Sound, macroquad::Error> {
         match audio_name {
             AudioName::ButtonClick => {
-                audio::load_sound_from_bytes(include_bytes!("../../../../assets/audio/ui/click.wav"))
-                    .await
+                audio::load_sound_from_bytes(include_bytes!(
+                    "../../../../assets/audio/ui/click.wav"
+                ))
+                .await
             }
             AudioName::ButtonHover => {
-                audio::load_sound_from_bytes(include_bytes!("../../../../assets/audio/ui/hover.wav"))
-                    .await
+                audio::load_sound_from_bytes(include_bytes!(
+                    "../../../../assets/audio/ui/hover.wav"
+                ))
+                .await
             }
         }
+    }
+    /// Plays this sound once.
+    pub fn play(&self) {
+        audio::play_sound_once(&self.sound);
     }
 }

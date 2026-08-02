@@ -13,7 +13,7 @@ async fn main() {
 
     let mut game = game::Game::new();
     let mut page_manager = PageManager::new();
-    game::audio::load_sounds().await;
+    game::asset_repository::audio_repository::AudioRepository::get_instance();
 
     loop {
         game.update_state(());

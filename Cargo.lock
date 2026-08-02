@@ -19,6 +19,7 @@ name = "asteroid_rush"
 version = "0.1.0"
 dependencies = [
  "macroquad",
+ "pollster",
  "strum",
 ]
 
@@ -303,6 +304,12 @@ dependencies = [
  "flate2",
  "miniz_oxide",
 ]
+
+[[package]]
+name = "pollster"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc6355899e1c9462875b6757c79f3caa011a1fdae12bbb1a2e72dd1f234f8336"
 
 [[package]]
 name = "proc-macro2"

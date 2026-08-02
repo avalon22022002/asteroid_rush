@@ -4,8 +4,8 @@
 //! Callers ask a submodule for an asset by name instead of touching
 //! `include_bytes!`/decoding themselves.
 
-pub mod textures;
 pub mod audio_repository;
+pub mod textures;
 
 /// A single category of asset (audio, textures, ...) as a repository. Each
 /// implementor defines its own fixed source table — one entry per
@@ -13,6 +13,7 @@ pub mod audio_repository;
 /// That only checks the file exists and embeds its raw bytes at compile
 /// time (a missing/renamed path fails the build); decoding those bytes into
 /// a usable asset still happens at runtime, via `load_all`/`get_asset`.
+#[allow(async_fn_in_trait)]
 pub trait AssetRepository {
     /// The decoded, ready-to-use asset type this repository stores
     /// (e.g. `Texture2D`, `Sound`).
