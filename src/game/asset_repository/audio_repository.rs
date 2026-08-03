@@ -8,13 +8,13 @@ use strum::IntoEnumIterator;
 
 use crate::game::asset_repository;
 use crate::game::asset_repository::AssetRepository;
-use crate::game::asset_repository::audio_repository::audio::{Audio, AudioName};
+use crate::game::asset_repository::audio_repository::audio::{Audio, AudioIdentifier};
 
 const LOG_PREFIX: &str = "AudioRepository: ";
 
 #[derive(Debug)]
 pub struct AudioRepository {
-    audios: OnceLock<HashMap<AudioName, Audio>>,
+    audios: OnceLock<HashMap<AudioIdentifier, Audio>>,
 }
 
 /// The shared singleton returned by `get_instance`.
@@ -52,7 +52,7 @@ impl AudioRepository {
 
 impl asset_repository::AssetRepository for AudioRepository {
     type Asset = Audio;
-    type AssetIdentifier = AudioName;
+    type AssetIdentifier = AudioIdentifier;
 
     async fn load_all(&mut self) {
         if self.audios.get().is_some() {
@@ -61,8 +61,8 @@ impl asset_repository::AssetRepository for AudioRepository {
         }
 
         logging::info!("{LOG_PREFIX} initializing..");
-        let mut audio_map: HashMap<AudioName, Audio> = HashMap::new();
-        for identifier in AudioName::iter() {
+        let mut audio_map: HashMap<AudioIdentifier, Audio> = HashMap::new();
+        for identifier in AudioIdentifier::iter() {
             let sound = Audio::decode_sound(identifier).await.unwrap_or_else(|_| panic!("{LOG_PREFIX} Failed to Load Audio: {identifier:?}"));
 
             audio_map.insert(identifier, Audio::new(identifier, sound));
