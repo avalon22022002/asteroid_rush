@@ -61,7 +61,6 @@ impl HomePage {
             ),
             ship: Ship::new(
                 Vec2::new(BASE_WIDTH - 300.0, 180.0),
-                Vec2::new(236.0, 300.0),
                 ShipKind::Sentinel,
                 "Sentinel".to_string(),
             ),

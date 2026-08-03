@@ -1,10 +1,11 @@
-use macroquad::texture::Texture2D;
+use macroquad::{math::{Vec2}, texture::Texture2D};
 
 const LOG_PREFIX: &str = "[animation]";
 
 /// A sequence of sprite frames played back at a fixed rate, looping.
 pub struct Animation {
     frames: Vec<Texture2D>,
+    scale: Vec2,
     frame_duration: f32,
     elapsed: f32,
     current: usize,
@@ -12,9 +13,10 @@ pub struct Animation {
 
 impl Animation {
     /// `fps` is how many frames to show per second.
-    pub fn new(frames: Vec<Texture2D>, fps: f32) -> Self {
+    fn new(frames: Vec<Texture2D>, scale:Vec2, fps: f32) -> Self {
         Self {
             frames,
+            scale,
             frame_duration: 1.0 / fps,
             elapsed: 0.0,
             current: 0,
@@ -45,6 +47,10 @@ impl Animation {
     pub fn current_frame(&self) -> &Texture2D {
         &self.frames[self.current]
     }
+    
+    pub fn frame_scale(&self) -> &Vec2 {
+        &self.scale
+    }
 
     /// Decodes each `(path, bytes)` pair as an image frame and builds an
     /// `Animation` from them. `path` is only used for load logging — pass
@@ -60,18 +66,19 @@ impl Animation {
     /// let alive_animation = Animation::load(
     ///     &[
     ///         (
-    ///             "assets/ships/vanguard/alive_0.png",
+    ///             "../../../assets/ships/vanguard/alive_0.png",
     ///             include_bytes!("../../../assets/ships/vanguard/alive_0.png"),
     ///         ),
     ///         (
-    ///             "assets/ships/vanguard/alive_1.png",
+    ///             "../../../assets/ships/vanguard/alive_1.png",
     ///             include_bytes!("../../../assets/ships/vanguard/alive_1.png"),
     ///         ),
     ///     ],
+    ///     Vec2::new(0.5, 0.5);
     ///     8.0,
     /// );
     /// ```
-    pub fn load(frames: &[(&str, &[u8])], fps: f32) -> Self {
+    pub fn load(frames: &[(&str, &[u8])], scale:Vec2, fps: f32) -> Self {
         println!(
             "{LOG_PREFIX} loading {} animation frame(s)...",
             frames.len()
@@ -87,6 +94,6 @@ impl Animation {
 
         println!("{LOG_PREFIX} load complete");
 
-        Self::new(frames, fps)
+        Self::new(frames, scale, fps)
     }
 }

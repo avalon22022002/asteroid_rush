@@ -103,6 +103,7 @@ impl ShipKind {
                             ),
                         ),
                     ],
+                    Vec2::new(236.0, 300.0),
                     12.0,
                 );
                 // No dedicated death sprite set yet — freeze on the last
@@ -112,6 +113,7 @@ impl ShipKind {
                         "assets/animations/ships/sentinel/sentinel_07.png",
                         include_bytes!("../../../assets/animations/ships/sentinel/sentinel_07.png"),
                     )],
+                    Vec2::new(236.0, 300.0),
                     1.0,
                 );
                 (alive, dead)
@@ -132,7 +134,6 @@ pub struct ShipStats {
 }
 pub struct Ship {
     pos: Vec2,
-    size: Vec2,
     kind: ShipKind,
     ship_stats: ShipStats,
     description: String,
@@ -142,11 +143,10 @@ pub struct Ship {
 }
 
 impl Ship {
-    pub fn new(pos: Vec2, size: Vec2, kind: ShipKind, description: String) -> Self {
+    pub fn new(pos: Vec2, kind: ShipKind, description: String) -> Self {
         let (alive_animation, dead_animation) = kind.default_animations();
         Self {
             pos,
-            size,
             kind,
             ship_stats: kind.base_stats(),
             description,
@@ -163,7 +163,7 @@ impl Ship {
         let dir = movement_input();
         self.pos = (self.pos + dir * self.ship_stats.speed * dt).clamp(
             Vec2::ZERO,
-            Vec2::new(BASE_WIDTH - self.size.x, BASE_HEIGHT - self.size.y),
+            Vec2::new(BASE_WIDTH - self.ship_size().x, BASE_HEIGHT - self.ship_size().y),
         );
     }
 
@@ -173,6 +173,14 @@ impl Ship {
             &self.alive_animation
         } else {
             &self.dead_animation
+        }
+    }
+
+    fn ship_size(&self) -> &Vec2 {
+        if self.is_alive {
+            &self.alive_animation.frame_scale()
+        } else {
+            &self.dead_animation.frame_scale()
         }
     }
 
@@ -216,7 +224,7 @@ impl Drawable for Ship {
             self.pos.y,
             WHITE,
             DrawTextureParams {
-                dest_size: Some(self.size),
+                dest_size: Some(*self.ship_size()),
                 ..Default::default()
             },
         );
