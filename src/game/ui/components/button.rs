@@ -1,6 +1,6 @@
 use std::sync::OnceLock;
 
-use macroquad::prelude::*;
+use macroquad::{audio,prelude::*};
 
 use crate::game::{
     asset_repository::{
@@ -221,14 +221,18 @@ impl SelfEventHandler for Button {
     fn handle_self_event(&mut self, event: Self::Event) {
         if let Some(ButtonEvents::Clicked) = event {
             // play audio click sound
-            AudioRepository::get_instance()
+            audio::play_sound_once(
+                AudioRepository::get_instance()
                 .get_asset(AudioIdentifier::ButtonClick)
-                .play();
+                .get_sound()
+            );
         } else if let Some(ButtonEvents::HoverStarted) = event {
             // play audio hover sound
-            AudioRepository::get_instance()
-                .get_asset(AudioIdentifier::ButtonHover)
-                .play();
+            audio::play_sound_once(
+                AudioRepository::get_instance()
+                    .get_asset(AudioIdentifier::ButtonHover)
+                    .get_sound()
+            );
         }
     }
 }

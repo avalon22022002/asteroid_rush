@@ -36,8 +36,7 @@ impl Audio {
             }
         }
     }
-    /// Plays this sound once.
-    pub fn play(&self) {
-        audio::play_sound_once(&self.sound);
+    pub fn get_sound(&self)->&Sound{
+        &self.sound
     }
 }
