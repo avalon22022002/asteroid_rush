@@ -64,17 +64,11 @@ impl Animation {
     ///
     /// ```ignore
     /// let alive_animation = Animation::load(
-    ///     &[
-    ///         (
-    ///             "../../../assets/ships/vanguard/alive_0.png",
-    ///             include_bytes!("../../../assets/ships/vanguard/alive_0.png"),
-    ///         ),
-    ///         (
-    ///             "../../../assets/ships/vanguard/alive_1.png",
-    ///             include_bytes!("../../../assets/ships/vanguard/alive_1.png"),
-    ///         ),
-    ///     ],
-    ///     Vec2::new(0.5, 0.5);
+    ///     frame_sequence!(
+    ///         "../../../assets/animations/ships/sentinel/sentinel_",
+    ///         ["00", "01"]
+    ///     ),
+    ///     Vec2::new(236.0, 300.0),
     ///     8.0,
     /// );
     /// ```

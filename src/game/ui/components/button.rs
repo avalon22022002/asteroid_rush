@@ -7,7 +7,7 @@ use crate::game::{
         AssetRepository,
         audio_repository::{
             AudioRepository,
-            audio::AudioName::{self},
+            audio::AudioIdentifier,
         },
     },
     interaction::{Interactive, SelfEventHandler},
@@ -222,12 +222,12 @@ impl SelfEventHandler for Button {
         if let Some(ButtonEvents::Clicked) = event {
             // play audio click sound
             AudioRepository::get_instance()
-                .get_asset(AudioName::ButtonClick)
+                .get_asset(AudioIdentifier::ButtonClick)
                 .play();
         } else if let Some(ButtonEvents::HoverStarted) = event {
             // play audio hover sound
             AudioRepository::get_instance()
-                .get_asset(AudioName::ButtonHover)
+                .get_asset(AudioIdentifier::ButtonHover)
                 .play();
         }
     }

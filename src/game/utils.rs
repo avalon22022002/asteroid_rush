@@ -6,6 +6,36 @@ pub fn ordered(a: f32, b: f32) -> (f32, f32) {
     (a.min(b), a.max(b))
 }
 
+/// Expands to a `&[(&str, &[u8])]` frame list for `Animation::load`: one
+/// entry per `suffix`, built from `concat!($base, suffix, ".png")`.
+///
+/// # Example
+///
+/// ```ignore
+/// // Path is relative to the file *invoking* the macro (e.g. ship.rs in
+/// // src/game/entities/), not to this file where it's defined.
+/// let alive = Animation::load(
+///     frame_sequence!(
+///         "../../../assets/animations/ships/sentinel/sentinel_",
+///         ["00", "01", "02", "03", "04", "05", "06", "07"]
+///     ),
+///     Vec2::new(236.0, 300.0),
+///     12.0,
+/// );
+/// ```
+macro_rules! frame_sequence {
+    ($base:literal, [$($suffix:literal),+ $(,)?]) => {
+        &[$((
+            concat!($base, $suffix, ".png"),
+            include_bytes!(concat!($base, $suffix, ".png")),
+        )),+]
+    };
+}
+// `macro_rules!` macros aren't visible outside their defining file by
+// default (unlike normal items). This re-export makes `frame_sequence`
+// importable via a regular `use` path (e.g. from `entities::ship`).
+pub(crate) use frame_sequence;
+
 // Backing counter for `get_next_unique_id`. Atomic (rather than a plain
 // `static mut` or a counter threaded through game state) so ids stay unique
 // and race-free even if id generation ever happens from multiple threads.

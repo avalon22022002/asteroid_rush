@@ -4,6 +4,7 @@ use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     entities::animation::Animation,
     rendering::{Drawable, StateUpdatable},
+    utils::frame_sequence,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -53,66 +54,17 @@ impl ShipKind {
         match self {
             ShipKind::Sentinel => {
                 let alive = Animation::load(
-                    &[
-                        (
-                            "assets/animations/ships/sentinel/sentinel_00.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_00.png"
-                            ),
-                        ),
-                        (
-                            "assets/animations/ships/sentinel/sentinel_01.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_01.png"
-                            ),
-                        ),
-                        (
-                            "assets/animations/ships/sentinel/sentinel_02.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_02.png"
-                            ),
-                        ),
-                        (
-                            "assets/animations/ships/sentinel/sentinel_03.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_03.png"
-                            ),
-                        ),
-                        (
-                            "assets/animations/ships/sentinel/sentinel_04.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_04.png"
-                            ),
-                        ),
-                        (
-                            "assets/animations/ships/sentinel/sentinel_05.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_05.png"
-                            ),
-                        ),
-                        (
-                            "assets/animations/ships/sentinel/sentinel_06.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_06.png"
-                            ),
-                        ),
-                        (
-                            "assets/animations/ships/sentinel/sentinel_07.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_07.png"
-                            ),
-                        ),
-                    ],
+                    frame_sequence!(
+                        "../../../assets/animations/ships/sentinel/sentinel_",
+                        ["00", "01", "02", "03", "04", "05", "06", "07"]
+                    ),
                     Vec2::new(236.0, 300.0),
                     12.0,
                 );
                 // No dedicated death sprite set yet — freeze on the last
                 // alive frame as a placeholder until one's added.
                 let dead = Animation::load(
-                    &[(
-                        "assets/animations/ships/sentinel/sentinel_07.png",
-                        include_bytes!("../../../assets/animations/ships/sentinel/sentinel_07.png"),
-                    )],
+                    frame_sequence!("../../../assets/animations/ships/sentinel/sentinel_", ["07"]),
                     Vec2::new(236.0, 300.0),
                     1.0,
                 );
