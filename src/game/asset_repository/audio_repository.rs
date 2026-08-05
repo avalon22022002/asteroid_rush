@@ -3,6 +3,7 @@ pub mod audio;
 use std::collections::HashMap;
 use std::sync::OnceLock;
 
+use futures::executor;
 use macroquad::logging;
 use strum::IntoEnumIterator;
 
@@ -29,7 +30,7 @@ impl AudioRepository {
         let mut repo = AudioRepository {
             audios: OnceLock::new(),
         };
-        pollster::block_on(repo.load_all());
+        executor::block_on(repo.load_all());
         repo
     }
 

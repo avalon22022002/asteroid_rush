@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+futures = { version = "0.3.33", features = ["executor"] }
 macroquad = { version = "0.4.15", features = ["audio"] }
-pollster = "1.0.1"
 strum = { version = "0.28.0", features = ["derive"] }
