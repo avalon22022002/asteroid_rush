@@ -55,7 +55,7 @@ impl ShipKind {
             ShipKind::Sentinel => {
                 let alive = Animation::load(
                     frame_sequence!(
-                        "../../../assets/animations/ships/sentinel/sentinel_",
+                        "assets/animations/ships/sentinel/sentinel_",
                         ["00", "01", "02", "03", "04", "05", "06", "07"]
                     ),
                     Vec2::new(236.0, 300.0),
@@ -64,7 +64,7 @@ impl ShipKind {
                 // No dedicated death sprite set yet — freeze on the last
                 // alive frame as a placeholder until one's added.
                 let dead = Animation::load(
-                    frame_sequence!("../../../assets/animations/ships/sentinel/sentinel_", ["07"]),
+                    frame_sequence!("assets/animations/ships/sentinel/sentinel_", ["07"]),
                     Vec2::new(236.0, 300.0),
                     1.0,
                 );

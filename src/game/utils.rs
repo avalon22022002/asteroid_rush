@@ -12,11 +12,11 @@ pub fn ordered(a: f32, b: f32) -> (f32, f32) {
 /// # Example
 ///
 /// ```ignore
-/// // Path is relative to the file *invoking* the macro (e.g. ship.rs in
-/// // src/game/entities/), not to this file where it's defined.
+/// // `base` is always relative to the project root (CARGO_MANIFEST_DIR),
+/// // regardless of which file invokes the macro.
 /// let alive = Animation::load(
 ///     frame_sequence!(
-///         "../../../assets/animations/ships/sentinel/sentinel_",
+///         "assets/animations/ships/sentinel/sentinel_",
 ///         ["00", "01", "02", "03", "04", "05", "06", "07"]
 ///     ),
 ///     Vec2::new(236.0, 300.0),
@@ -27,7 +27,13 @@ macro_rules! frame_sequence {
     ($base:literal, [$($suffix:literal),+ $(,)?]) => {
         &[$((
             concat!($base, $suffix, ".png"),
-            include_bytes!(concat!($base, $suffix, ".png")),
+            include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/",
+                $base,
+                $suffix,
+                ".png"
+            )),
         )),+]
     };
 }

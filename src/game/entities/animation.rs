@@ -65,7 +65,7 @@ impl Animation {
     /// ```ignore
     /// let alive_animation = Animation::load(
     ///     frame_sequence!(
-    ///         "../../../assets/animations/ships/sentinel/sentinel_",
+    ///         "assets/animations/ships/sentinel/sentinel_",
     ///         ["00", "01"]
     ///     ),
     ///     Vec2::new(236.0, 300.0),
