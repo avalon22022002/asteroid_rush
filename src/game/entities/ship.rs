@@ -3,8 +3,8 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     entities::animation::Animation,
+    frames::frame_sequence,
     rendering::{Drawable, StateUpdatable},
-    utils::frame_sequence,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

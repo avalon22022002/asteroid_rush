@@ -1,6 +1,7 @@
 pub mod asset_repository;
 pub mod background;
 pub mod entities;
+pub mod frames;
 pub mod interaction;
 pub mod object;
 pub mod rendering;
