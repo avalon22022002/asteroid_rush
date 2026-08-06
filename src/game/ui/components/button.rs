@@ -25,7 +25,7 @@ const LOG_PREFIX: &str = "[button]";
 ///     Rect::new(20.0, 100.0, 200.0, 48.0),
 ///     "New Game".to_string(),
 ///     30,
-///     None, // use the default button-background.png art
+///     None, // use the default button-background_00.png art
 /// );
 ///
 /// loop {
@@ -102,10 +102,10 @@ impl Button {
         static DEFAULT_TEXTURE: OnceLock<Texture2D> = OnceLock::new();
         DEFAULT_TEXTURE.get_or_init(|| {
             println!(
-                "{LOG_PREFIX} loading default texture (assets/ui/button/button-background.png)..."
+                "{LOG_PREFIX} loading default texture (assets/ui/button/button-background_00.png)..."
             );
             Texture2D::from_file_with_format(
-                include_bytes!("../../../../assets/ui/button/button-background.png"),
+                include_bytes!("../../../../assets/ui/button/button-background_00.png"),
                 None,
             )
         })

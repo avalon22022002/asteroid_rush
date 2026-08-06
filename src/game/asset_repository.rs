@@ -5,7 +5,7 @@
 //! `include_bytes!`/decoding themselves.
 
 pub mod audio_repository;
-pub mod textures;
+pub mod sprite_repository;
 
 /// A single category of asset (audio, textures, ...) as a repository. Each
 /// implementor defines its own fixed source table — one entry per
