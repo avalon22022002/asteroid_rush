@@ -2,7 +2,7 @@ use macroquad::texture::Texture2D;
 use strum::EnumIter;
 use crate::game::{
     frames::{load_frames, frame_sequence},
-    asset_repository::sprite_repository::traits::SpriteTextures,
+    asset_repository::sprite_repository::traits::{SpriteTextures,Sprite},
 };
 
 pub const SHIP_V1_SPRITE: &str="ShipV1Sprite";
@@ -54,3 +54,5 @@ impl SpriteTextures for ShipV1 {
         }
     }
 }
+
+impl Sprite for ShipV1 {}

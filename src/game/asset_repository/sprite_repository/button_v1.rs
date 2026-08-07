@@ -2,7 +2,7 @@ use macroquad::texture::Texture2D;
 use strum::EnumIter;
 use crate::game::{
     frames::{load_frames, frame_sequence},
-    asset_repository::sprite_repository::traits::SpriteTextures,
+    asset_repository::sprite_repository::traits::{SpriteTextures,Sprite}
 };
 
 const LOG_PREFIX: &str = "[button_v1]";
@@ -53,3 +53,5 @@ impl SpriteTextures for ButtonV1 {
         }
     }
 }
+
+impl Sprite for ButtonV1 {}

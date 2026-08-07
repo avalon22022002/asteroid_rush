@@ -28,3 +28,7 @@ pub trait SpriteTextures {
     /// return empty.
     fn get_textures_for(&self, texture_kind: Self::Kind) -> &Vec<Texture2D>;
 }
+
+/// Every sprite type implements this. Just `SpriteTextures` for now; more
+/// capability traits will join as supertraits later.
+pub trait Sprite: SpriteTextures {}
