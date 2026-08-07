@@ -25,3 +25,14 @@ pub trait AssetRepository {
     /// initialization is a contract violation; implementations may panic.
     fn get_asset(&self, identifier: Self::AssetIdentifier) -> &Self::Asset;
 }
+
+/// A repository that loads all its assets up front, rather than lazily.
+pub trait Preloadable {
+    /// Loads everything. Call once at init so decoding cost lands there,
+    /// not mid-gameplay. Must be idempotent — repeat calls are no-ops.
+    ///
+    /// Written as `-> impl Future<Output = ()>` instead of `async fn` so
+    /// implementers can bound the future (e.g. `+ Send`) if needed —
+    /// equivalent to `async fn load_all(&mut self)` otherwise.
+    fn load_all(&mut self) -> impl Future<Output = ()>;
+}
