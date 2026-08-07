@@ -1,6 +1,9 @@
 use macroquad::texture::Texture2D;
-use strum::{EnumIter, IntoEnumIterator};
-use crate::game::frames::{load_frames, frame_sequence};
+use strum::EnumIter;
+use crate::game::{
+    frames::{load_frames, frame_sequence},
+    asset_repository::sprite_repository::traits::SpriteTextures,
+};
 
 const LOG_PREFIX: &str = "[button_v1]";
 
@@ -18,14 +21,17 @@ pub struct ButtonV1 {
 }
 
 impl ButtonV1 {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self { scifi_v1_texture: Vec::new() }
     }
+}
 
-    /// Returns the frames for `texture_kind`, loading them on first use.
+impl SpriteTextures for ButtonV1 {
+    type Kind = ButtonV1Textures;
+
     /// Exhaustive match: adding a `ButtonV1Textures` variant without adding
     /// it here is a compile error.
-    async fn load_textures_for(&mut self, texture_kind: ButtonV1Textures) -> &Vec<Texture2D> {
+    async fn load_textures_for(&mut self, texture_kind: ButtonV1Textures) {
         match texture_kind {
             ButtonV1Textures::BasicScifiV1 => {
                 if self.scifi_v1_texture.is_empty() {
@@ -34,19 +40,16 @@ impl ButtonV1 {
                     self.scifi_v1_texture = load_frames(
                         frame_sequence!("assets/ui/button/button-background_", ["00"])
                     ).await;
-                    
+
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
-                &self.scifi_v1_texture
             }
         }
     }
 
-    /// Eagerly loads every `ButtonV1Textures` kind. Call once at game init,
-    /// same as `AssetRepository::load_all`.
-    async fn load_all_textures(&mut self) {
-        for texture_kind in ButtonV1Textures::iter() {
-            self.load_textures_for(texture_kind).await;
+    fn get_textures_for(&self, texture_kind: ButtonV1Textures) -> &Vec<Texture2D> {
+        match texture_kind {
+            ButtonV1Textures::BasicScifiV1 => &self.scifi_v1_texture,
         }
     }
 }

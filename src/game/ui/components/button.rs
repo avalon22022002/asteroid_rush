@@ -4,7 +4,7 @@ use macroquad::{audio,prelude::*};
 
 use crate::game::{
     asset_repository::{
-        AssetRepository,
+        traits::AssetRepository,
         audio_repository::{
             AudioRepository,
             audio::AudioIdentifier,

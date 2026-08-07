@@ -7,9 +7,10 @@ use futures::executor;
 use macroquad::logging;
 use strum::IntoEnumIterator;
 
-use crate::game::asset_repository;
-use crate::game::asset_repository::AssetRepository;
-use crate::game::asset_repository::audio_repository::audio::{Audio, AudioIdentifier};
+use crate::game::asset_repository::{
+    traits::AssetRepository,
+    audio_repository::audio::{Audio, AudioIdentifier},
+};
 
 const LOG_PREFIX: &str = "AudioRepository: ";
 
@@ -51,7 +52,7 @@ impl AudioRepository {
     }
 }
 
-impl asset_repository::AssetRepository for AudioRepository {
+impl AssetRepository for AudioRepository {
     type Asset = Audio;
     type AssetIdentifier = AudioIdentifier;
 

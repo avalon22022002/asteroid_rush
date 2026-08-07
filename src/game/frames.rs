@@ -10,6 +10,11 @@ const LOG_PREFIX: &str = "[frames]";
 /// Expands to a `&[(&str, &[u8])]` frame list: one entry per `suffix`,
 /// built from `concat!($base, suffix, ".png")`.
 ///
+/// Suffixes are an explicit list, not a start/end range, since `macro_rules!`
+/// has no compile-time arithmetic/padding to turn e.g. `7` into `"07"` —
+/// doing that would need runtime string building, defeating the point of
+/// checking each file exists at compile time via `include_bytes!`.
+///
 /// # Example
 ///
 /// ```ignore
