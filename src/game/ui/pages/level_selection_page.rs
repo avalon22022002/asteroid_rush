@@ -54,19 +54,16 @@ impl LevelSelectionPage {
                 Rect::new(x, level_1_y, button_width, button_height),
                 "Level 1".to_string(),
                 30,
-                None,
             ),
             level_2_button: Button::new(
                 Rect::new(x, level_2_y, button_width, button_height),
                 "Level 2".to_string(),
                 30,
-                None,
             ),
             level_3_button: Button::new(
                 Rect::new(x, level_3_y, button_width, button_height),
                 "Level 3".to_string(),
                 30,
-                None,
             ),
             asteroid_field: AsteroidField::new(15, None),
         }

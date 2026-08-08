@@ -51,13 +51,11 @@ impl HomePage {
                 Rect::new(x, new_game_y, button_width, button_height),
                 "New Game".to_string(),
                 30,
-                None,
             ),
             exit_button: Button::new(
                 Rect::new(x, exit_y, button_width, button_height),
                 "Exit".to_string(),
                 30,
-                None,
             ),
             ship: Ship::new(
                 Vec2::new(BASE_WIDTH - 300.0, 180.0),

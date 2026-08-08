@@ -1,9 +1,12 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    BASE_HEIGHT, BASE_WIDTH,
+    BASE_HEIGHT, BASE_WIDTH, 
+    asset_repository::{
+        sprite_repository::{traits::SpriteTextures, SpriteRepository, ShipV1Textures}, 
+        traits::Singleton
+    }, 
     entities::animation::Animation,
-    frames::frame_sequence,
     rendering::{Drawable, StateUpdatable},
 };
 
@@ -45,35 +48,6 @@ impl ShipKind {
             },
         }
     }
-
-    /// Default (alive, dead) animations for a freshly spawned ship of this
-    /// kind. Picked automatically from `kind` so `Ship::new` doesn't need
-    /// per-ship animation overrides — every ship of the same kind looks the
-    /// same to start.
-    fn default_animations(self) -> (Animation, Animation) {
-        match self {
-            ShipKind::Sentinel => {
-                let alive = Animation::load(
-                    frame_sequence!(
-                        "assets/animations/ships/sentinel/sentinel_",
-                        ["00", "01", "02", "03", "04", "05", "06", "07"]
-                    ),
-                    Vec2::new(236.0, 300.0),
-                    12.0,
-                );
-                // No dedicated death sprite set yet — freeze on the last
-                // alive frame as a placeholder until one's added.
-                let dead = Animation::load(
-                    frame_sequence!("assets/animations/ships/sentinel/sentinel_", ["07"]),
-                    Vec2::new(236.0, 300.0),
-                    1.0,
-                );
-                (alive, dead)
-            }
-            ShipKind::Vanguard => todo!("vanguard animation frames not added yet"),
-            ShipKind::Viper => todo!("viper animation frames not added yet"),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -95,8 +69,27 @@ pub struct Ship {
 }
 
 impl Ship {
+    pub fn get_alive_and_dead_animations_for( kind:ShipKind ) -> (Animation, Animation) {
+        let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
+        match kind {
+            ShipKind::Sentinel => {
+                let alive = Animation::new(ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive), Vec2::new(236.0, 300.0), 12.0);
+                // No dedicated death sprite set yet — freeze on the last
+                // alive frame as a placeholder until one's added.
+                let dead = Animation::new(
+                    ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
+                    Vec2::new(236.0, 300.0),
+                    1.0,
+                );
+                return (alive, dead)
+            }
+            ShipKind::Vanguard => todo!("vanguard animation frames not added yet"),
+            ShipKind::Viper => todo!("viper animation frames not added yet"),
+        }
+    }
+
     pub fn new(pos: Vec2, kind: ShipKind, description: String) -> Self {
-        let (alive_animation, dead_animation) = kind.default_animations();
+        let (alive_animation, dead_animation) = Self::get_alive_and_dead_animations_for(kind);
         Self {
             pos,
             kind,

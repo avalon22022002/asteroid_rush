@@ -1,10 +1,9 @@
-use std::sync::OnceLock;
-
 use macroquad::{audio,prelude::*};
 
 use crate::game::{
     asset_repository::{
         traits::Singleton,
+        sprite_repository::{traits::SpriteTextures, SpriteRepository, ButtonV1Textures},
         audio_repository::{
             AudioRepository,
             traits::AudioClips,
@@ -12,6 +11,7 @@ use crate::game::{
             button_hover::ButtonHoverSound,
         },
     },
+    entities::animation::Animation,
     interaction::{Interactive, SelfEventHandler},
     object::HasId,
     rendering::{Drawable, StateUpdatable},
@@ -27,7 +27,6 @@ const LOG_PREFIX: &str = "[button]";
 ///     Rect::new(20.0, 100.0, 200.0, 48.0),
 ///     "New Game".to_string(),
 ///     30,
-///     None, // use the default button-background_00.png art
 /// );
 ///
 /// loop {
@@ -58,7 +57,7 @@ pub struct Button {
     bounds: Rect,
     label: String,
     font_size: u16,
-    texture: Texture2D,
+    animation: Animation,
     is_mouse_over: bool,
     was_hovered: bool,
     clicked: bool,
@@ -80,37 +79,30 @@ pub enum ButtonEvents {
 }
 
 impl Button {
-    /// `texture` is the background art drawn across `bounds`. Pass `None` to
-    /// use the shared default (`assets/ui/button/button-background.png`), or
-    /// `Some(..)` to give this button its own art.
-    pub fn new(bounds: Rect, label: String, font_size: u16, texture: Option<Texture2D>) -> Self {
+    pub fn new(bounds: Rect, label: String, font_size: u16) -> Self {
         Self {
             id: utils::get_next_unique_id(),
             bounds,
             label,
             font_size,
-            texture: texture.unwrap_or_else(|| Self::default_texture().clone()),
+            animation: Self::default_animation(bounds.size()),
             is_mouse_over: false,
             was_hovered: false,
             clicked: false,
         }
     }
 
-    /// The background art every `Button` falls back to when `Button::new` is
-    /// given `None` for `texture`. Loaded once and cloned per button —
-    /// cloning a `Texture2D` is cheap, it's just a handle to the same GPU
-    /// texture.
-    fn default_texture() -> &'static Texture2D {
-        static DEFAULT_TEXTURE: OnceLock<Texture2D> = OnceLock::new();
-        DEFAULT_TEXTURE.get_or_init(|| {
-            println!(
-                "{LOG_PREFIX} loading default texture (assets/ui/button/button-background_00.png)..."
-            );
-            Texture2D::from_file_with_format(
-                include_bytes!("../../../../assets/ui/button/button-background_00.png"),
-                None,
-            )
-        })
+    /// The background art every `Button` uses, pulled from the shared
+    /// `SpriteRepository` singleton (same pattern as `Ship`). A single
+    /// static frame — `fps` is irrelevant since `Animation::advance` is a
+    /// no-op below two frames.
+    fn default_animation(scale: Vec2) -> Animation {
+        let button_sprites = &SpriteRepository::get_instance().button_v1_sprite;
+        Animation::new(
+            button_sprites.get_textures_for(&ButtonV1Textures::BasicScifiV1),
+            scale,
+            1.0,
+        )
     }
 
     /// Returns `true` if the mouse cursor is currently within the button's bounds.
@@ -173,7 +165,7 @@ impl Drawable for Button {
         };
 
         draw_texture_ex(
-            &self.texture,
+            self.animation.current_frame(),
             self.bounds.x,
             self.bounds.y,
             tint,

@@ -13,17 +13,18 @@ const LOG_PREFIX: &str = "[ship_v1]";
 /// new ship-v1 look.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum ShipV1Textures {
-    Sentinel,
+    SentinelAlive,
 }
 
 pub struct ShipV1 {
     /// Frames for `ShipV1Textures::Sentinel`. Add a field here per new variant.
-    sentinel_texture: Vec<Texture2D>,
+    sentinel_alive_texture: Vec<Texture2D>,
+    sentinel_dead_texture: Vec<Texture2D>,
 }
 
 impl ShipV1 {
     pub fn new() -> Self {
-        Self { sentinel_texture: Vec::new() }
+        Self { sentinel_alive_texture: Vec::new(), sentinel_dead_texture: Vec::new() }
     }
 }
 
@@ -34,12 +35,12 @@ impl SpriteTextures for ShipV1 {
     /// here is a compile error.
     async fn load_textures_for(&mut self, texture_kind: &ShipV1Textures) {
         match texture_kind {
-            ShipV1Textures::Sentinel => {
-                if self.sentinel_texture.is_empty() {
+            ShipV1Textures::SentinelAlive => {
+                if self.sentinel_alive_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.sentinel_texture = load_frames(
-                        frame_sequence!("assets/animations/ships/sentinel/sentinel_", ["00","01","02","03", "04","05","06","07"])
+                    self.sentinel_alive_texture = load_frames(
+                        frame_sequence!("assets/animations/ships/sentinel/alive/sentinel_", ["00","01","02","03", "04","05","06","07"])
                     ).await;
 
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
@@ -50,7 +51,7 @@ impl SpriteTextures for ShipV1 {
 
     fn get_textures_for(&self, texture_kind: &Self::Kind) -> &Vec<Texture2D> {
         match texture_kind {
-            ShipV1Textures::Sentinel => &self.sentinel_texture
+            ShipV1Textures::SentinelAlive => &self.sentinel_alive_texture
         }
     }
 }

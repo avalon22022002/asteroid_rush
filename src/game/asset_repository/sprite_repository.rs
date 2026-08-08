@@ -6,8 +6,9 @@ use std::sync::OnceLock;
 
 use futures::executor;
 
-use button_v1::ButtonV1;
-use ship_v1::ShipV1;
+pub use button_v1::*;
+pub use ship_v1::*;
+
 use crate::game::asset_repository::{
     sprite_repository::traits::SpriteTextures,
     traits::{Preloadable, Singleton},

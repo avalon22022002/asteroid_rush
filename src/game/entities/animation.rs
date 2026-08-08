@@ -12,10 +12,12 @@ pub struct Animation {
 }
 
 impl Animation {
-    /// `fps` is how many frames to show per second.
-    fn new(frames: Vec<Texture2D>, scale:Vec2, fps: f32) -> Self {
+    /// `frames` is cloned in — cheap, since `Texture2D` is just a handle to
+    /// a GPU texture, not a deep copy. `scale` is the on-screen draw size
+    /// shared by every frame. `fps` is how many frames to show per second.
+    pub fn new(frames: &[Texture2D], scale: Vec2, fps: f32) -> Self {
         Self {
-            frames,
+            frames: frames.to_vec(),
             scale,
             frame_duration: 1.0 / fps,
             elapsed: 0.0,
@@ -50,44 +52,5 @@ impl Animation {
     
     pub fn frame_scale(&self) -> &Vec2 {
         &self.scale
-    }
-
-    /// Decodes each `(path, bytes)` pair as an image frame and builds an
-    /// `Animation` from them. `path` is only used for load logging — pass
-    /// the same path given to `include_bytes!` at the call site so log
-    /// output (and the panic message, if the bytes aren't a valid image)
-    /// names the actual file. `include_bytes!` bakes the file in at compile
-    /// time, so a missing/renamed PNG fails the build instead of surfacing
-    /// as a runtime error.
-    ///
-    /// # Example
-    ///
-    /// ```ignore
-    /// let alive_animation = Animation::load(
-    ///     frame_sequence!(
-    ///         "assets/animations/ships/sentinel/sentinel_",
-    ///         ["00", "01"]
-    ///     ),
-    ///     Vec2::new(236.0, 300.0),
-    ///     8.0,
-    /// );
-    /// ```
-    pub fn load(frames: &[(&str, &[u8])], scale:Vec2, fps: f32) -> Self {
-        println!(
-            "{LOG_PREFIX} loading {} animation frame(s)...",
-            frames.len()
-        );
-
-        let frames = frames
-            .iter()
-            .map(|(path, bytes)| {
-                println!("{LOG_PREFIX} loading {path}...");
-                Texture2D::from_file_with_format(bytes, None)
-            })
-            .collect();
-
-        println!("{LOG_PREFIX} load complete");
-
-        Self::new(frames, scale, fps)
     }
 }
