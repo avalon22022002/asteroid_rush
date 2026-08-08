@@ -92,6 +92,11 @@ impl Button {
         }
     }
 
+    /// This button's on-screen position and size.
+    pub fn bounds(&self) -> Rect {
+        self.bounds
+    }
+
     /// The background art every `Button` uses, pulled from the shared
     /// `SpriteRepository` singleton (same pattern as `Ship`). A single
     /// static frame — `fps` is irrelevant since `Animation::advance` is a
