@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
-    asset_repository::sprite_repository::BannerV1Textures,
+    asset_repository::sprite_repository::{BannerV1Textures, ButtonV1Textures},
     entities::asteroidfield::AsteroidField,
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
@@ -36,8 +36,9 @@ impl Default for LevelSelectionPage {
 
 impl LevelSelectionPage {
     pub fn new() -> Self {
-        let button_width = BASE_WIDTH * 0.5;
-        let button_height = BASE_HEIGHT * 0.18;
+        let button_width = BASE_WIDTH * 0.33;
+        // Derive height from the button art's width:height so it isn't stretched.
+        let button_height = button_width / ButtonV1Textures::BasicScifiV1.aspect_ratio();
         let gap = 10.0;
         let x = 20.0;
         let level_1_y = BASE_HEIGHT * 0.35;
@@ -47,7 +48,7 @@ impl LevelSelectionPage {
         Self {
             main_banner: Banner::new(
                 BannerV1Textures::LevelSelectionPageMain,
-                Vec2::new(x, 50.0),
+                Vec2::new(x, 25.0),
                 Vec2::new(450.0, 111.0),
             ),
             level_1_button: Button::new(

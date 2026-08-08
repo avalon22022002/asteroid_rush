@@ -1,9 +1,10 @@
-//! Shared additive-blend pass for "glow on hover" effects.
+//! Shared "glow on hover" pass.
 //!
-//! Drawing a sprite through this *adds* its light to the framebuffer
-//! (`dst += srcAlpha * src`) instead of replacing pixels, so bright areas glow
-//! and dark areas stay put — a blue UI panel lights up while its dark bevel
-//! doesn't, with no mask or separate sprite.
+//! Draws the sprite a second time in "add light" mode — like stacking a glowing
+//! copy on top instead of painting over it. Bright parts pile on more light and
+//! glow; dark or see-through parts have nothing to add and stay the same. So a
+//! blue panel lights up while its dark border doesn't — no mask or extra sprite.
+//! (The GPU does this as `result = src * srcAlpha + dst`.)
 
 use std::cell::OnceCell;
 
@@ -12,8 +13,8 @@ use macroquad::{
     prelude::*,
 };
 
-// macroquad's default texture shaders, unchanged — only the blend mode differs.
-// `color0` arrives 0..255 and is normalized to match `draw_texture_ex`'s tint.
+// macroquad's default texture shaders, unchanged — only the blend mode (set in
+// `material`) makes this additive. `color0` is the 0..255 tint, normalized here.
 const VERTEX_SHADER: &str = "#version 100
 attribute vec3 position;
 attribute vec2 texcoord;
@@ -52,6 +53,8 @@ fn material() -> Material {
                 },
                 MaterialParams {
                     pipeline_params: PipelineParams {
+                        // Additive blend: result = src * srcAlpha + dst. This is
+                        // what makes the draw add light instead of covering.
                         color_blend: Some(BlendState::new(
                             Equation::Add,
                             BlendFactor::Value(BlendValue::SourceAlpha),
@@ -69,8 +72,10 @@ fn material() -> Material {
 }
 
 /// Draws `texture` at `bounds` additively tinted by `tint`. The tint's alpha
-/// controls glow strength; its rgb biases the added light's hue.
-pub fn draw(texture: &Texture2D, bounds: Rect, tint: Color) {
+/// controls glow strength; its rgb biases the added light's hue. `source` crops
+/// the sampled texels — pass the same crop the base art uses so the glow lines
+/// up; `None` samples the whole texture.
+pub fn draw(texture: &Texture2D, bounds: Rect, tint: Color, source: Option<Rect>) {
     gl_use_material(&material());
     draw_texture_ex(
         texture,
@@ -79,6 +84,7 @@ pub fn draw(texture: &Texture2D, bounds: Rect, tint: Color) {
         tint,
         DrawTextureParams {
             dest_size: Some(bounds.size()),
+            source,
             ..Default::default()
         },
     );

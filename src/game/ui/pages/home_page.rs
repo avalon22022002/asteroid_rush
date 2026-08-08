@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
-    asset_repository::sprite_repository::BannerV1Textures,
+    asset_repository::sprite_repository::{BannerV1Textures, ButtonV1Textures},
     entities::ship::{Ship, ShipKind},
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
@@ -34,8 +34,9 @@ impl Default for HomePage {
 
 impl HomePage {
     pub fn new() -> Self {
-        let button_width = BASE_WIDTH * 0.5;
-        let button_height = BASE_HEIGHT * 0.2;
+        let button_width = BASE_WIDTH * 0.4;
+        // Derive height from the button art's width:height so it isn't stretched.
+        let button_height = button_width / ButtonV1Textures::BasicScifiV1.aspect_ratio();
         let gap = 10.0;
         let x = 20.0;
         let new_game_y = BASE_HEIGHT * 0.40;

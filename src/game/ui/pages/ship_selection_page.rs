@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     asset_repository::{
-        sprite_repository::{traits::SpriteTextures, SpriteRepository, ShipV1Textures, BannerV1Textures},
+        sprite_repository::{traits::SpriteTextures, SpriteRepository, ShipV1Textures, BannerV1Textures, ButtonV1Textures},
         traits::Singleton,
     },
     entities::{animation::Animation, ship::ShipKind},
@@ -37,10 +37,13 @@ impl Default for ShipSelectionPage {
 impl ShipSelectionPage {
     pub fn new() -> Self {
         let button_width = BASE_WIDTH * 0.42;
-        let button_height = BASE_HEIGHT * 0.24;
-        let gap = 10.0;
+        // Derive height from the button art's own width:height so it isn't stretched.
+        let button_height = button_width / ButtonV1Textures::BasicScifiV1.aspect_ratio();
+        // Button trims the texture's transparent margins, so a button's bounds
+        // are exactly its visible button art — this is a true gap between them.
+        let gap = 12.0;
         let x = 20.0;
-        let vanguard_y = BASE_HEIGHT * 0.30;
+        let vanguard_y = BASE_HEIGHT * 0.28;
         let sentinel_y = vanguard_y + button_height + gap;
         let viper_y = sentinel_y + button_height + gap;
         let icon_size = Vec2::splat(button_height * 0.7);

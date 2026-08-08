@@ -149,6 +149,7 @@ impl Button {
             self.animation.current_frame(),
             self.bounds,
             Color::new(0.4, 0.7, 1.0, pulse),
+            Some(ButtonV1Textures::BasicScifiV1.opaque_region()),
         );
     }
 }
@@ -190,6 +191,9 @@ impl Drawable for Button {
             tint,
             DrawTextureParams {
                 dest_size: Some(self.bounds.size()),
+                // Crop the texture's transparent margins so the button art fills
+                // the bounds, keeping layout gaps and the hit area honest.
+                source: Some(ButtonV1Textures::BasicScifiV1.opaque_region()),
                 ..Default::default()
             },
         );
