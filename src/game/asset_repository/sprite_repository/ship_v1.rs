@@ -32,7 +32,7 @@ impl SpriteTextures for ShipV1 {
 
     /// Exhaustive match: adding a `ShipV1Textures` variant without adding it
     /// here is a compile error.
-    async fn load_textures_for(&mut self, texture_kind: ShipV1Textures) {
+    async fn load_textures_for(&mut self, texture_kind: &ShipV1Textures) {
         match texture_kind {
             ShipV1Textures::Sentinel => {
                 if self.sentinel_texture.is_empty() {
@@ -48,7 +48,7 @@ impl SpriteTextures for ShipV1 {
         }
     }
 
-    fn get_textures_for(&self, texture_kind: Self::Kind) -> &Vec<Texture2D> {
+    fn get_textures_for(&self, texture_kind: &Self::Kind) -> &Vec<Texture2D> {
         match texture_kind {
             ShipV1Textures::Sentinel => &self.sentinel_texture
         }

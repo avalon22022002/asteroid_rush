@@ -4,10 +4,12 @@ use macroquad::{audio,prelude::*};
 
 use crate::game::{
     asset_repository::{
-        traits::AssetRepository,
+        traits::Singleton,
         audio_repository::{
             AudioRepository,
-            audio::AudioIdentifier,
+            traits::AudioClips,
+            button_click::ButtonClickSound,
+            button_hover::ButtonHoverSound,
         },
     },
     interaction::{Interactive, SelfEventHandler},
@@ -223,15 +225,17 @@ impl SelfEventHandler for Button {
             // play audio click sound
             audio::play_sound_once(
                 AudioRepository::get_instance()
-                .get_asset(AudioIdentifier::ButtonClick)
-                .get_sound()
+                    .button_click_sounds
+                    .get_clip_for(&ButtonClickSound::Basic)
+                    .unwrap_or_else(|| panic!("{LOG_PREFIX} button click sound not loaded")),
             );
         } else if let Some(ButtonEvents::HoverStarted) = event {
             // play audio hover sound
             audio::play_sound_once(
                 AudioRepository::get_instance()
-                    .get_asset(AudioIdentifier::ButtonHover)
-                    .get_sound()
+                    .button_hover_sounds
+                    .get_clip_for(&ButtonHoverSound::Basic)
+                    .unwrap_or_else(|| panic!("{LOG_PREFIX} button hover sound not loaded")),
             );
         }
     }

@@ -31,7 +31,7 @@ impl SpriteTextures for ButtonV1 {
 
     /// Exhaustive match: adding a `ButtonV1Textures` variant without adding
     /// it here is a compile error.
-    async fn load_textures_for(&mut self, texture_kind: ButtonV1Textures) {
+    async fn load_textures_for(&mut self, texture_kind: &ButtonV1Textures) {
         match texture_kind {
             ButtonV1Textures::BasicScifiV1 => {
                 if self.scifi_v1_texture.is_empty() {
@@ -47,7 +47,7 @@ impl SpriteTextures for ButtonV1 {
         }
     }
 
-    fn get_textures_for(&self, texture_kind: ButtonV1Textures) -> &Vec<Texture2D> {
+    fn get_textures_for(&self, texture_kind: &ButtonV1Textures) -> &Vec<Texture2D> {
         match texture_kind {
             ButtonV1Textures::BasicScifiV1 => &self.scifi_v1_texture,
         }

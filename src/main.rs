@@ -1,5 +1,6 @@
 use asteroid_rush::game::{
     self,
+    asset_repository::traits::Singleton,
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::pages::{PageEvents, PageManager, home_page::HomePageEvent},

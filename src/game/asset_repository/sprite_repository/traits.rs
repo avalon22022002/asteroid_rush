@@ -13,20 +13,20 @@ pub trait SpriteTextures {
     /// Loads the frames for `texture_kind` on first use. Implementers should
     /// make this idempotent, since a redundant call shouldn't re-decode
     /// frames already loaded. Use `get_textures_for` to read them back.
-    async fn load_textures_for(&mut self, texture_kind: Self::Kind);
+    async fn load_textures_for(&mut self, texture_kind: &Self::Kind);
 
     /// Eagerly loads every `Kind` variant. Call once at game init, same as
-    /// `AssetRepository::load_all`.
+    /// `Preloadable::load_all`.
     async fn load_all_textures(&mut self) {
         for texture_kind in Self::Kind::iter() {
-            self.load_textures_for(texture_kind).await;
+            self.load_textures_for(&texture_kind).await;
         }
     }
 
     /// Returns the frames for `texture_kind`. `load_textures_for`/
     /// `load_all_textures` must be called (and awaited) first, else it may
     /// return empty.
-    fn get_textures_for(&self, texture_kind: Self::Kind) -> &Vec<Texture2D>;
+    fn get_textures_for(&self, texture_kind: &Self::Kind) -> &Vec<Texture2D>;
 }
 
 /// Every sprite type implements this. Just `SpriteTextures` for now; more

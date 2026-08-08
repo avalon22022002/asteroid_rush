@@ -1,90 +1,64 @@
-pub mod audio;
+pub mod traits;
+pub mod button_click;
+pub mod button_hover;
 
-use std::collections::HashMap;
 use std::sync::OnceLock;
 
 use futures::executor;
-use macroquad::logging;
-use strum::IntoEnumIterator;
 
+use button_click::ButtonClickSounds;
+use button_hover::ButtonHoverSounds;
 use crate::game::asset_repository::{
-    traits::AssetRepository,
-    audio_repository::audio::{Audio, AudioIdentifier},
+    audio_repository::traits::AudioClips,
+    traits::{Preloadable, Singleton},
 };
 
-const LOG_PREFIX: &str = "AudioRepository: ";
-
-#[derive(Debug)]
+/// # Example
+///
+/// ```no_run
+/// use asteroid_rush::game::asset_repository::{
+///     traits::Singleton,
+///     audio_repository::{AudioRepository, traits::AudioClips, button_click::ButtonClickSound},
+/// };
+///
+/// // get_instance builds (and loads) the repository on first call, so it's
+/// // already fully loaded here — no separate load_all step needed.
+/// let repo = AudioRepository::get_instance();
+/// let clip = repo.button_click_sounds.get_clip_for(&ButtonClickSound::Basic);
+/// ```
 pub struct AudioRepository {
-    audios: OnceLock<HashMap<AudioIdentifier, Audio>>,
+    pub button_click_sounds: ButtonClickSounds,
+    pub button_hover_sounds: ButtonHoverSounds,
 }
 
-/// The shared singleton returned by `get_instance`.
+impl AudioRepository {
+    pub fn new() -> Self {
+        Self {
+            button_click_sounds: ButtonClickSounds::new(),
+            button_hover_sounds: ButtonHoverSounds::new(),
+        }
+    }
+}
+
 static INSTANCE: OnceLock<AudioRepository> = OnceLock::new();
 
-impl AudioRepository {
-    /// Builds a fully loaded `AudioRepository`. `block_on`'s the async
-    /// `load_all` to stay sync — fine here since this repo is meant to be
-    /// initialized once, up front, before the game loop starts: a slightly
-    /// longer startup trades off for a lag-free game loop afterward.
-    fn new() -> AudioRepository {
-        let mut repo = AudioRepository {
-            audios: OnceLock::new(),
-        };
+impl Singleton for AudioRepository {
+    fn storage() -> &'static OnceLock<Self> {
+        &INSTANCE
+    }
+
+    /// Builds a fully loaded `AudioRepository`. `block_on`'s `load_all` to
+    /// stay sync, same tradeoff (and reasoning) as `SpriteRepository::new`.
+    fn new() -> Self {
+        let mut repo = AudioRepository::new();
         executor::block_on(repo.load_all());
         repo
     }
-
-    /// Returns the shared singleton, building and loading it on first call.
-    /// Prefer calling this once at game init so that cost lands there
-    /// instead of mid-game — but once set, calling this again (as often as
-    /// you like, from anywhere) is just a cheap lookup.
-    pub fn get_instance() -> &'static AudioRepository {
-        if let Some(instance) = INSTANCE.get() {
-            return instance;
-        }
-
-        INSTANCE.set(AudioRepository::new()).unwrap_or_else(|_| panic!("{LOG_PREFIX} get_instance failed to set the shared instance"));
-
-        INSTANCE
-            .get()
-            .unwrap_or_else(|| panic!("{LOG_PREFIX} get_instance failed to initialize"))
-    }
 }
 
-impl AssetRepository for AudioRepository {
-    type Asset = Audio;
-    type AssetIdentifier = AudioIdentifier;
-
+impl Preloadable for AudioRepository {
     async fn load_all(&mut self) {
-        if self.audios.get().is_some() {
-            let msg = format!("{LOG_PREFIX} Already Iniliazed skipping");
-            logging::info!("{msg}");
-        }
-
-        logging::info!("{LOG_PREFIX} initializing..");
-        let mut audio_map: HashMap<AudioIdentifier, Audio> = HashMap::new();
-        for identifier in AudioIdentifier::iter() {
-            let sound = Audio::decode_sound(identifier).await.unwrap_or_else(|_| panic!("{LOG_PREFIX} Failed to Load Audio: {identifier:?}"));
-
-            audio_map.insert(identifier, Audio::new(identifier, sound));
-        }
-
-        self.audios
-            .set(audio_map)
-            .unwrap_or_else(|_| panic!("{LOG_PREFIX} Failed to initialize"));
-
-        logging::info!("{LOG_PREFIX} initialized.");
-    }
-
-    fn get_asset(&self, identifier: Self::AssetIdentifier) -> &Self::Asset {
-        let asset = self
-            .audios
-            .get()
-            .unwrap_or_else(|| panic!("{LOG_PREFIX} get_asset called before load_all"))
-            .get(&identifier)
-            .unwrap_or_else(|| panic!("{LOG_PREFIX} No audio registered for {identifier:?}"));
-
-        asset
+        self.button_click_sounds.load_all_clips().await;
+        self.button_hover_sounds.load_all_clips().await;
     }
 }
