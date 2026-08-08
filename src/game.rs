@@ -1,6 +1,7 @@
-pub mod audio;
+pub mod asset_repository;
 pub mod background;
 pub mod entities;
+pub mod frames;
 pub mod interaction;
 pub mod object;
 pub mod rendering;
@@ -17,6 +18,12 @@ pub const BASE_HEIGHT: f32 = 455.0;
 
 pub struct Game {
     background: background::Background,
+}
+
+impl Default for Game {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Game {

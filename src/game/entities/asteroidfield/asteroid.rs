@@ -1,16 +1,17 @@
-use std::sync::OnceLock;
-
 use macroquad::prelude::*;
 
 use crate::game::{
+    asset_repository::{
+        sprite_repository::{traits::SpriteTextures, SpriteRepository, AsteroidV1Textures},
+        traits::Singleton,
+    },
+    entities::animation::Animation,
     rendering::{Drawable, StateUpdatable},
     utils::ordered,
 };
 
-const LOG_PREFIX: &str = "[asteroid]";
-
 /// Identifies which asteroid texture to draw. Add a variant here (and cases
-/// in `AsteroidTextureKind::texture`/`render_size`) to register a new
+/// in `AsteroidTextureKind::sprite_kind`/`render_size`) to register a new
 /// asteroid look.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AsteroidTextureKind {
@@ -19,24 +20,10 @@ pub enum AsteroidTextureKind {
 }
 
 impl AsteroidTextureKind {
-    /// Decodes this kind's texture. Loaded once per kind and reused after
-    /// that — `include_bytes!` bakes the file in at compile time, so a
-    /// missing/renamed asset fails the build instead of surfacing as a
-    /// runtime error.
-    fn texture(self) -> &'static Texture2D {
+    /// This kind's texture group in `SpriteRepository`.
+    fn sprite_kind(self) -> AsteroidV1Textures {
         match self {
-            AsteroidTextureKind::Molten => {
-                static TEXTURE: OnceLock<Texture2D> = OnceLock::new();
-                TEXTURE.get_or_init(|| {
-                    println!(
-                        "{LOG_PREFIX} loading {self:?} (assets/animations/asteroid/asteroid1.png)..."
-                    );
-                    Texture2D::from_file_with_format(
-                        include_bytes!("../../../../assets/animations/asteroid/asteroid_0.png"),
-                        None,
-                    )
-                })
-            }
+            AsteroidTextureKind::Molten => AsteroidV1Textures::Molten,
         }
     }
 
@@ -62,6 +49,7 @@ pub struct Asteroid {
     rotation: f32,
     /// Spin rate in radians/second. Can be negative to spin counterclockwise.
     rotation_speed: f32,
+    animation: Animation,
 }
 
 impl Asteroid {
@@ -74,6 +62,12 @@ impl Asteroid {
         rotation: f32,
         rotation_speed: f32,
     ) -> Self {
+        let asteroid_sprites = &SpriteRepository::get_instance().asteroid_v1_sprite;
+        let animation = Animation::new(
+            asteroid_sprites.get_textures_for(&kind.sprite_kind()),
+            Vec2::splat(kind.render_size() * scale),
+            1.0,
+        );
         Self {
             x,
             y,
@@ -82,6 +76,7 @@ impl Asteroid {
             speed,
             rotation,
             rotation_speed,
+            animation,
         }
     }
 
@@ -150,29 +145,27 @@ impl Asteroid {
 
 impl Default for Asteroid {
     fn default() -> Self {
-        Asteroid {
-            x: rand::gen_range(0.0, screen_width()),
-            y: rand::gen_range(0.0, screen_height()),
-            kind: AsteroidTextureKind::Molten,
-            scale: rand::gen_range(0.5, 1.5),
-            speed: rand::gen_range(60.0, 220.0),
-            rotation: rand::gen_range(0.0, std::f32::consts::TAU),
-            rotation_speed: rand::gen_range(-std::f32::consts::PI, std::f32::consts::PI),
-        }
+        Asteroid::new(
+            rand::gen_range(0.0, screen_width()),
+            rand::gen_range(0.0, screen_height()),
+            AsteroidTextureKind::Molten,
+            rand::gen_range(0.5, 1.5),
+            rand::gen_range(60.0, 220.0),
+            rand::gen_range(0.0, std::f32::consts::TAU),
+            rand::gen_range(-std::f32::consts::PI, std::f32::consts::PI),
+        )
     }
 }
 
 impl Drawable for Asteroid {
     fn draw(&self) {
-        let texture = self.kind.texture();
-        let size = Vec2::splat(self.kind.render_size() * self.scale);
         draw_texture_ex(
-            texture,
+            self.animation.current_frame(),
             self.x,
             self.y,
             WHITE,
             DrawTextureParams {
-                dest_size: Some(size),
+                dest_size: Some(*self.animation.frame_scale()),
                 rotation: self.rotation,
                 ..Default::default()
             },

@@ -2,11 +2,12 @@ use macroquad::prelude::*;
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
+    asset_repository::sprite_repository::BannerV1Textures,
     entities::ship::{Ship, ShipKind},
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{
-        banner::{Banner, BannerKind},
+        banner::Banner,
         button::{Button, ButtonEvents},
     },
 };
@@ -25,6 +26,12 @@ pub struct HomePage {
     ship: Ship,
 }
 
+impl Default for HomePage {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl HomePage {
     pub fn new() -> Self {
         let button_width = BASE_WIDTH * 0.5;
@@ -36,26 +43,22 @@ impl HomePage {
 
         Self {
             main_banner: Banner::new(
-                BannerKind::HomePageMain,
+                BannerV1Textures::HomePageMain,
                 Vec2::new(x, 50.0),
                 Vec2::new(450.0, 111.0),
-                None,
             ),
             new_game_button: Button::new(
                 Rect::new(x, new_game_y, button_width, button_height),
                 "New Game".to_string(),
                 30,
-                None,
             ),
             exit_button: Button::new(
                 Rect::new(x, exit_y, button_width, button_height),
                 "Exit".to_string(),
                 30,
-                None,
             ),
             ship: Ship::new(
                 Vec2::new(BASE_WIDTH - 300.0, 180.0),
-                Vec2::new(236.0, 300.0),
                 ShipKind::Sentinel,
                 "Sentinel".to_string(),
             ),

@@ -2,11 +2,12 @@ use macroquad::prelude::*;
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
+    asset_repository::sprite_repository::BannerV1Textures,
     entities::asteroidfield::AsteroidField,
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{
-        banner::{Banner, BannerKind},
+        banner::Banner,
         button::{Button, ButtonEvents},
     },
 };
@@ -27,6 +28,12 @@ pub struct LevelSelectionPage {
     asteroid_field: AsteroidField,
 }
 
+impl Default for LevelSelectionPage {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl LevelSelectionPage {
     pub fn new() -> Self {
         let button_width = BASE_WIDTH * 0.5;
@@ -39,28 +46,24 @@ impl LevelSelectionPage {
 
         Self {
             main_banner: Banner::new(
-                BannerKind::LevelSelectionPageMain,
+                BannerV1Textures::LevelSelectionPageMain,
                 Vec2::new(x, 50.0),
                 Vec2::new(450.0, 111.0),
-                None,
             ),
             level_1_button: Button::new(
                 Rect::new(x, level_1_y, button_width, button_height),
                 "Level 1".to_string(),
                 30,
-                None,
             ),
             level_2_button: Button::new(
                 Rect::new(x, level_2_y, button_width, button_height),
                 "Level 2".to_string(),
                 30,
-                None,
             ),
             level_3_button: Button::new(
                 Rect::new(x, level_3_y, button_width, button_height),
                 "Level 3".to_string(),
                 30,
-                None,
             ),
             asteroid_field: AsteroidField::new(15, None),
         }

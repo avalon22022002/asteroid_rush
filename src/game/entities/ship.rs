@@ -1,7 +1,11 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    BASE_HEIGHT, BASE_WIDTH,
+    BASE_HEIGHT, BASE_WIDTH, 
+    asset_repository::{
+        sprite_repository::{traits::SpriteTextures, SpriteRepository, ShipV1Textures}, 
+        traits::Singleton
+    }, 
     entities::animation::Animation,
     rendering::{Drawable, StateUpdatable},
 };
@@ -44,82 +48,6 @@ impl ShipKind {
             },
         }
     }
-
-    /// Default (alive, dead) animations for a freshly spawned ship of this
-    /// kind. Picked automatically from `kind` so `Ship::new` doesn't need
-    /// per-ship animation overrides — every ship of the same kind looks the
-    /// same to start.
-    fn default_animations(self) -> (Animation, Animation) {
-        match self {
-            ShipKind::Sentinel => {
-                let alive = Animation::load(
-                    &[
-                        (
-                            "assets/animations/ships/sentinel/sentinel_00.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_00.png"
-                            ),
-                        ),
-                        (
-                            "assets/animations/ships/sentinel/sentinel_01.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_01.png"
-                            ),
-                        ),
-                        (
-                            "assets/animations/ships/sentinel/sentinel_02.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_02.png"
-                            ),
-                        ),
-                        (
-                            "assets/animations/ships/sentinel/sentinel_03.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_03.png"
-                            ),
-                        ),
-                        (
-                            "assets/animations/ships/sentinel/sentinel_04.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_04.png"
-                            ),
-                        ),
-                        (
-                            "assets/animations/ships/sentinel/sentinel_05.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_05.png"
-                            ),
-                        ),
-                        (
-                            "assets/animations/ships/sentinel/sentinel_06.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_06.png"
-                            ),
-                        ),
-                        (
-                            "assets/animations/ships/sentinel/sentinel_07.png",
-                            include_bytes!(
-                                "../../../assets/animations/ships/sentinel/sentinel_07.png"
-                            ),
-                        ),
-                    ],
-                    12.0,
-                );
-                // No dedicated death sprite set yet — freeze on the last
-                // alive frame as a placeholder until one's added.
-                let dead = Animation::load(
-                    &[(
-                        "assets/animations/ships/sentinel/sentinel_07.png",
-                        include_bytes!("../../../assets/animations/ships/sentinel/sentinel_07.png"),
-                    )],
-                    1.0,
-                );
-                (alive, dead)
-            }
-            ShipKind::Vanguard => todo!("vanguard animation frames not added yet"),
-            ShipKind::Viper => todo!("viper animation frames not added yet"),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -132,7 +60,6 @@ pub struct ShipStats {
 }
 pub struct Ship {
     pos: Vec2,
-    size: Vec2,
     kind: ShipKind,
     ship_stats: ShipStats,
     description: String,
@@ -142,11 +69,29 @@ pub struct Ship {
 }
 
 impl Ship {
-    pub fn new(pos: Vec2, size: Vec2, kind: ShipKind, description: String) -> Self {
-        let (alive_animation, dead_animation) = kind.default_animations();
+    pub fn get_alive_and_dead_animations_for( kind:ShipKind ) -> (Animation, Animation) {
+        let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
+        match kind {
+            ShipKind::Sentinel => {
+                let alive = Animation::new(ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive), Vec2::new(236.0, 300.0), 12.0);
+                // No dedicated death sprite set yet — freeze on the last
+                // alive frame as a placeholder until one's added.
+                let dead = Animation::new(
+                    ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
+                    Vec2::new(236.0, 300.0),
+                    1.0,
+                );
+                return (alive, dead)
+            }
+            ShipKind::Vanguard => todo!("vanguard animation frames not added yet"),
+            ShipKind::Viper => todo!("viper animation frames not added yet"),
+        }
+    }
+
+    pub fn new(pos: Vec2, kind: ShipKind, description: String) -> Self {
+        let (alive_animation, dead_animation) = Self::get_alive_and_dead_animations_for(kind);
         Self {
             pos,
-            size,
             kind,
             ship_stats: kind.base_stats(),
             description,
@@ -163,7 +108,7 @@ impl Ship {
         let dir = movement_input();
         self.pos = (self.pos + dir * self.ship_stats.speed * dt).clamp(
             Vec2::ZERO,
-            Vec2::new(BASE_WIDTH - self.size.x, BASE_HEIGHT - self.size.y),
+            Vec2::new(BASE_WIDTH - self.ship_size().x, BASE_HEIGHT - self.ship_size().y),
         );
     }
 
@@ -173,6 +118,14 @@ impl Ship {
             &self.alive_animation
         } else {
             &self.dead_animation
+        }
+    }
+
+    fn ship_size(&self) -> &Vec2 {
+        if self.is_alive {
+            &self.alive_animation.frame_scale()
+        } else {
+            &self.dead_animation.frame_scale()
         }
     }
 
@@ -216,7 +169,7 @@ impl Drawable for Ship {
             self.pos.y,
             WHITE,
             DrawTextureParams {
-                dest_size: Some(self.size),
+                dest_size: Some(*self.ship_size()),
                 ..Default::default()
             },
         );

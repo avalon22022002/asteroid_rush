@@ -19,7 +19,7 @@ impl Starfield {
             .map(|_| Star::random_between_range(&lower_limits, &upper_limits))
             .collect();
 
-        return Starfield { stars };
+        Starfield { stars }
     }
 }
 

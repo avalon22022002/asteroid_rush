@@ -20,5 +20,5 @@ pub fn get_next_unique_id() -> u64 {
     // `Relaxed` just means we're not using this counter to keep anything else
     // in sync across threads — we only care that every call gets a different
     // number, not exactly when each thread sees the update.
-    return NEXT_ID.fetch_add(1, Ordering::Relaxed);
+    NEXT_ID.fetch_add(1, Ordering::Relaxed)
 }

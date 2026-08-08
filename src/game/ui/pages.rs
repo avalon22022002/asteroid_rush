@@ -27,6 +27,12 @@ pub struct PageManager {
     current_page: Pages,
 }
 
+impl Default for PageManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PageManager {
     pub fn new() -> Self {
         Self {
@@ -67,10 +73,10 @@ impl Interactive for PageManager {
         match &self.current_page {
             Pages::HomePage(home_page) => home_page
                 .poll_event()
-                .map(|event| PageEvents::HomePageEvent(event)),
+                .map(PageEvents::HomePageEvent),
             Pages::LevelSelectionPage(level_selection_page) => level_selection_page
                 .poll_event()
-                .map(|event| PageEvents::LevelSelectionPageEvent(event)),
+                .map(PageEvents::LevelSelectionPageEvent),
         }
     }
 }
