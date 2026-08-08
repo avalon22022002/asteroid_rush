@@ -1,3 +1,4 @@
+pub mod asteroid_v1;
 pub mod banner_v1;
 pub mod button_v1;
 pub mod ship_v1;
@@ -7,6 +8,7 @@ use std::sync::OnceLock;
 
 use futures::executor;
 
+pub use asteroid_v1::*;
 pub use banner_v1::*;
 pub use button_v1::*;
 pub use ship_v1::*;
@@ -31,6 +33,7 @@ use crate::game::asset_repository::{
 /// ```
 
 pub struct SpriteRepository {
+    pub asteroid_v1_sprite: AsteroidV1,
     pub banner_v1_sprite: BannerV1,
     pub button_v1_sprite: ButtonV1,
     pub ship_v1_sprite: ShipV1,
@@ -39,6 +42,7 @@ pub struct SpriteRepository {
 impl SpriteRepository {
     pub fn new() -> Self {
         Self {
+            asteroid_v1_sprite: AsteroidV1::new(),
             banner_v1_sprite: BannerV1::new(),
             button_v1_sprite: ButtonV1::new(),
             ship_v1_sprite: ShipV1::new()
@@ -64,6 +68,7 @@ impl Singleton for SpriteRepository {
 
 impl Preloadable for SpriteRepository {
     async fn load_all(&mut self) {
+        self.asteroid_v1_sprite.load_all_textures().await;
         self.banner_v1_sprite.load_all_textures().await;
         self.button_v1_sprite.load_all_textures().await;
         self.ship_v1_sprite.load_all_textures().await;

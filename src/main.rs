@@ -12,10 +12,14 @@ use macroquad::prelude::*;
 async fn main() {
     println!("Moving star field with Home Page!");
 
-    let mut game = game::Game::new();
-    let mut page_manager = PageManager::new();
+    // Both repositories build (and, via Singleton::new, fully load) on this
+    // first `get_instance` call, so every sound/texture is decoded here,
+    // up front, instead of stalling whichever page first needs one.
     game::asset_repository::audio_repository::AudioRepository::get_instance();
     game::asset_repository::sprite_repository::SpriteRepository::get_instance();
+
+    let mut game = game::Game::new();
+    let mut page_manager = PageManager::new();
 
     loop {
         game.update_state(());
