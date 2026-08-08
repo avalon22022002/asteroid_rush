@@ -2,11 +2,12 @@ use macroquad::prelude::*;
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
+    asset_repository::sprite_repository::BannerV1Textures,
     entities::ship::{Ship, ShipKind},
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{
-        banner::{Banner, BannerKind},
+        banner::Banner,
         button::{Button, ButtonEvents},
     },
 };
@@ -42,10 +43,9 @@ impl HomePage {
 
         Self {
             main_banner: Banner::new(
-                BannerKind::HomePageMain,
+                BannerV1Textures::HomePageMain,
                 Vec2::new(x, 50.0),
                 Vec2::new(450.0, 111.0),
-                None,
             ),
             new_game_button: Button::new(
                 Rect::new(x, new_game_y, button_width, button_height),

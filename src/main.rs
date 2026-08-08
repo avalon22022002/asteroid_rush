@@ -15,6 +15,7 @@ async fn main() {
     let mut game = game::Game::new();
     let mut page_manager = PageManager::new();
     game::asset_repository::audio_repository::AudioRepository::get_instance();
+    game::asset_repository::sprite_repository::SpriteRepository::get_instance();
 
     loop {
         game.update_state(());
