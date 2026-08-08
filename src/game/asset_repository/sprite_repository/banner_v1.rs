@@ -14,6 +14,7 @@ const LOG_PREFIX: &str = "[banner_v1]";
 pub enum BannerV1Textures {
     HomePageMain,
     LevelSelectionPageMain,
+    ShipSelectionPageMain,
 }
 
 pub struct BannerV1 {
@@ -21,6 +22,8 @@ pub struct BannerV1 {
     home_page_main_texture: Vec<Texture2D>,
     /// Frames for `BannerV1Textures::LevelSelectionPageMain`.
     level_selection_page_main_texture: Vec<Texture2D>,
+    /// Frames for `BannerV1Textures::ShipSelectionPageMain`.
+    ship_selection_page_main_texture: Vec<Texture2D>,
 }
 
 impl BannerV1 {
@@ -28,6 +31,7 @@ impl BannerV1 {
         Self {
             home_page_main_texture: Vec::new(),
             level_selection_page_main_texture: Vec::new(),
+            ship_selection_page_main_texture: Vec::new(),
         }
     }
 }
@@ -61,6 +65,17 @@ impl SpriteTextures for BannerV1 {
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
             }
+            BannerV1Textures::ShipSelectionPageMain => {
+                if self.ship_selection_page_main_texture.is_empty() {
+                    println!("{LOG_PREFIX} loading {texture_kind:?}...");
+
+                    self.ship_selection_page_main_texture = load_frames(
+                        frame_sequence!("assets/ui/text/ship_selection_page_title", [""])
+                    ).await;
+
+                    println!("{LOG_PREFIX} {texture_kind:?} load complete");
+                }
+            }
         }
     }
 
@@ -68,6 +83,7 @@ impl SpriteTextures for BannerV1 {
         match texture_kind {
             BannerV1Textures::HomePageMain => &self.home_page_main_texture,
             BannerV1Textures::LevelSelectionPageMain => &self.level_selection_page_main_texture,
+            BannerV1Textures::ShipSelectionPageMain => &self.ship_selection_page_main_texture,
         }
     }
 }
