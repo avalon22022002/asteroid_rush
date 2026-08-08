@@ -57,8 +57,13 @@ impl Singleton for AudioRepository {
 }
 
 impl Preloadable for AudioRepository {
+    /// Loads every clip group concurrently (`futures::join!`) rather than
+    /// one after another, so the total wait is the slowest single load, not
+    /// their sum.
     async fn load_all(&mut self) {
-        self.button_click_sounds.load_all_clips().await;
-        self.button_hover_sounds.load_all_clips().await;
+        futures::join!(
+            self.button_click_sounds.load_all_clips(),
+            self.button_hover_sounds.load_all_clips(),
+        );
     }
 }

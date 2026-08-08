@@ -67,10 +67,15 @@ impl Singleton for SpriteRepository {
 }
 
 impl Preloadable for SpriteRepository {
+    /// Loads every sprite type concurrently (`futures::join!`) rather than
+    /// one after another, so the total wait is the slowest single load, not
+    /// their sum.
     async fn load_all(&mut self) {
-        self.asteroid_v1_sprite.load_all_textures().await;
-        self.banner_v1_sprite.load_all_textures().await;
-        self.button_v1_sprite.load_all_textures().await;
-        self.ship_v1_sprite.load_all_textures().await;
+        futures::join!(
+            self.asteroid_v1_sprite.load_all_textures(),
+            self.banner_v1_sprite.load_all_textures(),
+            self.button_v1_sprite.load_all_textures(),
+            self.ship_v1_sprite.load_all_textures(),
+        );
     }
 }
