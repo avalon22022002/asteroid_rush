@@ -1,4 +1,4 @@
-use macroquad::{audio,prelude::*};
+use macroquad::{audio, prelude::*};
 
 use crate::game::{
     asset_repository::{
@@ -15,6 +15,7 @@ use crate::game::{
     interaction::{Interactive, SelfEventHandler},
     object::HasId,
     rendering::{Drawable, StateUpdatable},
+    ui::components::utils::additive_glow,
     utils,
 };
 
@@ -92,6 +93,11 @@ impl Button {
         }
     }
 
+    /// This button's on-screen position and size.
+    pub fn bounds(&self) -> Rect {
+        self.bounds
+    }
+
     /// The background art every `Button` uses, pulled from the shared
     /// `SpriteRepository` singleton (same pattern as `Ship`). A single
     /// static frame — `fps` is irrelevant since `Animation::advance` is a
@@ -132,6 +138,20 @@ impl Button {
     fn hover_ended(&self) -> bool {
         !self.is_mouse_over && self.was_hovered
     }
+
+    /// Re-draws the button art over itself additively so only the bright blue
+    /// panel lights up on hover (see `additive_glow`). The blue tint biases the
+    /// added light toward blue; a faint sine pulse keeps it alive without
+    /// visibly flickering.
+    fn draw_hover_glow(&self) {
+        let pulse = 0.60 + 0.05 * (get_time() as f32 * 3.0).sin();
+        additive_glow::draw(
+            self.animation.current_frame(),
+            self.bounds,
+            Color::new(0.4, 0.7, 1.0, pulse),
+            Some(ButtonV1Textures::BasicScifiV1.opaque_region()),
+        );
+    }
 }
 
 impl StateUpdatable<()> for Button {
@@ -171,9 +191,18 @@ impl Drawable for Button {
             tint,
             DrawTextureParams {
                 dest_size: Some(self.bounds.size()),
+                // Crop the texture's transparent margins so the button art fills
+                // the bounds, keeping layout gaps and the hit area honest.
+                source: Some(ButtonV1Textures::BasicScifiV1.opaque_region()),
                 ..Default::default()
             },
         );
+
+        // Additive glow pass on top of the base art, so only the bright blue
+        // panel lights up on hover.
+        if self.is_mouse_over && !self.clicked {
+            self.draw_hover_glow();
+        }
 
         let ts = measure_text(&self.label, None, self.font_size, 1.0);
         draw_text_ex(

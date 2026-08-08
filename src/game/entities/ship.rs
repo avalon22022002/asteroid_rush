@@ -21,6 +21,24 @@ pub enum ShipKind {
 }
 
 impl ShipKind {
+    /// Display name shown in the ship-select UI.
+    pub fn display_name(self) -> &'static str {
+        match self {
+            ShipKind::Vanguard => "Vanguard",
+            ShipKind::Sentinel => "Sentinel",
+            ShipKind::Viper => "Viper",
+        }
+    }
+
+    /// One-line role blurb shown under `display_name` in the ship-select UI.
+    pub fn role(self) -> &'static str {
+        match self {
+            ShipKind::Vanguard => "Allrounder",
+            ShipKind::Sentinel => "Defender",
+            ShipKind::Viper => "Attacker",
+        }
+    }
+
     /// Base `ShipStats` for a freshly spawned ship of this kind, matching
     /// the class blurbs above (gun count, relative health, relative speed).
     fn base_stats(self) -> ShipStats {
