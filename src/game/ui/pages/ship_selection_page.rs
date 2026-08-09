@@ -39,7 +39,7 @@ impl Default for ShipSelectionPage {
 
 impl ShipSelectionPage {
     pub fn new() -> Self {
-        let button_width = BASE_WIDTH * 0.42;
+        let button_width = BASE_WIDTH * 0.34;
         // Derive height from the button art's own width:height so it isn't stretched.
         let button_height = button_width / ButtonV1Textures::BasicScifiV1.aspect_ratio();
         // Button trims the texture's transparent margins, so a button's bounds
