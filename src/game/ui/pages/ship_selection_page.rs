@@ -13,13 +13,15 @@ use crate::game::{
         banner::Banner,
         button::{Button, ButtonEvents},
         icon_label_button::IconLabelButton,
+        preview_card::{PreviewCard, PreviewCardEvent},
     },
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ShipSelectionPageEvent {
-    ShipSelected(ShipKind),
-    /// The player pressed the back button to return to the previous page
+    /// The player confirmed their selected ship via the preview card.
+    ShipConfirmed(ShipKind),
+    /// The player pressed the back button to return to the home page.
     BackButtonPressed,
 }
 
@@ -29,6 +31,9 @@ pub struct ShipSelectionPage {
     sentinel_button: IconLabelButton,
     viper_button: IconLabelButton,
     back_button: Button,
+    preview_card: PreviewCard,
+    /// The ship currently highlighted and shown in the preview card.
+    selected_ship_kind: ShipKind,
 }
 
 impl Default for ShipSelectionPage {
@@ -57,16 +62,11 @@ impl ShipSelectionPage {
         let back_width = 90.0;
         let back_height = back_width / ButtonV1Textures::BasicScifiV1.aspect_ratio();
 
-        // Only Sentinel has dedicated ship art today — reused here as a
-        // placeholder icon for Vanguard/Viper until theirs is added.
+        // Only Sentinel has art today; reuse it as a placeholder for every ship.
         let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
-        let icon = || {
-            Animation::new(
-                ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
-                icon_size,
-                1.0,
-            )
-        };
+
+        // The preview opens on the first ship so the card is never empty.
+        let default_ship_kind = ShipKind::Vanguard;
 
         Self {
             main_banner: Banner::new(
@@ -76,19 +76,31 @@ impl ShipSelectionPage {
             ),
             vanguard_button: IconLabelButton::new(
                 Rect::new(x, vanguard_y, button_width, button_height),
-                icon(),
+                Animation::new(
+                        ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
+                        icon_size,
+                        12.0,
+                    ),
                 ShipKind::Vanguard.display_name().to_string(),
                 ShipKind::Vanguard.role().to_string(),
             ),
             sentinel_button: IconLabelButton::new(
                 Rect::new(x, sentinel_y, button_width, button_height),
-                icon(),
+                Animation::new(
+                        ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
+                        icon_size,
+                        12.0,
+                    ),
                 ShipKind::Sentinel.display_name().to_string(),
                 ShipKind::Sentinel.role().to_string(),
             ),
             viper_button: IconLabelButton::new(
                 Rect::new(x, viper_y, button_width, button_height),
-                icon(),
+                Animation::new(
+                        ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
+                        icon_size,
+                        12.0,
+                    ),
                 ShipKind::Viper.display_name().to_string(),
                 ShipKind::Viper.role().to_string(),
             ),
@@ -97,6 +109,27 @@ impl ShipSelectionPage {
                 "Back".to_string(),
                 20,
             ),
+            preview_card: PreviewCard::new(
+                Rect::new(300.0, 110.0, 250.0, 335.0),
+                Animation::new(
+                        ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
+                        icon_size,
+                        12.0,
+                    ),
+                default_ship_kind.display_name().to_string(),
+                default_ship_kind.role().to_string(),
+                {
+                    let stats = default_ship_kind.stats();
+                    vec![
+                        ("Damage".to_string(), format!("{}", stats.fire_damage() as i32)),
+                        ("Defense".to_string(), format!("{}", stats.max_health() as i32)),
+                        ("Speed".to_string(), format!("{}", stats.speed() as i32)),
+                        ("Guns".to_string(), format!("{}", stats.gun_count())),
+                    ]
+                },
+                "SELECT SHIP".to_string(),
+            ),
+            selected_ship_kind: default_ship_kind,
         }
     }
 }
@@ -108,6 +141,7 @@ impl Drawable for ShipSelectionPage {
         self.sentinel_button.draw();
         self.viper_button.draw();
         self.back_button.draw();
+        self.preview_card.draw();
     }
 }
 
@@ -117,26 +151,54 @@ impl StateUpdatable<()> for ShipSelectionPage {
         self.sentinel_button.update_state(());
         self.viper_button.update_state(());
         self.back_button.update_state(());
+        self.preview_card.update_state(());
+
+        // A ship-button click pins that ship as the preview subject. The page
+        // knows which button fired, so selection lives here, not on the buttons.
+        let clicked = if matches!(self.vanguard_button.poll_event(), Some(ButtonEvents::Clicked)) {
+            Some(ShipKind::Vanguard)
+        } else if matches!(self.sentinel_button.poll_event(), Some(ButtonEvents::Clicked)) {
+            Some(ShipKind::Sentinel)
+        } else if matches!(self.viper_button.poll_event(), Some(ButtonEvents::Clicked)) {
+            Some(ShipKind::Viper)
+        } else {
+            None
+        };
+        if let Some(ship_kind) = clicked {
+            self.selected_ship_kind = ship_kind;
+
+            // Only Sentinel has art today; reuse it as a placeholder for every ship.
+            let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
+            let stats = ship_kind.stats();
+            self.preview_card.set_content(
+                Animation::new(
+                    ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
+                    Vec2::new(140.0, 178.0),
+                    12.0,
+                ),
+                ship_kind.display_name().to_string(),
+                ship_kind.role().to_string(),
+                vec![
+                    ("Damage".to_string(), format!("{}", stats.fire_damage() as i32)),
+                    ("Defense".to_string(), format!("{}", stats.max_health() as i32)),
+                    ("Speed".to_string(), format!("{}", stats.speed() as i32)),
+                    ("Guns".to_string(), format!("{}", stats.gun_count())),
+                ],
+            );
+        }
     }
 }
 
 impl Interactive for ShipSelectionPage {
     type Event = Option<ShipSelectionPageEvent>;
 
-    /// Checks all three ship buttons for a click this frame. If more than
-    /// one somehow fires on the same frame, Vanguard wins.
+    /// Surfaces Events which would be helpful for external listeners.
     fn poll_event(&self) -> Self::Event {
         if let Some(ButtonEvents::Clicked) = self.back_button.poll_event() {
             return Some(ShipSelectionPageEvent::BackButtonPressed);
         }
-        if let Some(ButtonEvents::Clicked) = self.vanguard_button.poll_event() {
-            return Some(ShipSelectionPageEvent::ShipSelected(ShipKind::Vanguard));
-        }
-        if let Some(ButtonEvents::Clicked) = self.sentinel_button.poll_event() {
-            return Some(ShipSelectionPageEvent::ShipSelected(ShipKind::Sentinel));
-        }
-        if let Some(ButtonEvents::Clicked) = self.viper_button.poll_event() {
-            return Some(ShipSelectionPageEvent::ShipSelected(ShipKind::Viper));
+        if let Some(PreviewCardEvent::ActionButtonClicked) = self.preview_card.poll_event() {
+            return Some(ShipSelectionPageEvent::ShipConfirmed(self.selected_ship_kind));
         }
         None
     }
@@ -152,5 +214,7 @@ impl SelfEventHandler for ShipSelectionPage {
             .handle_self_event(self.viper_button.poll_event());
         self.back_button
             .handle_self_event(self.back_button.poll_event());
+        self.preview_card
+            .handle_self_event(self.preview_card.poll_event());
     }
 }

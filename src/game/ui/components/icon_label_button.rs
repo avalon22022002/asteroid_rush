@@ -32,6 +32,12 @@ impl IconLabelButton {
             subtitle,
         }
     }
+
+    /// This button's on-screen position and size, so an owning page can draw
+    /// a selection highlight around it.
+    pub fn bounds(&self) -> Rect {
+        self.button.bounds()
+    }
 }
 
 impl StateUpdatable<()> for IconLabelButton {

@@ -41,7 +41,8 @@ impl ShipKind {
 
     /// Base `ShipStats` for a freshly spawned ship of this kind, matching
     /// the class blurbs above (gun count, relative health, relative speed).
-    fn base_stats(self) -> ShipStats {
+    /// Also drives the ship-select preview, so it's public.
+    pub fn stats(self) -> ShipStats {
         match self {
             ShipKind::Vanguard => ShipStats {
                 max_health: 100.0,
@@ -75,6 +76,21 @@ pub struct ShipStats {
     speed: f32,
     gun_count: u8,
     fire_damage: f32,
+}
+
+impl ShipStats {
+    pub fn max_health(&self) -> f32 {
+        self.max_health
+    }
+    pub fn speed(&self) -> f32 {
+        self.speed
+    }
+    pub fn gun_count(&self) -> u8 {
+        self.gun_count
+    }
+    pub fn fire_damage(&self) -> f32 {
+        self.fire_damage
+    }
 }
 pub struct Ship {
     pos: Vec2,
@@ -111,7 +127,7 @@ impl Ship {
         Self {
             pos,
             kind,
-            ship_stats: kind.base_stats(),
+            ship_stats: kind.stats(),
             description,
             alive_animation,
             dead_animation,

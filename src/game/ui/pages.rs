@@ -115,8 +115,8 @@ impl SelfEventHandler for PageManager {
                 let ship_selection_page_event = ship_selection_page.poll_event();
                 ship_selection_page.handle_self_event(ship_selection_page_event);
                 match ship_selection_page_event {
-                    Some(ShipSelectionPageEvent::ShipSelected(kind)) => {
-                        println!("{LOG_PREFIX}[ShipSelectionPage] {kind:?} selected");
+                    Some(ShipSelectionPageEvent::ShipConfirmed(kind)) => {
+                        println!("{LOG_PREFIX}[ShipSelectionPage] {kind:?} confirmed");
                         self.current_page = Pages::LevelSelectionPage(LevelSelectionPage::new())
                     }
                     Some(ShipSelectionPageEvent::BackButtonPressed) => {
