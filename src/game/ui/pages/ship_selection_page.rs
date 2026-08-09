@@ -11,7 +11,7 @@ use crate::game::{
     rendering::{Drawable, StateUpdatable},
     ui::components::{
         banner::Banner,
-        button::ButtonEvents,
+        button::{Button, ButtonEvents},
         icon_label_button::IconLabelButton,
     },
 };
@@ -19,6 +19,8 @@ use crate::game::{
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ShipSelectionPageEvent {
     ShipSelected(ShipKind),
+    /// The player pressed the back button to return to the previous page
+    BackButtonPressed,
 }
 
 pub struct ShipSelectionPage {
@@ -26,6 +28,7 @@ pub struct ShipSelectionPage {
     vanguard_button: IconLabelButton,
     sentinel_button: IconLabelButton,
     viper_button: IconLabelButton,
+    back_button: Button,
 }
 
 impl Default for ShipSelectionPage {
@@ -47,6 +50,12 @@ impl ShipSelectionPage {
         let sentinel_y = vanguard_y + button_height + gap;
         let viper_y = sentinel_y + button_height + gap;
         let icon_size = Vec2::splat(button_height * 0.7);
+
+        // Small back button in the top-right corner — the banner already
+        // occupies the top-left. Height derives from the art's aspect ratio
+        // so the small size isn't stretched.
+        let back_width = 90.0;
+        let back_height = back_width / ButtonV1Textures::BasicScifiV1.aspect_ratio();
 
         // Only Sentinel has dedicated ship art today — reused here as a
         // placeholder icon for Vanguard/Viper until theirs is added.
@@ -83,6 +92,11 @@ impl ShipSelectionPage {
                 ShipKind::Viper.display_name().to_string(),
                 ShipKind::Viper.role().to_string(),
             ),
+            back_button: Button::new(
+                Rect::new(BASE_WIDTH - back_width - 20.0, 15.0, back_width, back_height),
+                "Back".to_string(),
+                20,
+            ),
         }
     }
 }
@@ -93,6 +107,7 @@ impl Drawable for ShipSelectionPage {
         self.vanguard_button.draw();
         self.sentinel_button.draw();
         self.viper_button.draw();
+        self.back_button.draw();
     }
 }
 
@@ -101,6 +116,7 @@ impl StateUpdatable<()> for ShipSelectionPage {
         self.vanguard_button.update_state(());
         self.sentinel_button.update_state(());
         self.viper_button.update_state(());
+        self.back_button.update_state(());
     }
 }
 
@@ -110,6 +126,9 @@ impl Interactive for ShipSelectionPage {
     /// Checks all three ship buttons for a click this frame. If more than
     /// one somehow fires on the same frame, Vanguard wins.
     fn poll_event(&self) -> Self::Event {
+        if let Some(ButtonEvents::Clicked) = self.back_button.poll_event() {
+            return Some(ShipSelectionPageEvent::BackButtonPressed);
+        }
         if let Some(ButtonEvents::Clicked) = self.vanguard_button.poll_event() {
             return Some(ShipSelectionPageEvent::ShipSelected(ShipKind::Vanguard));
         }
@@ -131,5 +150,7 @@ impl SelfEventHandler for ShipSelectionPage {
             .handle_self_event(self.sentinel_button.poll_event());
         self.viper_button
             .handle_self_event(self.viper_button.poll_event());
+        self.back_button
+            .handle_self_event(self.back_button.poll_event());
     }
 }
