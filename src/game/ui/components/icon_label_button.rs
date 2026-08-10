@@ -60,6 +60,8 @@ impl Drawable for IconLabelButton {
         let icon_size = *self.icon.frame_scale();
         let icon_x = bounds.x + inset_x;
         let icon_y = bounds.y + (bounds.h - icon_size.y) / 2.0;
+        
+        // Draw Icon Animation
         draw_texture_ex(
             self.icon.current_frame(),
             icon_x,
@@ -79,6 +81,8 @@ impl Drawable for IconLabelButton {
         // against this button's own blue background art.
         let subtitle_color = Color::new(1.0, 0.85, 0.4, 1.0);
         let title_ts = measure_text(&self.title, None, title_font_size, 1.0);
+        
+        // Draw title
         draw_text_ex(
             &self.title,
             text_x,
@@ -89,6 +93,8 @@ impl Drawable for IconLabelButton {
                 ..Default::default()
             },
         );
+
+        // Draw subtitle
         draw_text_ex(
             &self.subtitle,
             text_x,
