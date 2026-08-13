@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH, 
     asset_repository::{
-        sprite_repository::{traits::SpriteTextures, SpriteRepository, ShipV1Textures}, 
+        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures},
         traits::Singleton
     }, 
     entities::animation::Animation,
@@ -41,7 +41,8 @@ impl ShipKind {
 
     /// Base `ShipStats` for a freshly spawned ship of this kind, matching
     /// the class blurbs above (gun count, relative health, relative speed).
-    fn base_stats(self) -> ShipStats {
+    /// Also drives the ship-select preview, so it's public.
+    pub fn stats(self) -> ShipStats {
         match self {
             ShipKind::Vanguard => ShipStats {
                 max_health: 100.0,
@@ -76,6 +77,21 @@ pub struct ShipStats {
     gun_count: u8,
     fire_damage: f32,
 }
+
+impl ShipStats {
+    pub fn max_health(&self) -> f32 {
+        self.max_health
+    }
+    pub fn speed(&self) -> f32 {
+        self.speed
+    }
+    pub fn gun_count(&self) -> u8 {
+        self.gun_count
+    }
+    pub fn fire_damage(&self) -> f32 {
+        self.fire_damage
+    }
+}
 pub struct Ship {
     pos: Vec2,
     kind: ShipKind,
@@ -91,13 +107,17 @@ impl Ship {
         let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
         match kind {
             ShipKind::Sentinel => {
-                let alive = Animation::new(ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive), Vec2::new(236.0, 300.0), 12.0);
+                // Crop the transparent padding so the drawn ship fills its
+                // scale box instead of floating small inside the frame.
+                let crop = Some(ShipV1Textures::SentinelAlive.content_bounds());
+                let alive = Animation::new(ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive), Vec2::new(236.0, 300.0), 12.0, crop);
                 // No dedicated death sprite set yet — freeze on the last
                 // alive frame as a placeholder until one's added.
                 let dead = Animation::new(
                     ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
                     Vec2::new(236.0, 300.0),
                     1.0,
+                    crop,
                 );
                 return (alive, dead)
             }
@@ -111,7 +131,7 @@ impl Ship {
         Self {
             pos,
             kind,
-            ship_stats: kind.base_stats(),
+            ship_stats: kind.stats(),
             description,
             alive_animation,
             dead_animation,
@@ -188,6 +208,7 @@ impl Drawable for Ship {
             WHITE,
             DrawTextureParams {
                 dest_size: Some(*self.ship_size()),
+                source: self.current_animation().frame_crop(),
                 ..Default::default()
             },
         );

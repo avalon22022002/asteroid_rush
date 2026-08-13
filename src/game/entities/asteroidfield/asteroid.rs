@@ -67,6 +67,7 @@ impl Asteroid {
             asteroid_sprites.get_textures_for(&kind.sprite_kind()),
             Vec2::splat(kind.render_size() * scale),
             1.0,
+            None,
         );
         Self {
             x,

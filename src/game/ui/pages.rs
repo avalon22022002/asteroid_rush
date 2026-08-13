@@ -114,9 +114,16 @@ impl SelfEventHandler for PageManager {
             Pages::ShipSelectionPage(ship_selection_page) => {
                 let ship_selection_page_event = ship_selection_page.poll_event();
                 ship_selection_page.handle_self_event(ship_selection_page_event);
-                if let Some(ShipSelectionPageEvent::ShipSelected(kind)) = ship_selection_page_event {
-                    println!("{LOG_PREFIX}[ShipSelectionPage] {kind:?} selected");
-                    self.current_page = Pages::LevelSelectionPage(LevelSelectionPage::new())
+                match ship_selection_page_event {
+                    Some(ShipSelectionPageEvent::ShipConfirmed(kind)) => {
+                        println!("{LOG_PREFIX}[ShipSelectionPage] {kind:?} confirmed");
+                        self.current_page = Pages::LevelSelectionPage(LevelSelectionPage::new())
+                    }
+                    Some(ShipSelectionPageEvent::BackButtonPressed) => {
+                        println!("{LOG_PREFIX}[ShipSelectionPage] Back clicked");
+                        self.current_page = Pages::HomePage(HomePage::new())
+                    }
+                    None => {}
                 }
             }
             Pages::LevelSelectionPage(level_selection_page) => {
@@ -131,6 +138,10 @@ impl SelfEventHandler for PageManager {
                     }
                     Some(LevelSelectionPageEvent::Level3Selected) => {
                         println!("{LOG_PREFIX}[LevelSelectionPage] Level 3 clicked");
+                    }
+                    Some(LevelSelectionPageEvent::BackButtonPressed) => {
+                        println!("{LOG_PREFIX}[LevelSelectionPage] Back clicked");
+                        self.current_page = Pages::ShipSelectionPage(ShipSelectionPage::new())
                     }
                     None => {}
                 }

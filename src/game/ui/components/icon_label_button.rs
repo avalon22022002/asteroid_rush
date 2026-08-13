@@ -5,7 +5,7 @@ use crate::game::{
     interaction::{Interactive, SelfEventHandler},
     object::HasId,
     rendering::{Drawable, StateUpdatable},
-    ui::components::button::{Button, ButtonEvents},
+    ui::components::button::{Button, ButtonEvents, ButtonKind},
 };
 
 /// A `Button` with an icon and a two-line title/subtitle label instead of
@@ -26,11 +26,17 @@ impl IconLabelButton {
     /// left-aligned lines to its right.
     pub fn new(bounds: Rect, icon: Animation, title: String, subtitle: String) -> Self {
         Self {
-            button: Button::new(bounds, String::new(), 16),
+            button: Button::new(bounds, String::new(), 16, ButtonKind::Basic),
             icon,
             title,
             subtitle,
         }
+    }
+
+    /// This button's on-screen position and size, so an owning page can draw
+    /// a selection highlight around it.
+    pub fn bounds(&self) -> Rect {
+        self.button.bounds()
     }
 }
 
@@ -51,21 +57,30 @@ impl Drawable for IconLabelButton {
         let inset_x = bounds.w * 0.14;
         let inset_y = bounds.h * 0.25;
 
-        let icon_size = *self.icon.frame_scale();
+        // `icon_box` is the square area reserved for the icon; the art is fit
+        // inside it at its own aspect ratio (via `content_size`) so it isn't
+        // stretched, and centered within the box.
+        let icon_box = *self.icon.frame_scale();
+        let content = self.icon.content_size();
+        let fit_scale = (icon_box.x / content.x).min(icon_box.y / content.y);
+        let art_size = content * fit_scale;
         let icon_x = bounds.x + inset_x;
-        let icon_y = bounds.y + (bounds.h - icon_size.y) / 2.0;
+        let icon_y = bounds.y + (bounds.h - icon_box.y) / 2.0;
+
+        // Draw Icon Animation
         draw_texture_ex(
             self.icon.current_frame(),
-            icon_x,
-            icon_y,
+            icon_x + (icon_box.x - art_size.x) / 2.0,
+            icon_y + (icon_box.y - art_size.y) / 2.0,
             WHITE,
             DrawTextureParams {
-                dest_size: Some(icon_size),
+                dest_size: Some(art_size),
+                source: self.icon.frame_crop(),
                 ..Default::default()
             },
         );
 
-        let text_x = icon_x + icon_size.x + inset_x * 0.6;
+        let text_x = icon_x + icon_box.x + inset_x * 0.6;
         let _ = inset_y;
         let title_font_size = 24;
         let subtitle_font_size = 16;
@@ -73,6 +88,8 @@ impl Drawable for IconLabelButton {
         // against this button's own blue background art.
         let subtitle_color = Color::new(1.0, 0.85, 0.4, 1.0);
         let title_ts = measure_text(&self.title, None, title_font_size, 1.0);
+        
+        // Draw title
         draw_text_ex(
             &self.title,
             text_x,
@@ -83,6 +100,8 @@ impl Drawable for IconLabelButton {
                 ..Default::default()
             },
         );
+
+        // Draw subtitle
         draw_text_ex(
             &self.subtitle,
             text_x,

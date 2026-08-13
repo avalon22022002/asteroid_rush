@@ -1,4 +1,4 @@
-use macroquad::texture::Texture2D;
+use macroquad::{math::Rect, texture::Texture2D};
 use strum::IntoEnumIterator;
 
 /// Common lazy-loading behavior shared by `sprite_repository`'s texture-group
@@ -32,3 +32,20 @@ pub trait SpriteTextures {
 /// Every sprite type implements this. Just `SpriteTextures` for now; more
 /// capability traits will join as supertraits later.
 pub trait Sprite: SpriteTextures {}
+
+/// Tight box around a sprite's drawn pixels, excluding transparent padding.
+/// Implemented on the `*Textures` kind enums (e.g. `ButtonV1Textures`), since
+/// bounds are a property of the individual art, not the texture-group type.
+pub trait SpriteBounds {
+    /// The tightest rectangle enclosing the sprite's drawn (opaque) pixels, in
+    /// source-texture pixel coordinates. Kinds with no transparent padding
+    /// return the full frame anchored at the origin.
+    fn content_bounds(&self) -> Rect;
+
+    /// The drawn content's width-to-height ratio, for sizing a draw region so
+    /// it isn't stretched. Derived from `content_bounds`.
+    fn aspect_ratio(&self) -> f32 {
+        let b = self.content_bounds();
+        b.w / b.h
+    }
+}

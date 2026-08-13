@@ -3,7 +3,7 @@ use macroquad::{audio, prelude::*};
 use crate::game::{
     asset_repository::{
         traits::Singleton,
-        sprite_repository::{traits::SpriteTextures, SpriteRepository, ButtonV1Textures},
+        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ButtonV1Textures},
         audio_repository::{
             AudioRepository,
             traits::AudioClips,
@@ -21,36 +21,73 @@ use crate::game::{
 
 const LOG_PREFIX: &str = "[button]";
 
+/// The visual style of a `Button`: its background art (and later, any
+/// per-style tweaks like tint or sound). Callers pick a `ButtonKind`; the
+/// mapping to the underlying texture asset stays internal to this module, so
+/// swapping art or adding styles never touches call sites.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ButtonKind {
+    /// The standard blue sci-fi menu button used across the game's pages.
+    Basic,
+}
+
+impl ButtonKind {
+    /// The background texture this style draws.
+    fn texture(&self) -> ButtonV1Textures {
+        match self {
+            ButtonKind::Basic => ButtonV1Textures::BasicScifiV1,
+        }
+    }
+}
+
+impl SpriteBounds for ButtonKind {
+    /// Delegates to the backing texture so callers can size a button by its
+    /// art's aspect ratio without naming the texture enum directly.
+    fn content_bounds(&self) -> Rect {
+        self.texture().content_bounds()
+    }
+}
+
 /// # Example
 ///
-/// ```ignore
-/// let mut new_game_button = Button::new(
-///     Rect::new(20.0, 100.0, 200.0, 48.0),
-///     "New Game".to_string(),
-///     30,
-/// );
+/// ```no_run
+/// use asteroid_rush::game::{
+///     interaction::{Interactive, SelfEventHandler},
+///     rendering::{Drawable, StateUpdatable},
+///     ui::components::button::{Button, ButtonEvents, ButtonKind},
+/// };
+/// use macroquad::prelude::*;
 ///
-/// loop {
-///     // Refresh hover/clicked state from this frame's input.
-///     new_game_button.update_state(());
-///     new_game_button.draw();
+/// async fn demo() {
+///     let mut new_game_button = Button::new(
+///         Rect::new(20.0, 100.0, 200.0, 48.0),
+///         "New Game".to_string(),
+///         30,
+///         ButtonKind::Basic,
+///     );
 ///
-///     // Let the button react to its own event first — self-contained
-///     // feedback it owns, like playing the click sound. `event` is
-///     // `Copy`, so reading it here doesn't stop the consumer below from
-///     // reading it too.
-///     let event = new_game_button.poll_event();
-///     new_game_button.handle_self_event(event);
+///     loop {
+///         // Refresh hover/clicked state from this frame's input.
+///         new_game_button.update_state(());
+///         new_game_button.draw();
 ///
-///     // Then the consumer decides what the click *means* for the app.
-///     // That's custom app logic (page navigation, game state, ...), which
-///     // `SelfEventHandler` deliberately stays out of — the button has no
-///     // notion of "pages".
-///     if let Some(ButtonEvents::Clicked) = event {
-///         println!("New Game clicked — switch to the game page");
+///         // Let the button react to its own event first — self-contained
+///         // feedback it owns, like playing the click sound. `event` is
+///         // `Copy`, so reading it here doesn't stop the consumer below from
+///         // reading it too.
+///         let event = new_game_button.poll_event();
+///         new_game_button.handle_self_event(event);
+///
+///         // Then the consumer decides what the click *means* for the app.
+///         // That's custom app logic (page navigation, game state, ...), which
+///         // `SelfEventHandler` deliberately stays out of — the button has no
+///         // notion of "pages".
+///         if let Some(ButtonEvents::Clicked) = event {
+///             println!("New Game clicked — switch to the game page");
+///         }
+///
+///         next_frame().await;
 ///     }
-///
-///     next_frame().await;
 /// }
 /// ```
 pub struct Button {
@@ -58,6 +95,7 @@ pub struct Button {
     bounds: Rect,
     label: String,
     font_size: u16,
+    kind: ButtonKind,
     animation: Animation,
     is_mouse_over: bool,
     was_hovered: bool,
@@ -80,13 +118,20 @@ pub enum ButtonEvents {
 }
 
 impl Button {
-    pub fn new(bounds: Rect, label: String, font_size: u16) -> Self {
+    pub fn new(bounds: Rect, label: String, font_size: u16, kind: ButtonKind) -> Self {
+        let button_sprites = &SpriteRepository::get_instance().button_v1_sprite;
         Self {
             id: utils::get_next_unique_id(),
             bounds,
             label,
             font_size,
-            animation: Self::default_animation(bounds.size()),
+            kind,
+            animation: Animation::new(
+                button_sprites.get_textures_for(&kind.texture()),
+                bounds.size(),
+                1.0,
+                None,
+            ),
             is_mouse_over: false,
             was_hovered: false,
             clicked: false,
@@ -96,19 +141,6 @@ impl Button {
     /// This button's on-screen position and size.
     pub fn bounds(&self) -> Rect {
         self.bounds
-    }
-
-    /// The background art every `Button` uses, pulled from the shared
-    /// `SpriteRepository` singleton (same pattern as `Ship`). A single
-    /// static frame — `fps` is irrelevant since `Animation::advance` is a
-    /// no-op below two frames.
-    fn default_animation(scale: Vec2) -> Animation {
-        let button_sprites = &SpriteRepository::get_instance().button_v1_sprite;
-        Animation::new(
-            button_sprites.get_textures_for(&ButtonV1Textures::BasicScifiV1),
-            scale,
-            1.0,
-        )
     }
 
     /// Returns `true` if the mouse cursor is currently within the button's bounds.
@@ -144,27 +176,26 @@ impl Button {
     /// added light toward blue; a faint sine pulse keeps it alive without
     /// visibly flickering.
     fn draw_hover_glow(&self) {
+        // Glow intensity oscillating between 0.55 and 0.65 for a slow, steady pulse.
         let pulse = 0.60 + 0.05 * (get_time() as f32 * 3.0).sin();
         additive_glow::draw(
             self.animation.current_frame(),
             self.bounds,
             Color::new(0.4, 0.7, 1.0, pulse),
-            Some(ButtonV1Textures::BasicScifiV1.opaque_region()),
+            Some(self.kind.content_bounds()),
         );
     }
 }
 
 impl StateUpdatable<()> for Button {
     /// Refreshes `is_mouse_over`/`clicked` from the current mouse state. This
-    /// only updates the button's own state for rendering — it does not
-    /// decide what a click *means*. Consumers read `poll_event` (via
-    /// `Interactive`) after this to react to the click, keeping Button
-    /// decoupled from whatever action it triggers.
+    /// only updates the button's own state
     fn update_state(&mut self, _args: ()) {
-        // Capture last frame's hover state before overwriting it — order
-        // matters here: `hover_started`/`hover_ended` compare the two, so
-        // `was_hovered` must still hold the *previous* frame's value when
-        // `is_mouse_over` gets this frame's.
+        // Save the old hover state into `was_hovered` *before* refreshing
+        // `is_mouse_over`, so we keep both last frame's and this frame's
+        // values. `hover_started`/`hover_ended` detect edges by comparing
+        // the two, which only works when `was_hovered` holds the previous
+        // value and `is_mouse_over` holds the current one.
         self.was_hovered = self.is_mouse_over;
         self.is_mouse_over = self.mouse_over_bounds();
         self.clicked = self.is_clicked_via_mouse();
@@ -173,13 +204,12 @@ impl StateUpdatable<()> for Button {
 
 impl Drawable for Button {
     fn draw(&self) {
-        // Tints the background art for interaction feedback: darker while
-        // held down, brighter on hover, unchanged (pure white multiplier)
-        // otherwise.
+        // Per-pixel color multiplier applied to the background art. `WHITE`
+        // (1,1,1,1) leaves the art untouched; the `0.8` gray darkens it while
+        // the button is held down, giving a "pressed in" look. Hover doesn't
+        // need a branch here — the additive glow pass below handles that cue.
         let tint = if self.clicked {
             Color::new(0.8, 0.8, 0.8, 1.0)
-        } else if self.is_mouse_over {
-            Color::new(1.2, 1.2, 1.2, 1.0)
         } else {
             WHITE
         };
@@ -193,7 +223,7 @@ impl Drawable for Button {
                 dest_size: Some(self.bounds.size()),
                 // Crop the texture's transparent margins so the button art fills
                 // the bounds, keeping layout gaps and the hit area honest.
-                source: Some(ButtonV1Textures::BasicScifiV1.opaque_region()),
+                source: Some(self.kind.content_bounds()),
                 ..Default::default()
             },
         );

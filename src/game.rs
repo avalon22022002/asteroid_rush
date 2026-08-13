@@ -13,8 +13,8 @@ use macroquad::prelude::*;
 
 /// Base window size the game is designed at. UI elements scale their visuals
 /// relative to this so proportions hold up if the window is resized.
-pub const BASE_WIDTH: f32 = 605.0;
-pub const BASE_HEIGHT: f32 = 455.0;
+pub const BASE_WIDTH: f32 = 960.0;
+pub const BASE_HEIGHT: f32 = 540.0;
 
 pub struct Game {
     background: background::Background,
@@ -38,6 +38,10 @@ impl Game {
             window_title: "AstroRush: Space Shooter Classic".to_owned(),
             window_width: BASE_WIDTH as i32,
             window_height: BASE_HEIGHT as i32,
+            // Lock the window size: a fixed viewport keeps component positions
+            // and scales simple, since everything is laid out against a known
+            // BASE_WIDTH x BASE_HEIGHT and never has to reflow on resize.
+            window_resizable: false,
             ..Default::default()
         }
     }

@@ -2,7 +2,7 @@ use macroquad::{math::Rect, texture::Texture2D};
 use strum::EnumIter;
 use crate::game::{
     frames::{load_frames, frame_sequence},
-    asset_repository::sprite_repository::traits::{SpriteTextures,Sprite}
+    asset_repository::sprite_repository::traits::{SpriteTextures,Sprite,SpriteBounds}
 };
 
 const LOG_PREFIX: &str = "[button_v1]";
@@ -15,22 +15,15 @@ pub enum ButtonV1Textures {
     BasicScifiV1,
 }
 
-impl ButtonV1Textures {
+impl SpriteBounds for ButtonV1Textures {
     /// The button art (the button's texture PNG) has empty transparent space
     /// around the drawn button. This returns the rect covering just the drawn
     /// button, so callers can sample that and leave the empty border out.
-    pub fn opaque_region(&self) -> Rect {
+    fn content_bounds(&self) -> Rect {
         match self {
             // BasicScifiV1 is a 690×362 PNG; the drawn button sits in this sub-rect.
             ButtonV1Textures::BasicScifiV1 => Rect::new(54.0, 68.0, 589.0, 231.0),
         }
-    }
-
-    /// The drawn button's width-to-height ratio, for sizing a draw region so it
-    /// isn't stretched.
-    pub fn aspect_ratio(&self) -> f32 {
-        let r = self.opaque_region();
-        r.w / r.h
     }
 }
 

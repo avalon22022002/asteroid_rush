@@ -1,8 +1,8 @@
-use macroquad::texture::Texture2D;
+use macroquad::{math::Rect, texture::Texture2D};
 use strum::EnumIter;
 use crate::game::{
     frames::{load_frames, frame_sequence},
-    asset_repository::sprite_repository::traits::{SpriteTextures, Sprite},
+    asset_repository::sprite_repository::traits::{SpriteTextures, Sprite, SpriteBounds},
 };
 
 const LOG_PREFIX: &str = "[banner_v1]";
@@ -15,6 +15,18 @@ pub enum BannerV1Textures {
     HomePageMain,
     LevelSelectionPageMain,
     ShipSelectionPageMain,
+}
+
+impl SpriteBounds for BannerV1Textures {
+    /// Banner art has no transparent padding, so its content fills the whole
+    /// source PNG — the bounds are the full frame at the origin.
+    fn content_bounds(&self) -> Rect {
+        match self {
+            BannerV1Textures::HomePageMain => Rect::new(0.0, 0.0, 2078.0, 512.0),
+            BannerV1Textures::LevelSelectionPageMain => Rect::new(0.0, 0.0, 1024.0, 252.0),
+            BannerV1Textures::ShipSelectionPageMain => Rect::new(0.0, 0.0, 1007.0, 248.0),
+        }
+    }
 }
 
 pub struct BannerV1 {

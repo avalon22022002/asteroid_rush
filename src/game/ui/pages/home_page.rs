@@ -2,13 +2,13 @@ use macroquad::prelude::*;
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
-    asset_repository::sprite_repository::{BannerV1Textures, ButtonV1Textures},
+    asset_repository::sprite_repository::traits::SpriteBounds,
     entities::ship::{Ship, ShipKind},
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{
-        banner::Banner,
-        button::{Button, ButtonEvents},
+        banner::{Banner, BannerKind},
+        button::{Button, ButtonEvents, ButtonKind},
     },
 };
 
@@ -34,32 +34,42 @@ impl Default for HomePage {
 
 impl HomePage {
     pub fn new() -> Self {
-        let button_width = BASE_WIDTH * 0.4;
+        let pos_x = 40.0;
+
+        let banner_kind = BannerKind::HomeTitle;
+        let banner_height = BASE_HEIGHT * 0.24;
+        let banner_width = banner_height * banner_kind.aspect_ratio();
+
+        let button_width = BASE_WIDTH * 0.3;
         // Derive height from the button art's width:height so it isn't stretched.
-        let button_height = button_width / ButtonV1Textures::BasicScifiV1.aspect_ratio();
-        let gap = 10.0;
-        let x = 20.0;
-        let new_game_y = BASE_HEIGHT * 0.40;
+        let button_height = button_width / ButtonKind::Basic.aspect_ratio();
+        let gap = 14.0;
+        // Center the buttons horizontally within the banner's span.
+        let button_x = pos_x + (banner_width - button_width) / 2.0;
+        let new_game_y = BASE_HEIGHT * 0.42;
         let exit_y = new_game_y + button_height + gap;
 
         Self {
             main_banner: Banner::new(
-                BannerV1Textures::HomePageMain,
-                Vec2::new(x, 50.0),
-                Vec2::new(450.0, 111.0),
+                banner_kind,
+                Vec2::new(pos_x, BASE_HEIGHT * 0.09),
+                Vec2::new(banner_width, banner_height),
             ),
             new_game_button: Button::new(
-                Rect::new(x, new_game_y, button_width, button_height),
+                Rect::new(button_x, new_game_y, button_width, button_height),
                 "New Game".to_string(),
-                30,
+                34,
+                ButtonKind::Basic,
             ),
             exit_button: Button::new(
-                Rect::new(x, exit_y, button_width, button_height),
+                Rect::new(button_x, exit_y, button_width, button_height),
                 "Exit".to_string(),
-                30,
+                34,
+                ButtonKind::Basic,
             ),
             ship: Ship::new(
-                Vec2::new(BASE_WIDTH - 300.0, 180.0),
+                // Right-anchored, vertically aligned with the button group.
+                Vec2::new(BASE_WIDTH - 300.0, BASE_HEIGHT * 0.36),
                 ShipKind::Sentinel,
                 "Sentinel".to_string(),
             ),
