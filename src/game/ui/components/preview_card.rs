@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    entities::animation::Animation, interaction::{Interactive, SelfEventHandler}, rendering::{Drawable, StateUpdatable}, ui::components::{button::{Button, ButtonEvents}},
+    entities::animation::Animation, interaction::{Interactive, SelfEventHandler}, rendering::{Drawable, StateUpdatable}, ui::components::{button::{Button, ButtonEvents, ButtonKind}},
 };
 
 /// Height of one stat row in the scrollable list, in logical pixels.
@@ -94,7 +94,7 @@ impl PreviewCard {
             title,
             subtitle,
             label_value_pairs,
-            action_button: Button::new(layout.button, action_label, 24),
+            action_button: Button::new(layout.button, action_label, 24, ButtonKind::Basic),
             layout,
             scroll_offset: 0.0
         }

@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     asset_repository::{
-        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures, BannerV1Textures, ButtonV1Textures},
+        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures, BannerV1Textures},
         traits::Singleton,
     },
     entities::{animation::Animation, ship::ShipKind},
@@ -11,7 +11,7 @@ use crate::game::{
     rendering::{Drawable, StateUpdatable},
     ui::components::{
         banner::Banner,
-        button::{Button, ButtonEvents},
+        button::{Button, ButtonEvents, ButtonKind},
         icon_label_button::IconLabelButton,
         preview_card::{PreviewCard, PreviewCardEvent},
     },
@@ -46,7 +46,7 @@ impl ShipSelectionPage {
     pub fn new() -> Self {
         let button_width = BASE_WIDTH * 0.34;
         // Derive height from the button art's own width:height so it isn't stretched.
-        let button_height = button_width / ButtonV1Textures::BasicScifiV1.aspect_ratio();
+        let button_height = button_width / ButtonKind::Basic.aspect_ratio();
         // Button trims the texture's transparent margins, so a button's bounds
         // are exactly its visible button art — this is a true gap between them.
         let gap = 12.0;
@@ -60,7 +60,7 @@ impl ShipSelectionPage {
         // occupies the top-left. Height derives from the art's aspect ratio
         // so the small size isn't stretched.
         let back_width = 90.0;
-        let back_height = back_width / ButtonV1Textures::BasicScifiV1.aspect_ratio();
+        let back_height = back_width / ButtonKind::Basic.aspect_ratio();
 
         // Only Sentinel has art today; reuse it as a placeholder for every ship.
         let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
@@ -113,6 +113,7 @@ impl ShipSelectionPage {
                 Rect::new(BASE_WIDTH - back_width - 20.0, 15.0, back_width, back_height),
                 "Back".to_string(),
                 20,
+                ButtonKind::Basic,
             ),
             preview_card: PreviewCard::new(
                 Rect::new(300.0, 110.0, 250.0, 335.0),

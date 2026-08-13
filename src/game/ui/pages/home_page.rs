@@ -2,13 +2,13 @@ use macroquad::prelude::*;
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
-    asset_repository::sprite_repository::{traits::SpriteBounds, BannerV1Textures, ButtonV1Textures},
+    asset_repository::sprite_repository::{traits::SpriteBounds, BannerV1Textures},
     entities::ship::{Ship, ShipKind},
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{
         banner::Banner,
-        button::{Button, ButtonEvents},
+        button::{Button, ButtonEvents, ButtonKind},
     },
 };
 
@@ -42,7 +42,7 @@ impl HomePage {
 
         let button_width = BASE_WIDTH * 0.3;
         // Derive height from the button art's width:height so it isn't stretched.
-        let button_height = button_width / ButtonV1Textures::BasicScifiV1.aspect_ratio();
+        let button_height = button_width / ButtonKind::Basic.aspect_ratio();
         let gap = 14.0;
         // Center the buttons horizontally within the banner's span.
         let button_x = pos_x + (banner_width - button_width) / 2.0;
@@ -59,11 +59,13 @@ impl HomePage {
                 Rect::new(button_x, new_game_y, button_width, button_height),
                 "New Game".to_string(),
                 34,
+                ButtonKind::Basic,
             ),
             exit_button: Button::new(
                 Rect::new(button_x, exit_y, button_width, button_height),
                 "Exit".to_string(),
                 34,
+                ButtonKind::Basic,
             ),
             ship: Ship::new(
                 // Right-anchored, vertically aligned with the button group.

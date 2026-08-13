@@ -2,13 +2,13 @@ use macroquad::prelude::*;
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
-    asset_repository::sprite_repository::{traits::SpriteBounds, BannerV1Textures, ButtonV1Textures},
+    asset_repository::sprite_repository::{traits::SpriteBounds, BannerV1Textures},
     entities::asteroidfield::AsteroidField,
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{
         banner::Banner,
-        button::{Button, ButtonEvents},
+        button::{Button, ButtonEvents, ButtonKind},
     },
 };
 
@@ -42,7 +42,7 @@ impl LevelSelectionPage {
     pub fn new() -> Self {
         let button_width = BASE_WIDTH * 0.33;
         // Derive height from the button art's width:height so it isn't stretched.
-        let button_height = button_width / ButtonV1Textures::BasicScifiV1.aspect_ratio();
+        let button_height = button_width / ButtonKind::Basic.aspect_ratio();
         let gap = 10.0;
         let x = 20.0;
         let level_1_y = BASE_HEIGHT * 0.35;
@@ -53,7 +53,7 @@ impl LevelSelectionPage {
         // occupies the top-left. Height derives from the art's aspect ratio
         // so the small size isn't stretched.
         let back_width = 90.0;
-        let back_height = back_width / ButtonV1Textures::BasicScifiV1.aspect_ratio();
+        let back_height = back_width / ButtonKind::Basic.aspect_ratio();
 
         Self {
             main_banner: Banner::new(
@@ -65,21 +65,25 @@ impl LevelSelectionPage {
                 Rect::new(x, level_1_y, button_width, button_height),
                 "Level 1".to_string(),
                 30,
+                ButtonKind::Basic,
             ),
             level_2_button: Button::new(
                 Rect::new(x, level_2_y, button_width, button_height),
                 "Level 2".to_string(),
                 30,
+                ButtonKind::Basic,
             ),
             level_3_button: Button::new(
                 Rect::new(x, level_3_y, button_width, button_height),
                 "Level 3".to_string(),
                 30,
+                ButtonKind::Basic,
             ),
             back_button: Button::new(
                 Rect::new(BASE_WIDTH - back_width - 20.0, 15.0, back_width, back_height),
                 "Back".to_string(),
                 20,
+                ButtonKind::Basic,
             ),
             asteroid_field: AsteroidField::new(15, None),
         }

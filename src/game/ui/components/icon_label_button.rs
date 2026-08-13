@@ -5,7 +5,7 @@ use crate::game::{
     interaction::{Interactive, SelfEventHandler},
     object::HasId,
     rendering::{Drawable, StateUpdatable},
-    ui::components::button::{Button, ButtonEvents},
+    ui::components::button::{Button, ButtonEvents, ButtonKind},
 };
 
 /// A `Button` with an icon and a two-line title/subtitle label instead of
@@ -26,7 +26,7 @@ impl IconLabelButton {
     /// left-aligned lines to its right.
     pub fn new(bounds: Rect, icon: Animation, title: String, subtitle: String) -> Self {
         Self {
-            button: Button::new(bounds, String::new(), 16),
+            button: Button::new(bounds, String::new(), 16, ButtonKind::Basic),
             icon,
             title,
             subtitle,

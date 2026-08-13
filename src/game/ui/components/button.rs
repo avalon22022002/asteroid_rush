@@ -21,6 +21,33 @@ use crate::game::{
 
 const LOG_PREFIX: &str = "[button]";
 
+/// The visual style of a `Button`: its background art (and later, any
+/// per-style tweaks like tint or sound). Callers pick a `ButtonKind`; the
+/// mapping to the underlying texture asset stays internal to this module, so
+/// swapping art or adding styles never touches call sites.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ButtonKind {
+    /// The standard blue sci-fi menu button used across the game's pages.
+    Basic,
+}
+
+impl ButtonKind {
+    /// The background texture this style draws.
+    fn texture(&self) -> ButtonV1Textures {
+        match self {
+            ButtonKind::Basic => ButtonV1Textures::BasicScifiV1,
+        }
+    }
+}
+
+impl SpriteBounds for ButtonKind {
+    /// Delegates to the backing texture so callers can size a button by its
+    /// art's aspect ratio without naming the texture enum directly.
+    fn content_bounds(&self) -> Rect {
+        self.texture().content_bounds()
+    }
+}
+
 /// # Example
 ///
 /// ```ignore
@@ -28,6 +55,7 @@ const LOG_PREFIX: &str = "[button]";
 ///     Rect::new(20.0, 100.0, 200.0, 48.0),
 ///     "New Game".to_string(),
 ///     30,
+///     ButtonKind::Basic,
 /// );
 ///
 /// loop {
@@ -58,6 +86,7 @@ pub struct Button {
     bounds: Rect,
     label: String,
     font_size: u16,
+    kind: ButtonKind,
     animation: Animation,
     is_mouse_over: bool,
     was_hovered: bool,
@@ -80,13 +109,21 @@ pub enum ButtonEvents {
 }
 
 impl Button {
-    pub fn new(bounds: Rect, label: String, font_size: u16) -> Self {
+    pub fn new(bounds: Rect, label: String, font_size: u16, kind: ButtonKind) -> Self {
+        let button_sprites = &SpriteRepository::get_instance().button_v1_sprite;
+        let animation = Animation::new(
+            button_sprites.get_textures_for(&kind.texture()),
+            bounds.size(),
+            1.0,
+            None,
+        );
         Self {
             id: utils::get_next_unique_id(),
             bounds,
             label,
             font_size,
-            animation: Self::default_animation(bounds.size()),
+            kind,
+            animation,
             is_mouse_over: false,
             was_hovered: false,
             clicked: false,
@@ -96,22 +133,6 @@ impl Button {
     /// This button's on-screen position and size.
     pub fn bounds(&self) -> Rect {
         self.bounds
-    }
-
-    /// The background art every `Button` uses, pulled from the shared
-    /// `SpriteRepository` singleton (same pattern as `Ship`). A single
-    /// static frame — `fps` is irrelevant since `Animation::advance` is a
-    /// no-op below two frames.
-    fn default_animation(scale: Vec2) -> Animation {
-        let button_sprites = &SpriteRepository::get_instance().button_v1_sprite;
-        // Button crops the padded art itself via an explicit `source` at draw
-        // time, so the animation carries no crop of its own.
-        Animation::new(
-            button_sprites.get_textures_for(&ButtonV1Textures::BasicScifiV1),
-            scale,
-            1.0,
-            None,
-        )
     }
 
     /// Returns `true` if the mouse cursor is currently within the button's bounds.
@@ -152,7 +173,7 @@ impl Button {
             self.animation.current_frame(),
             self.bounds,
             Color::new(0.4, 0.7, 1.0, pulse),
-            Some(ButtonV1Textures::BasicScifiV1.content_bounds()),
+            Some(self.kind.content_bounds()),
         );
     }
 }
@@ -196,7 +217,7 @@ impl Drawable for Button {
                 dest_size: Some(self.bounds.size()),
                 // Crop the texture's transparent margins so the button art fills
                 // the bounds, keeping layout gaps and the hit area honest.
-                source: Some(ButtonV1Textures::BasicScifiV1.content_bounds()),
+                source: Some(self.kind.content_bounds()),
                 ..Default::default()
             },
         );
