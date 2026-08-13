@@ -51,34 +51,43 @@ impl SpriteBounds for ButtonKind {
 /// # Example
 ///
 /// ```no_run
-/// let mut new_game_button = Button::new(
-///     Rect::new(20.0, 100.0, 200.0, 48.0),
-///     "New Game".to_string(),
-///     30,
-///     ButtonKind::Basic,
-/// );
+/// use asteroid_rush::game::{
+///     interaction::{Interactive, SelfEventHandler},
+///     rendering::{Drawable, StateUpdatable},
+///     ui::components::button::{Button, ButtonEvents, ButtonKind},
+/// };
+/// use macroquad::prelude::*;
 ///
-/// loop {
-///     // Refresh hover/clicked state from this frame's input.
-///     new_game_button.update_state(());
-///     new_game_button.draw();
+/// async fn demo() {
+///     let mut new_game_button = Button::new(
+///         Rect::new(20.0, 100.0, 200.0, 48.0),
+///         "New Game".to_string(),
+///         30,
+///         ButtonKind::Basic,
+///     );
 ///
-///     // Let the button react to its own event first — self-contained
-///     // feedback it owns, like playing the click sound. `event` is
-///     // `Copy`, so reading it here doesn't stop the consumer below from
-///     // reading it too.
-///     let event = new_game_button.poll_event();
-///     new_game_button.handle_self_event(event);
+///     loop {
+///         // Refresh hover/clicked state from this frame's input.
+///         new_game_button.update_state(());
+///         new_game_button.draw();
 ///
-///     // Then the consumer decides what the click *means* for the app.
-///     // That's custom app logic (page navigation, game state, ...), which
-///     // `SelfEventHandler` deliberately stays out of — the button has no
-///     // notion of "pages".
-///     if let Some(ButtonEvents::Clicked) = event {
-///         println!("New Game clicked — switch to the game page");
+///         // Let the button react to its own event first — self-contained
+///         // feedback it owns, like playing the click sound. `event` is
+///         // `Copy`, so reading it here doesn't stop the consumer below from
+///         // reading it too.
+///         let event = new_game_button.poll_event();
+///         new_game_button.handle_self_event(event);
+///
+///         // Then the consumer decides what the click *means* for the app.
+///         // That's custom app logic (page navigation, game state, ...), which
+///         // `SelfEventHandler` deliberately stays out of — the button has no
+///         // notion of "pages".
+///         if let Some(ButtonEvents::Clicked) = event {
+///             println!("New Game clicked — switch to the game page");
+///         }
+///
+///         next_frame().await;
 ///     }
-///
-///     next_frame().await;
 /// }
 /// ```
 pub struct Button {

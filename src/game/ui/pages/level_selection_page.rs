@@ -2,12 +2,12 @@ use macroquad::prelude::*;
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
-    asset_repository::sprite_repository::{traits::SpriteBounds, BannerV1Textures},
+    asset_repository::sprite_repository::traits::SpriteBounds,
     entities::asteroidfield::AsteroidField,
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{
-        banner::Banner,
+        banner::{Banner, BannerKind},
         button::{Button, ButtonEvents, ButtonKind},
     },
 };
@@ -57,7 +57,7 @@ impl LevelSelectionPage {
 
         Self {
             main_banner: Banner::new(
-                BannerV1Textures::LevelSelectionPageMain,
+                BannerKind::LevelSelectionTitle,
                 Vec2::new(x, 25.0),
                 Vec2::new(450.0, 111.0),
             ),

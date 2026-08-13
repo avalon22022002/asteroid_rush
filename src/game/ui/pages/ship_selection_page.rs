@@ -3,14 +3,14 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     asset_repository::{
-        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures, BannerV1Textures},
+        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures},
         traits::Singleton,
     },
     entities::{animation::Animation, ship::ShipKind},
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{
-        banner::Banner,
+        banner::{Banner, BannerKind},
         button::{Button, ButtonEvents, ButtonKind},
         icon_label_button::IconLabelButton,
         preview_card::{PreviewCard, PreviewCardEvent},
@@ -72,7 +72,7 @@ impl ShipSelectionPage {
 
         Self {
             main_banner: Banner::new(
-                BannerV1Textures::ShipSelectionPageMain,
+                BannerKind::ShipSelectionTitle,
                 Vec2::new(x, 10.0),
                 Vec2::new(450.0, 111.0),
             ),
