@@ -50,7 +50,7 @@ impl SpriteBounds for ButtonKind {
 
 /// # Example
 ///
-/// ```ignore
+/// ```no_run
 /// let mut new_game_button = Button::new(
 ///     Rect::new(20.0, 100.0, 200.0, 48.0),
 ///     "New Game".to_string(),
@@ -111,19 +111,18 @@ pub enum ButtonEvents {
 impl Button {
     pub fn new(bounds: Rect, label: String, font_size: u16, kind: ButtonKind) -> Self {
         let button_sprites = &SpriteRepository::get_instance().button_v1_sprite;
-        let animation = Animation::new(
-            button_sprites.get_textures_for(&kind.texture()),
-            bounds.size(),
-            1.0,
-            None,
-        );
         Self {
             id: utils::get_next_unique_id(),
             bounds,
             label,
             font_size,
             kind,
-            animation,
+            animation: Animation::new(
+                button_sprites.get_textures_for(&kind.texture()),
+                bounds.size(),
+                1.0,
+                None,
+            ),
             is_mouse_over: false,
             was_hovered: false,
             clicked: false,
@@ -168,6 +167,7 @@ impl Button {
     /// added light toward blue; a faint sine pulse keeps it alive without
     /// visibly flickering.
     fn draw_hover_glow(&self) {
+        // Glow intensity oscillating between 0.55 and 0.65 for a slow, steady pulse.
         let pulse = 0.60 + 0.05 * (get_time() as f32 * 3.0).sin();
         additive_glow::draw(
             self.animation.current_frame(),
@@ -180,15 +180,13 @@ impl Button {
 
 impl StateUpdatable<()> for Button {
     /// Refreshes `is_mouse_over`/`clicked` from the current mouse state. This
-    /// only updates the button's own state for rendering — it does not
-    /// decide what a click *means*. Consumers read `poll_event` (via
-    /// `Interactive`) after this to react to the click, keeping Button
-    /// decoupled from whatever action it triggers.
+    /// only updates the button's own state
     fn update_state(&mut self, _args: ()) {
-        // Capture last frame's hover state before overwriting it — order
-        // matters here: `hover_started`/`hover_ended` compare the two, so
-        // `was_hovered` must still hold the *previous* frame's value when
-        // `is_mouse_over` gets this frame's.
+        // Save the old hover state into `was_hovered` *before* refreshing
+        // `is_mouse_over`, so we keep both last frame's and this frame's
+        // values. `hover_started`/`hover_ended` detect edges by comparing
+        // the two, which only works when `was_hovered` holds the previous
+        // value and `is_mouse_over` holds the current one.
         self.was_hovered = self.is_mouse_over;
         self.is_mouse_over = self.mouse_over_bounds();
         self.clicked = self.is_clicked_via_mouse();
@@ -197,13 +195,12 @@ impl StateUpdatable<()> for Button {
 
 impl Drawable for Button {
     fn draw(&self) {
-        // Tints the background art for interaction feedback: darker while
-        // held down, brighter on hover, unchanged (pure white multiplier)
-        // otherwise.
+        // Per-pixel color multiplier applied to the background art. `WHITE`
+        // (1,1,1,1) leaves the art untouched; the `0.8` gray darkens it while
+        // the button is held down, giving a "pressed in" look. Hover doesn't
+        // need a branch here — the additive glow pass below handles that cue.
         let tint = if self.clicked {
             Color::new(0.8, 0.8, 0.8, 1.0)
-        } else if self.is_mouse_over {
-            Color::new(1.2, 1.2, 1.2, 1.0)
         } else {
             WHITE
         };
