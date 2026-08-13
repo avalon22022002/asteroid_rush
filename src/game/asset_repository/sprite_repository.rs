@@ -29,7 +29,7 @@ use crate::game::asset_repository::{
 /// // get_instance builds (and loads) the repository on first call, so it's
 /// // already fully loaded here — no separate load_all step needed.
 /// let repo = SpriteRepository::get_instance();
-/// let textures = repo.button_v1_sprite.get_textures_for(ButtonV1Textures::BasicScifiV1);
+/// let textures = repo.button_v1_sprite.get_textures_for(&ButtonV1Textures::BasicScifiV1);
 /// ```
 
 pub struct SpriteRepository {
