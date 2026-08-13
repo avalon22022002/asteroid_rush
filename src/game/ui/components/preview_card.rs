@@ -57,7 +57,15 @@ impl PreviewCard {
         let subtitle_baseline_y = button.top() - 8.0;
         let title_baseline_y = subtitle_baseline_y - 22.0;
 
-        let animation_panel_bounds = Rect::new(card_bounds.x, card_bounds.y, card_bounds.w, card_bounds.h * 0.6);
+        // Art gets the top half of the card; the rest leaves room for the full
+        // stat list, title, subtitle, and button without any of them scrolling.
+        // Inset the top by `pad` so the art doesn't touch the card's border.
+        let animation_panel_bounds = Rect::new(
+            card_bounds.x,
+            card_bounds.y + pad,
+            card_bounds.w,
+            card_bounds.h * 0.5 - pad,
+        );
 
         // Stats fill the gap between the art and the title, scrolling if they
         // don't all fit.
@@ -117,6 +125,28 @@ impl PreviewCard {
     /// Total pixel height of all stat rows.
     fn content_height(&self) -> f32 {
         self.label_value_pairs.len() as f32 * ROW_HEIGHT
+    }
+
+    /// Draws the preview card's border: a semi transparent dark fill with a thin blue outline.
+    fn draw_preview_card_border(&self) {
+        // Draw semi transparent Dark Fill in Card
+        draw_rectangle(
+            self.bounds.x,
+            self.bounds.y,
+            self.bounds.w,
+            self.bounds.h,
+            Color::new(0.05, 0.08, 0.15, 0.55),
+        );
+
+        // Draw Card border with thin blue lines
+        draw_rectangle_lines(
+            self.bounds.x,
+            self.bounds.y,
+            self.bounds.w,
+            self.bounds.h,
+            2.0,
+            Color::new(0.4, 0.7, 1.0, 0.6),
+        );
     }
 
     /// The art centered in `panel` at its own aspect ratio so it isn't
@@ -255,6 +285,8 @@ impl PreviewCard {
 
 impl Drawable for PreviewCard {
     fn draw(&self) {
+        // Draw Card Border
+        self.draw_preview_card_border();
         // Draw Card Animation
         self.draw_animation_in_card();
         // Draw Card Title

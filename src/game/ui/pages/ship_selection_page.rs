@@ -44,17 +44,38 @@ impl Default for ShipSelectionPage {
 
 impl ShipSelectionPage {
     pub fn new() -> Self {
-        let button_width = BASE_WIDTH * 0.34;
+        let x = 24.0;
+
+        // Title banner in the top-left. Size off its height via the art's own
+        // aspect ratio so it isn't stretched.
+        let banner_kind = BannerKind::ShipSelectionTitle;
+        let banner_height = BASE_HEIGHT * 0.18;
+        let banner_width = banner_height * banner_kind.aspect_ratio();
+
+        // --- Left column: the three ship buttons, stacked. ---
+        let button_width = BASE_WIDTH * 0.30;
         // Derive height from the button art's own width:height so it isn't stretched.
         let button_height = button_width / ButtonKind::Basic.aspect_ratio();
         // Button trims the texture's transparent margins, so a button's bounds
         // are exactly its visible button art — this is a true gap between them.
-        let gap = 12.0;
-        let x = 20.0;
-        let vanguard_y = BASE_HEIGHT * 0.28;
+        let gap = 14.0;
+        // Center the column horizontally under the banner so the buttons sit
+        // directly below the "SELECT SHIP" title.
+        let button_x = x + (banner_width - button_width) / 2.0;
+        // Start the column just below the banner rather than mid-page.
+        let vanguard_y = 12.0 + banner_height + gap;
         let sentinel_y = vanguard_y + button_height + gap;
         let viper_y = sentinel_y + button_height + gap;
         let icon_size = Vec2::splat(button_height * 0.7);
+
+        // --- Right: the preview card, centered in the space beside the buttons. ---
+        let card_width = 320.0;
+        let card_height = 410.0;
+        let buttons_right = button_x + button_width;
+        // Centered in the space beside the buttons, then biased a little right
+        // so it isn't crowding the button column.
+        let card_x = buttons_right + ((BASE_WIDTH - buttons_right) - card_width) / 2.0 + 40.0;
+        let card_y = 100.0;
 
         // Small back button in the top-right corner — the banner already
         // occupies the top-left. Height derives from the art's aspect ratio
@@ -72,12 +93,12 @@ impl ShipSelectionPage {
 
         Self {
             main_banner: Banner::new(
-                BannerKind::ShipSelectionTitle,
-                Vec2::new(x, 10.0),
-                Vec2::new(450.0, 111.0),
+                banner_kind,
+                Vec2::new(x, 12.0),
+                Vec2::new(banner_width, banner_height),
             ),
             vanguard_button: IconLabelButton::new(
-                Rect::new(x, vanguard_y, button_width, button_height),
+                Rect::new(button_x, vanguard_y, button_width, button_height),
                 Animation::new(
                         ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
                         icon_size,
@@ -88,7 +109,7 @@ impl ShipSelectionPage {
                 ShipKind::Vanguard.role().to_string(),
             ),
             sentinel_button: IconLabelButton::new(
-                Rect::new(x, sentinel_y, button_width, button_height),
+                Rect::new(button_x, sentinel_y, button_width, button_height),
                 Animation::new(
                         ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
                         icon_size,
@@ -99,7 +120,7 @@ impl ShipSelectionPage {
                 ShipKind::Sentinel.role().to_string(),
             ),
             viper_button: IconLabelButton::new(
-                Rect::new(x, viper_y, button_width, button_height),
+                Rect::new(button_x, viper_y, button_width, button_height),
                 Animation::new(
                         ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
                         icon_size,
@@ -116,7 +137,7 @@ impl ShipSelectionPage {
                 ButtonKind::Basic,
             ),
             preview_card: PreviewCard::new(
-                Rect::new(300.0, 110.0, 250.0, 335.0),
+                Rect::new(card_x, card_y, card_width, card_height),
                 Animation::new(
                         ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
                         icon_size,
