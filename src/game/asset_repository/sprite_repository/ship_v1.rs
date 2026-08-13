@@ -1,8 +1,8 @@
-use macroquad::texture::Texture2D;
+use macroquad::{math::Rect, texture::Texture2D};
 use strum::EnumIter;
 use crate::game::{
     frames::{load_frames, frame_sequence},
-    asset_repository::sprite_repository::traits::{SpriteTextures,Sprite},
+    asset_repository::sprite_repository::traits::{SpriteTextures,Sprite,SpriteBounds},
 };
 
 pub const SHIP_V1_SPRITE: &str="ShipV1Sprite";
@@ -14,6 +14,19 @@ const LOG_PREFIX: &str = "[ship_v1]";
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum ShipV1Textures {
     SentinelAlive,
+}
+
+impl SpriteBounds for ShipV1Textures {
+    /// The ship art sits in a large transparent frame. This is the union of
+    /// every animation frame's opaque box (measured from the source PNGs), so
+    /// the crop holds steady across the whole loop instead of jittering as the
+    /// thruster flames change height.
+    fn content_bounds(&self) -> Rect {
+        match self {
+            // 488×620 source frames; drawn ship occupies this sub-rect.
+            ShipV1Textures::SentinelAlive => Rect::new(83.0, 23.0, 363.0, 462.0),
+        }
+    }
 }
 
 pub struct ShipV1 {

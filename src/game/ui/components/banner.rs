@@ -31,7 +31,7 @@ impl Banner {
     pub fn new(kind: BannerV1Textures, position: Vec2, size: Vec2) -> Self {
         let banner_sprites = &SpriteRepository::get_instance().banner_v1_sprite;
         Self {
-            animation: Animation::new(banner_sprites.get_textures_for(&kind), size, 1.0),
+            animation: Animation::new(banner_sprites.get_textures_for(&kind), size, 1.0, None),
             position,
         }
     }

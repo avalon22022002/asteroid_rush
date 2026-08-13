@@ -57,23 +57,30 @@ impl Drawable for IconLabelButton {
         let inset_x = bounds.w * 0.14;
         let inset_y = bounds.h * 0.25;
 
-        let icon_size = *self.icon.frame_scale();
+        // `icon_box` is the square area reserved for the icon; the art is fit
+        // inside it at its own aspect ratio (via `content_size`) so it isn't
+        // stretched, and centered within the box.
+        let icon_box = *self.icon.frame_scale();
+        let content = self.icon.content_size();
+        let fit_scale = (icon_box.x / content.x).min(icon_box.y / content.y);
+        let art_size = content * fit_scale;
         let icon_x = bounds.x + inset_x;
-        let icon_y = bounds.y + (bounds.h - icon_size.y) / 2.0;
-        
+        let icon_y = bounds.y + (bounds.h - icon_box.y) / 2.0;
+
         // Draw Icon Animation
         draw_texture_ex(
             self.icon.current_frame(),
-            icon_x,
-            icon_y,
+            icon_x + (icon_box.x - art_size.x) / 2.0,
+            icon_y + (icon_box.y - art_size.y) / 2.0,
             WHITE,
             DrawTextureParams {
-                dest_size: Some(icon_size),
+                dest_size: Some(art_size),
+                source: self.icon.frame_crop(),
                 ..Default::default()
             },
         );
 
-        let text_x = icon_x + icon_size.x + inset_x * 0.6;
+        let text_x = icon_x + icon_box.x + inset_x * 0.6;
         let _ = inset_y;
         let title_font_size = 24;
         let subtitle_font_size = 16;

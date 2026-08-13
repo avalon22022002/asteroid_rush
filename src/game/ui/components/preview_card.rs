@@ -132,12 +132,16 @@ impl PreviewCard {
             animation_panel.w * 0.95,
             animation_panel.h,
         );
-        let scale = (padded_panel.h / frame.height()).min(padded_panel.w / frame.width());
+        // Fit by the art's drawn content (crop, if any) so transparent padding
+        // doesn't skew the scale or leave the art floating small in the panel.
+        let content = self.art.content_size();
+        let scale = (padded_panel.h / content.y).min(padded_panel.w / content.x);
+        let art_size = content * scale;
         let frame_rect = Rect::new(
-            padded_panel.x + (padded_panel.w - frame.width() * scale) / 2.0,
-            padded_panel.y + (padded_panel.h - frame.height() * scale) / 2.0,
-            frame.width() * scale,
-            frame.height() * scale,
+            padded_panel.x + (padded_panel.w - art_size.x) / 2.0,
+            padded_panel.y + (padded_panel.h - art_size.y) / 2.0,
+            art_size.x,
+            art_size.y,
         );
 
         draw_texture_ex(
@@ -147,6 +151,7 @@ impl PreviewCard {
             WHITE,
             DrawTextureParams {
                 dest_size: Some(frame_rect.size()),
+                source: self.art.frame_crop(),
                 ..Default::default()
             },
         );

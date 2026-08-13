@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
-    asset_repository::sprite_repository::{BannerV1Textures, ButtonV1Textures},
+    asset_repository::sprite_repository::{traits::SpriteBounds, BannerV1Textures, ButtonV1Textures},
     entities::asteroidfield::AsteroidField,
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},

@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH, 
     asset_repository::{
-        sprite_repository::{traits::SpriteTextures, SpriteRepository, ShipV1Textures}, 
+        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures},
         traits::Singleton
     }, 
     entities::animation::Animation,
@@ -107,13 +107,17 @@ impl Ship {
         let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
         match kind {
             ShipKind::Sentinel => {
-                let alive = Animation::new(ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive), Vec2::new(236.0, 300.0), 12.0);
+                // Crop the transparent padding so the drawn ship fills its
+                // scale box instead of floating small inside the frame.
+                let crop = Some(ShipV1Textures::SentinelAlive.content_bounds());
+                let alive = Animation::new(ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive), Vec2::new(236.0, 300.0), 12.0, crop);
                 // No dedicated death sprite set yet — freeze on the last
                 // alive frame as a placeholder until one's added.
                 let dead = Animation::new(
                     ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
                     Vec2::new(236.0, 300.0),
                     1.0,
+                    crop,
                 );
                 return (alive, dead)
             }
@@ -204,6 +208,7 @@ impl Drawable for Ship {
             WHITE,
             DrawTextureParams {
                 dest_size: Some(*self.ship_size()),
+                source: self.current_animation().frame_crop(),
                 ..Default::default()
             },
         );

@@ -13,8 +13,8 @@ use macroquad::prelude::*;
 
 /// Base window size the game is designed at. UI elements scale their visuals
 /// relative to this so proportions hold up if the window is resized.
-pub const BASE_WIDTH: f32 = 605.0;
-pub const BASE_HEIGHT: f32 = 455.0;
+pub const BASE_WIDTH: f32 = 960.0;
+pub const BASE_HEIGHT: f32 = 540.0;
 
 pub struct Game {
     background: background::Background,

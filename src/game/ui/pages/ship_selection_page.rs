@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     asset_repository::{
-        sprite_repository::{traits::SpriteTextures, SpriteRepository, ShipV1Textures, BannerV1Textures, ButtonV1Textures},
+        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures, BannerV1Textures, ButtonV1Textures},
         traits::Singleton,
     },
     entities::{animation::Animation, ship::ShipKind},
@@ -64,6 +64,8 @@ impl ShipSelectionPage {
 
         // Only Sentinel has art today; reuse it as a placeholder for every ship.
         let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
+        // Crop the ship art's transparent padding so it fills its icon/panel.
+        let ship_crop = Some(ShipV1Textures::SentinelAlive.content_bounds());
 
         // The preview opens on the first ship so the card is never empty.
         let default_ship_kind = ShipKind::Vanguard;
@@ -80,6 +82,7 @@ impl ShipSelectionPage {
                         ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
                         icon_size,
                         12.0,
+                        ship_crop,
                     ),
                 ShipKind::Vanguard.display_name().to_string(),
                 ShipKind::Vanguard.role().to_string(),
@@ -90,6 +93,7 @@ impl ShipSelectionPage {
                         ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
                         icon_size,
                         12.0,
+                        ship_crop,
                     ),
                 ShipKind::Sentinel.display_name().to_string(),
                 ShipKind::Sentinel.role().to_string(),
@@ -100,6 +104,7 @@ impl ShipSelectionPage {
                         ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
                         icon_size,
                         12.0,
+                        ship_crop,
                     ),
                 ShipKind::Viper.display_name().to_string(),
                 ShipKind::Viper.role().to_string(),
@@ -115,6 +120,7 @@ impl ShipSelectionPage {
                         ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
                         icon_size,
                         12.0,
+                        ship_crop,
                     ),
                 default_ship_kind.display_name().to_string(),
                 default_ship_kind.role().to_string(),
@@ -169,12 +175,14 @@ impl StateUpdatable<()> for ShipSelectionPage {
 
             // Only Sentinel has art today; reuse it as a placeholder for every ship.
             let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
+            let ship_crop = Some(ShipV1Textures::SentinelAlive.content_bounds());
             let stats = ship_kind.stats();
             self.preview_card.set_content(
                 Animation::new(
                     ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
                     Vec2::new(140.0, 178.0),
                     12.0,
+                    ship_crop,
                 ),
                 ship_kind.display_name().to_string(),
                 ship_kind.role().to_string(),

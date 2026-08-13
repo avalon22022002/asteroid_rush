@@ -3,7 +3,7 @@ use macroquad::{audio, prelude::*};
 use crate::game::{
     asset_repository::{
         traits::Singleton,
-        sprite_repository::{traits::SpriteTextures, SpriteRepository, ButtonV1Textures},
+        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ButtonV1Textures},
         audio_repository::{
             AudioRepository,
             traits::AudioClips,
@@ -104,10 +104,13 @@ impl Button {
     /// no-op below two frames.
     fn default_animation(scale: Vec2) -> Animation {
         let button_sprites = &SpriteRepository::get_instance().button_v1_sprite;
+        // Button crops the padded art itself via an explicit `source` at draw
+        // time, so the animation carries no crop of its own.
         Animation::new(
             button_sprites.get_textures_for(&ButtonV1Textures::BasicScifiV1),
             scale,
             1.0,
+            None,
         )
     }
 
@@ -149,7 +152,7 @@ impl Button {
             self.animation.current_frame(),
             self.bounds,
             Color::new(0.4, 0.7, 1.0, pulse),
-            Some(ButtonV1Textures::BasicScifiV1.opaque_region()),
+            Some(ButtonV1Textures::BasicScifiV1.content_bounds()),
         );
     }
 }
@@ -193,7 +196,7 @@ impl Drawable for Button {
                 dest_size: Some(self.bounds.size()),
                 // Crop the texture's transparent margins so the button art fills
                 // the bounds, keeping layout gaps and the hit area honest.
-                source: Some(ButtonV1Textures::BasicScifiV1.opaque_region()),
+                source: Some(ButtonV1Textures::BasicScifiV1.content_bounds()),
                 ..Default::default()
             },
         );
