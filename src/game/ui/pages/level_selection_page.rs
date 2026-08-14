@@ -10,7 +10,7 @@ use crate::game::{
         banner::{Banner, BannerKind},
         button::{Button, ButtonEvents, ButtonKind},
     },
-    utils::size_from_width,
+    utils::aspect_size_from_fixed_width,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -41,18 +41,17 @@ impl Default for LevelSelectionPage {
 
 impl LevelSelectionPage {
     pub fn new() -> Self {
-        let (button_width, button_height) =
-            size_from_width(BASE_WIDTH * 0.33, ButtonKind::Basic.aspect_ratio());
+        let button_size = aspect_size_from_fixed_width(BASE_WIDTH * 0.33, ButtonKind::Basic.aspect_ratio());
         let gap = 10.0;
         let x = 20.0;
         let level_1_y = BASE_HEIGHT * 0.35;
-        let level_2_y = level_1_y + button_height + gap;
-        let level_3_y = level_2_y + button_height + gap;
+        let level_2_y = level_1_y + button_size.y + gap;
+        let level_3_y = level_2_y + button_size.y + gap;
 
         // Small back button in the top-right corner — the banner already
         // occupies the top-left. Height derives from the art's aspect ratio
         // so the small size isn't stretched.
-        let (back_width, back_height) = size_from_width(90.0, ButtonKind::Basic.aspect_ratio());
+        let back_size = aspect_size_from_fixed_width(90.0, ButtonKind::Basic.aspect_ratio());
 
         Self {
             main_banner: Banner::new(
@@ -61,25 +60,25 @@ impl LevelSelectionPage {
                 Vec2::new(450.0, 111.0),
             ),
             level_1_button: Button::new(
-                Rect::new(x, level_1_y, button_width, button_height),
+                Rect::new(x, level_1_y, button_size.x, button_size.y),
                 "Level 1".to_string(),
                 30,
                 ButtonKind::Basic,
             ),
             level_2_button: Button::new(
-                Rect::new(x, level_2_y, button_width, button_height),
+                Rect::new(x, level_2_y, button_size.x, button_size.y),
                 "Level 2".to_string(),
                 30,
                 ButtonKind::Basic,
             ),
             level_3_button: Button::new(
-                Rect::new(x, level_3_y, button_width, button_height),
+                Rect::new(x, level_3_y, button_size.x, button_size.y),
                 "Level 3".to_string(),
                 30,
                 ButtonKind::Basic,
             ),
             back_button: Button::new(
-                Rect::new(BASE_WIDTH - back_width - 20.0, 15.0, back_width, back_height),
+                Rect::new(BASE_WIDTH - back_size.x - 20.0, 15.0, back_size.x, back_size.y),
                 "Back".to_string(),
                 20,
                 ButtonKind::Basic,

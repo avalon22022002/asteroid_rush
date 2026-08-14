@@ -10,7 +10,7 @@ use crate::game::{
         banner::{Banner, BannerKind},
         button::{Button, ButtonEvents, ButtonKind},
     },
-    utils::{size_from_height, size_from_width},
+    utils::{aspect_size_from_fixed_height, aspect_size_from_fixed_width},
 };
 
 /// Choices the player can make from the title screen.
@@ -35,35 +35,29 @@ impl Default for HomePage {
 
 impl HomePage {
     pub fn new() -> Self {
-        let pos_x = 40.0;
 
         let banner_kind = BannerKind::HomeTitle;
-        let (banner_width, banner_height) =
-            size_from_height(BASE_HEIGHT * 0.24, banner_kind.aspect_ratio());
+        let banner_pos = Vec2::new(40.0, BASE_HEIGHT * 0.09);
+        let banner_size = aspect_size_from_fixed_height(BASE_HEIGHT * 0.24, banner_kind.aspect_ratio());
 
         let button_kind = ButtonKind::Basic;
-        let (button_width, button_height) =
-            size_from_width(BASE_WIDTH * 0.3, button_kind.aspect_ratio());
+        let button_size = aspect_size_from_fixed_width(BASE_WIDTH * 0.3, button_kind.aspect_ratio());
         let gap = 14.0;
         // Center the buttons horizontally within the banner's span.
-        let button_x = pos_x + (banner_width - button_width) / 2.0;
-        let new_game_y = BASE_HEIGHT * 0.42;
-        let exit_y = new_game_y + button_height + gap;
+        let button_x = banner_pos.x + (banner_size.x - button_size.x) / 2.0;
+        let new_game_button_y = BASE_HEIGHT * 0.42;
+        let exit_button_y = new_game_button_y + button_size.y + gap;
 
         Self {
-            main_banner: Banner::new(
-                banner_kind,
-                Vec2::new(40.0, BASE_HEIGHT*0.09),
-                Vec2::new(banner_width, banner_height),
-            ),
+            main_banner: Banner::new(banner_kind, banner_pos, banner_size),
             new_game_button: Button::new(
-                Rect::new(button_x, new_game_y, button_width, button_height),
+                Rect::new(button_x, new_game_button_y, button_size.x, button_size.y),
                 "New Game".to_string(),
                 34,
                 button_kind,
             ),
             exit_button: Button::new(
-                Rect::new(button_x, exit_y, button_width, button_height),
+                Rect::new(button_x, exit_button_y, button_size.x, button_size.y),
                 "Exit".to_string(),
                 34,
                 button_kind,
