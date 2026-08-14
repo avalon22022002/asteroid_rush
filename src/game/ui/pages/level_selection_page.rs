@@ -10,6 +10,7 @@ use crate::game::{
         banner::{Banner, BannerKind},
         button::{Button, ButtonEvents, ButtonKind},
     },
+    utils::size_from_width,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -40,9 +41,8 @@ impl Default for LevelSelectionPage {
 
 impl LevelSelectionPage {
     pub fn new() -> Self {
-        let button_width = BASE_WIDTH * 0.33;
-        // Derive height from the button art's width:height so it isn't stretched.
-        let button_height = button_width / ButtonKind::Basic.aspect_ratio();
+        let (button_width, button_height) =
+            size_from_width(BASE_WIDTH * 0.33, ButtonKind::Basic.aspect_ratio());
         let gap = 10.0;
         let x = 20.0;
         let level_1_y = BASE_HEIGHT * 0.35;
@@ -52,8 +52,7 @@ impl LevelSelectionPage {
         // Small back button in the top-right corner — the banner already
         // occupies the top-left. Height derives from the art's aspect ratio
         // so the small size isn't stretched.
-        let back_width = 90.0;
-        let back_height = back_width / ButtonKind::Basic.aspect_ratio();
+        let (back_width, back_height) = size_from_width(90.0, ButtonKind::Basic.aspect_ratio());
 
         Self {
             main_banner: Banner::new(

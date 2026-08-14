@@ -15,6 +15,7 @@ use crate::game::{
         icon_label_button::IconLabelButton,
         preview_card::{PreviewCard, PreviewCardEvent},
     },
+    utils::{size_from_height, size_from_width},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -49,13 +50,12 @@ impl ShipSelectionPage {
         // Title banner in the top-left. Size off its height via the art's own
         // aspect ratio so it isn't stretched.
         let banner_kind = BannerKind::ShipSelectionTitle;
-        let banner_height = BASE_HEIGHT * 0.18;
-        let banner_width = banner_height * banner_kind.aspect_ratio();
+        let (banner_width, banner_height) =
+            size_from_height(BASE_HEIGHT * 0.18, banner_kind.aspect_ratio());
 
         // --- Left column: the three ship buttons, stacked. ---
-        let button_width = BASE_WIDTH * 0.30;
-        // Derive height from the button art's own width:height so it isn't stretched.
-        let button_height = button_width / ButtonKind::Basic.aspect_ratio();
+        let (button_width, button_height) =
+            size_from_width(BASE_WIDTH * 0.30, ButtonKind::Basic.aspect_ratio());
         // Button trims the texture's transparent margins, so a button's bounds
         // are exactly its visible button art — this is a true gap between them.
         let gap = 14.0;
@@ -80,8 +80,7 @@ impl ShipSelectionPage {
         // Small back button in the top-right corner — the banner already
         // occupies the top-left. Height derives from the art's aspect ratio
         // so the small size isn't stretched.
-        let back_width = 90.0;
-        let back_height = back_width / ButtonKind::Basic.aspect_ratio();
+        let (back_width, back_height) = size_from_width(90.0, ButtonKind::Basic.aspect_ratio());
 
         // Only Sentinel has art today; reuse it as a placeholder for every ship.
         let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;

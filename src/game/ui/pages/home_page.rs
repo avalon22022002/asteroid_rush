@@ -10,6 +10,7 @@ use crate::game::{
         banner::{Banner, BannerKind},
         button::{Button, ButtonEvents, ButtonKind},
     },
+    utils::{size_from_height, size_from_width},
 };
 
 /// Choices the player can make from the title screen.
@@ -37,12 +38,12 @@ impl HomePage {
         let pos_x = 40.0;
 
         let banner_kind = BannerKind::HomeTitle;
-        let banner_height = BASE_HEIGHT * 0.24;
-        let banner_width = banner_height * banner_kind.aspect_ratio();
+        let (banner_width, banner_height) =
+            size_from_height(BASE_HEIGHT * 0.24, banner_kind.aspect_ratio());
 
-        let button_width = BASE_WIDTH * 0.3;
-        // Derive height from the button art's width:height so it isn't stretched.
-        let button_height = button_width / ButtonKind::Basic.aspect_ratio();
+        let button_kind = ButtonKind::Basic;
+        let (button_width, button_height) =
+            size_from_width(BASE_WIDTH * 0.3, button_kind.aspect_ratio());
         let gap = 14.0;
         // Center the buttons horizontally within the banner's span.
         let button_x = pos_x + (banner_width - button_width) / 2.0;
@@ -52,20 +53,20 @@ impl HomePage {
         Self {
             main_banner: Banner::new(
                 banner_kind,
-                Vec2::new(pos_x, BASE_HEIGHT * 0.09),
+                Vec2::new(40.0, BASE_HEIGHT*0.09),
                 Vec2::new(banner_width, banner_height),
             ),
             new_game_button: Button::new(
                 Rect::new(button_x, new_game_y, button_width, button_height),
                 "New Game".to_string(),
                 34,
-                ButtonKind::Basic,
+                button_kind,
             ),
             exit_button: Button::new(
                 Rect::new(button_x, exit_y, button_width, button_height),
                 "Exit".to_string(),
                 34,
-                ButtonKind::Basic,
+                button_kind,
             ),
             ship: Ship::new(
                 // Right-anchored, vertically aligned with the button group.
@@ -111,12 +112,11 @@ impl Interactive for HomePage {
 }
 
 impl SelfEventHandler for HomePage {
-    /// Fans out to each button's own self-contained feedback (e.g. its click
-    /// sound) — the same delegation `draw`/`update_state` already do above.
-    /// `HomePageEvent` (the `event` param) is app-level and means nothing to
-    /// a `Button`, so it's unused here: each child instead re-derives and
-    /// handles *its own* event, independently of any priority ordering
-    /// `poll_event` applies when deciding what the click means for the page.
+    /// Lets each button react to its own event (e.g. play its click sound),
+    /// the same way `HomePage` delegates drawing and state updates to its
+    /// children elsewhere. `_event` is this page's own `HomePageEvent`
+    /// verdict, which means nothing to a `Button`, so it's ignored here —
+    /// each child re-polls and handles its own event instead.
     fn handle_self_event(&mut self, _event: Self::Event) {
         self.new_game_button
             .handle_self_event(self.new_game_button.poll_event());

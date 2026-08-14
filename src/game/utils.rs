@@ -6,6 +6,26 @@ pub fn ordered(a: f32, b: f32) -> (f32, f32) {
     (a.min(b), a.max(b))
 }
 
+/// Computes `(width, height)` for a fixed height, using `aspect_ratio` (width/height)
+/// to derive the width.
+///
+/// - Use when height is the constrained dimension (e.g. fits a fixed-height slot)
+///   and width should follow to match the art's proportions.
+/// - Prevents stretching: scaling width and height independently distorts the art.
+pub fn size_from_height(height: f32, aspect_ratio: f32) -> (f32, f32) {
+    (height * aspect_ratio, height)
+}
+
+/// Computes `(width, height)` for a fixed width, using `aspect_ratio` (width/height)
+/// to derive the height.
+///
+/// - Use when width is the constrained dimension (e.g. fits a fixed-width slot)
+///   and height should follow to match the art's proportions.
+/// - Prevents stretching: scaling width and height independently distorts the art.
+pub fn size_from_width(width: f32, aspect_ratio: f32) -> (f32, f32) {
+    (width, width / aspect_ratio)
+}
+
 // Backing counter for `get_next_unique_id`. Atomic (rather than a plain
 // `static mut` or a counter threaded through game state) so ids stay unique
 // and race-free even if id generation ever happens from multiple threads.
