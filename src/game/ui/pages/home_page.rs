@@ -44,11 +44,11 @@ impl HomePage {
         // HomePage button common config
         let button_kind = ButtonKind::Basic;
         let button_size = aspect_size_from_fixed_width(BASE_WIDTH * 0.3, button_kind.aspect_ratio());
-        let button_pos_x = banner_pos.x + (banner_size.x - button_size.x) / 2.0; // Center the buttons horizontally within the banner's span.
-        let button_vertical_gap = 14.0;
-        
-        // HomePage button specific config
-        let new_game_button_y = BASE_HEIGHT * 0.42;
+        let button_pos_x = banner_pos.x + (banner_size.x - button_size.x) / 2.0; // Adjust the button's x co-ordinate so the buttons sit directly below the banner's "Space shooter Classic" title.
+        let button_vertical_gap = 14.0; // Vertical Spacing between buttons
+
+        // Adjust each individual button's y co-ordinate so they are placed one below each other with vertical gap
+        let new_game_button_y = BASE_HEIGHT * 0.42; // First button's y co-ordinate
         let exit_button_y = new_game_button_y + button_size.y + button_vertical_gap;
 
         Self {

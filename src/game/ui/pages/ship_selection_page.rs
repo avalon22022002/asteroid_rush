@@ -33,7 +33,7 @@ pub struct ShipSelectionPage {
     viper_button: IconLabelButton,
     back_button: Button,
     preview_card: PreviewCard,
-    /// The ship currently highlighted and shown in the preview card.
+    /// The kind of ship currently highlighted and shown in the preview card.
     selected_ship_kind: ShipKind,
 }
 
@@ -45,98 +45,78 @@ impl Default for ShipSelectionPage {
 
 impl ShipSelectionPage {
     pub fn new() -> Self {
-        let x = 24.0;
+        // Common x co-ordinate for Banner and Buttons
+        let common_pos_x = 24.0;
 
-        // Title banner in the top-left. Size off its height via the art's own
-        // aspect ratio so it isn't stretched.
+        // Title banner Config
         let banner_kind = BannerKind::ShipSelectionTitle;
+        let banner_pos = Vec2::new(common_pos_x, 12.0);
         let banner_size = aspect_size_from_fixed_height(BASE_HEIGHT * 0.18, banner_kind.aspect_ratio());
 
-        // --- Left column: the three ship buttons, stacked. ---
-        let button_size = aspect_size_from_fixed_width(BASE_WIDTH * 0.30, ButtonKind::Basic.aspect_ratio());
-        // Button trims the texture's transparent margins, so a button's bounds
-        // are exactly its visible button art — this is a true gap between them.
-        let gap = 14.0;
-        // Center the column horizontally under the banner so the buttons sit
-        // directly below the "SELECT SHIP" title.
-        let button_x = x + (banner_size.x - button_size.x) / 2.0;
-        // Start the column just below the banner rather than mid-page.
-        let vanguard_y = 12.0 + banner_size.y + gap;
-        let sentinel_y = vanguard_y + button_size.y + gap;
-        let viper_y = sentinel_y + button_size.y + gap;
-        let icon_size = Vec2::splat(button_size.y * 0.7);
+        // Ship Selection Page button common config
+        let button_kind = ButtonKind::Basic;
+        let button_size = aspect_size_from_fixed_width(BASE_WIDTH * 0.30, button_kind.aspect_ratio());
+        let button_vertical_gap = 14.0; // Vertical Spacing between buttons
+        let button_x = common_pos_x + (banner_size.x - button_size.x) / 2.0; // Adjust the button's x co-ordinate so the buttons sit directly below the banners's "SELECT SHIP" title.
+        let buttons_right = button_x + button_size.x; // Right edge of the button column, used to position the card beside it
 
-        // --- Right: the preview card, centered in the space beside the buttons. ---
-        let card_width = 320.0;
-        let card_height = 410.0;
-        let buttons_right = button_x + button_size.x;
-        // Centered in the space beside the buttons, then biased a little right
-        // so it isn't crowding the button column.
-        let card_x = buttons_right + ((BASE_WIDTH - buttons_right) - card_width) / 2.0 + 40.0;
-        let card_y = 100.0;
+        // Adjust each individual button's y coordinate so they're stacked with a vertical gap between them.
+        let vanguard_button_y = banner_pos.y + banner_size.y + button_vertical_gap; // First button is below the banner
+        let sentinel_button_y = vanguard_button_y + button_size.y + button_vertical_gap;
+        let viper_button_y = sentinel_button_y + button_size.y + button_vertical_gap;
 
-        // Small back button in the top-right corner — the banner already
-        // occupies the top-left. Height derives from the art's aspect ratio
-        // so the small size isn't stretched.
-        let back_size = aspect_size_from_fixed_width(90.0, ButtonKind::Basic.aspect_ratio());
+        // Adjust back button position and size at the top right corner of page
+        let back_button_size = aspect_size_from_fixed_width(90.0, button_kind.aspect_ratio());
+        let back_button_pos = Vec2::new(BASE_WIDTH - back_button_size.x - 20.0, 15.0);
 
-        // Only Sentinel has art today; reuse it as a placeholder for every ship.
+        // Ship Selection Page preview card config
+        // Adjust the preview card so its centered in the right space beside the buttons column
+        let preview_card_size = Vec2::new(320.0, 410.0);
+        let preview_card_pos = Vec2::new(buttons_right + ((BASE_WIDTH - buttons_right) - preview_card_size.x) / 2.0 + 40.0, 100.0);
+        let default_ship_kind = ShipKind::Vanguard; // The preview opens on the first so the card is never empty.
+
+        // Only Sentinel has art today; reuse it as a placeholder for every ship, later on can use the first button's ship Vanguard
         let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
-        // Crop the ship art's transparent padding so it fills its icon/panel.
-        let ship_crop = Some(ShipV1Textures::SentinelAlive.content_bounds());
-
-        // The preview opens on the first ship so the card is never empty.
-        let default_ship_kind = ShipKind::Vanguard;
+        let ship_icon_size = Vec2::splat(button_size.y * 0.7);
+        let default_ship_icon_textures = ShipV1Textures::SentinelAlive;
+        let default_ship_icon = || {
+            Animation::new(
+                ship_sprites.get_textures_for(&default_ship_icon_textures),
+                ship_icon_size,
+                12.0,
+                Some(default_ship_icon_textures.content_bounds()), // Crop the ship art's transparent padding, so it fills its icon/panel
+            )
+        };
 
         Self {
-            main_banner: Banner::new(banner_kind, Vec2::new(x, 12.0), banner_size),
+            main_banner: Banner::new(banner_kind, banner_pos, banner_size),
             vanguard_button: IconLabelButton::new(
-                Rect::new(button_x, vanguard_y, button_size.x, button_size.y),
-                Animation::new(
-                        ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
-                        icon_size,
-                        12.0,
-                        ship_crop,
-                    ),
+                Rect::new(button_x, vanguard_button_y, button_size.x, button_size.y),
+                default_ship_icon(),
                 ShipKind::Vanguard.display_name().to_string(),
                 ShipKind::Vanguard.role().to_string(),
             ),
             sentinel_button: IconLabelButton::new(
-                Rect::new(button_x, sentinel_y, button_size.x, button_size.y),
-                Animation::new(
-                        ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
-                        icon_size,
-                        12.0,
-                        ship_crop,
-                    ),
+                Rect::new(button_x, sentinel_button_y, button_size.x, button_size.y),
+                default_ship_icon(),
                 ShipKind::Sentinel.display_name().to_string(),
                 ShipKind::Sentinel.role().to_string(),
             ),
             viper_button: IconLabelButton::new(
-                Rect::new(button_x, viper_y, button_size.x, button_size.y),
-                Animation::new(
-                        ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
-                        icon_size,
-                        12.0,
-                        ship_crop,
-                    ),
+                Rect::new(button_x, viper_button_y, button_size.x, button_size.y),
+                default_ship_icon(),
                 ShipKind::Viper.display_name().to_string(),
                 ShipKind::Viper.role().to_string(),
             ),
             back_button: Button::new(
-                Rect::new(BASE_WIDTH - back_size.x - 20.0, 15.0, back_size.x, back_size.y),
+                Rect::new(back_button_pos.x, back_button_pos.y, back_button_size.x, back_button_size.y),
                 "Back".to_string(),
                 20,
-                ButtonKind::Basic,
+                button_kind,
             ),
             preview_card: PreviewCard::new(
-                Rect::new(card_x, card_y, card_width, card_height),
-                Animation::new(
-                        ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
-                        icon_size,
-                        12.0,
-                        ship_crop,
-                    ),
+                Rect::new(preview_card_pos.x, preview_card_pos.y, preview_card_size.x, preview_card_size.y),
+                default_ship_icon(),
                 default_ship_kind.display_name().to_string(),
                 default_ship_kind.role().to_string(),
                 {
