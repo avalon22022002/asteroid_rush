@@ -70,7 +70,9 @@ impl HomePage {
                 Vec2::new(BASE_WIDTH - 380.0, BASE_HEIGHT * 0.36),
                 ShipKind::Sentinel,
                 "Sentinel".to_string(),
-            ),
+            )
+            // Purely decorative here — shouldn't move or shoot.
+            .locked(true),
         }
     }
 }

@@ -100,6 +100,10 @@ pub struct Ship {
     alive_animation: Animation,
     dead_animation: Animation,
     is_alive: bool,
+    /// When `true`, the ship ignores player input entirely — no movement,
+    /// and (once added) no shooting either. For ships that are only ever
+    /// drawn for show, e.g. the one on the home page.
+    locked: bool,
 }
 
 impl Ship {
@@ -136,7 +140,15 @@ impl Ship {
             alive_animation,
             dead_animation,
             is_alive: true,
+            locked: false,
         }
+    }
+
+    /// Builder-style: sets whether this ship ignores player input (see
+    /// `locked`). Chain onto `new`, e.g. `Ship::new(..).locked(true)`.
+    pub fn locked(mut self, locked: bool) -> Self {
+        self.locked = locked;
+        self
     }
 
     /// Moves the ship by this frame's arrow-key input at `ship_stats.speed`
@@ -216,11 +228,12 @@ impl Drawable for Ship {
 }
 
 impl StateUpdatable<()> for Ship {
-    /// Only responds to movement input while alive — a dead ship shouldn't
-    /// steer, just play out its death animation in place.
+    /// Only responds to movement input while alive and unlocked — a dead
+    /// ship shouldn't steer (just play out its death animation in place),
+    /// and a `locked` ship ignores player input altogether.
     fn update_state(&mut self, _data: ()) {
         let dt = get_frame_time();
-        if self.is_alive {
+        if self.is_alive && !self.locked {
             self.apply_movement(dt);
         }
         self.current_animation_mut().advance(dt);
