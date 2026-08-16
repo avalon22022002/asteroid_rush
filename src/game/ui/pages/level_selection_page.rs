@@ -1,16 +1,10 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    BASE_HEIGHT, BASE_WIDTH,
-    asset_repository::sprite_repository::traits::SpriteBounds,
-    entities::asteroidfield::AsteroidField,
-    interaction::{Interactive, SelfEventHandler},
-    rendering::{Drawable, StateUpdatable},
-    ui::components::{
+    BASE_HEIGHT, BASE_WIDTH, asset_repository::sprite_repository::traits::SpriteBounds, entities::asteroidfield::{AsteroidField, asteroid::AsteroidKind}, interaction::{Interactive, SelfEventHandler}, rendering::{Drawable, StateUpdatable}, ui::components::{
         banner::{Banner, BannerKind},
         button::{Button, ButtonEvents, ButtonKind},
-    },
-    utils::aspect_size_from_fixed_width,
+    }, utils::{MinMax, aspect_size_from_fixed_width},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -83,7 +77,7 @@ impl LevelSelectionPage {
                 20,
                 ButtonKind::Basic,
             ),
-            asteroid_field: AsteroidField::new(15, None),
+            asteroid_field: AsteroidField::new(15, AsteroidKind::MoltenDarkAsteroid, MinMax{min: 0.3, max: 2.0}),
         }
     }
 }

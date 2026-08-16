@@ -7,23 +7,23 @@ use crate::game::{
     },
     entities::animation::Animation,
     rendering::{Drawable, StateUpdatable},
-    utils::ordered,
+    utils::{MinMax, biased_random_in_range}
 };
 
 /// Identifies which asteroid texture to draw. Add a variant here (and cases
-/// in `AsteroidTextureKind::sprite_kind`/`render_size`) to register a new
+/// in `AsteroidKind::sprite_kind`/`render_size`) to register a new
 /// asteroid look.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum AsteroidTextureKind {
+pub enum AsteroidKind {
     /// Dark rock veined with glowing molten cracks.
-    Molten,
+    MoltenDarkAsteroid,
 }
 
-impl AsteroidTextureKind {
+impl AsteroidKind {
     /// This kind's texture group in `SpriteRepository`.
     fn sprite_kind(self) -> AsteroidV1Textures {
         match self {
-            AsteroidTextureKind::Molten => AsteroidV1Textures::Molten,
+            AsteroidKind::MoltenDarkAsteroid => AsteroidV1Textures::Molten,
         }
     }
 
@@ -31,115 +31,124 @@ impl AsteroidTextureKind {
     /// source png's actual (much larger) resolution.
     fn render_size(self) -> f32 {
         match self {
-            AsteroidTextureKind::Molten => 60.0,
+            AsteroidKind::MoltenDarkAsteroid => 60.0,
         }
     }
+
+    fn stat_range(self) -> MinMax<AsteroidStats>{
+        match self {
+            AsteroidKind::MoltenDarkAsteroid =>  MinMax {
+                min: AsteroidStats { speed: 50.0, rotation_speed: 1.6, damage_to_die: 20, damage_on_collision: 10, spawn_time: 10 },
+                max: AsteroidStats { speed: 120.0, rotation_speed: 4.2, damage_to_die: 40, damage_on_collision: 25, spawn_time: 500},
+            },
+        }
+    }
+    fn random_stats_biased_by_scale(self, scale: f32)-> AsteroidStats{
+        let stat_range= self.stat_range();
+        AsteroidStats {
+            // Bigger asteroids are slower: flip the sign so growing size pulls toward min.
+            speed: biased_random_in_range(MinMax { min:stat_range.min.speed, max: stat_range.max.speed }, -scale),
+            // Bigger asteroids rotate slower: flip the sign so growing size pulls toward min.
+            rotation_speed: biased_random_in_range(MinMax { min: stat_range.min.rotation_speed, max: stat_range.max.rotation_speed }, -scale),
+            // Bigger asteroids take more hits to destroy: bias grows with size.
+            damage_to_die: biased_random_in_range(MinMax { min: stat_range.min.damage_to_die as f32, max: stat_range.max.damage_to_die as f32 }, scale) as u32,
+            // Bigger asteroids deal more collision damage: bias grows with size.
+            damage_on_collision: biased_random_in_range(MinMax { min: stat_range.min.damage_on_collision as f32, max: stat_range.max.damage_on_collision as f32 }, scale) as u32,
+            // Bigger asteroids take longer to spawn: bias grows with scale.
+            spawn_time: biased_random_in_range(MinMax { min: stat_range.min.spawn_time as f32, max: stat_range.max.spawn_time as f32 }, scale) as u32
+
+        }
+    }
+}
+
+struct AsteroidStats {
+    speed: f32,
+    rotation_speed: f32,
+    damage_to_die: u32,
+    damage_on_collision: u32,
+    spawn_time: u32,
+}
+
+/// Where an asteroid is in its spawn lifecycle.
+#[derive(Debug, Clone, Copy)]
+enum AsteroidStatus {
+    /// Not yet on screen — counts `remaining` frames down to 0, then spawns
+    /// (picks a fresh `x` and switches to `Active`). Used to stagger a
+    /// freshly-created batch of asteroids so they don't all pop in at once.
+    Spawning { remaining: u32 },
+    Active,
 }
 
 pub struct Asteroid {
-    x: f32,
-    y: f32,
-    kind: AsteroidTextureKind,
-    /// Multiplier applied to the source texture's size, so asteroids vary in
-    /// size without needing separate art per size.
-    scale: f32,
-    /// Fall speed in units/second.
-    speed: f32,
-    /// Current rotation in radians (matches `DrawTextureParams::rotation`).
-    rotation: f32,
-    /// Spin rate in radians/second. Can be negative to spin counterclockwise.
-    rotation_speed: f32,
+    pos: Vec2, // Position (x, y) of the asteroid
+    current_rotation: f32, // Current rotation in radians (matches `DrawTextureParams::rotation`)
+    kind: AsteroidKind, // The asteroid's kind
+    scale: f32, // Scale factor for asteroid size variation, without needing separate art per size
+    stats: AsteroidStats,
     animation: Animation,
+    status: AsteroidStatus,
 }
 
 impl Asteroid {
+    /// `spawn_delay_frames` postpones this asteroid's first appearance by
+    /// that many frames instead of spawning it immediately — 0 (or less)
+    /// spawns right away. Used to stagger a freshly-created batch of
+    /// asteroids so they don't all pop in at once.
     pub fn new(
-        x: f32,
-        y: f32,
-        kind: AsteroidTextureKind,
+        pos: Vec2,
+        current_rotation: f32,
+        kind: AsteroidKind,
         scale: f32,
-        speed: f32,
-        rotation: f32,
-        rotation_speed: f32,
     ) -> Self {
         let asteroid_sprites = &SpriteRepository::get_instance().asteroid_v1_sprite;
-        let animation = Animation::new(
-            asteroid_sprites.get_textures_for(&kind.sprite_kind()),
-            Vec2::splat(kind.render_size() * scale),
-            1.0,
-            None,
-        );
+        let stats = kind.random_stats_biased_by_scale(scale);
         Self {
-            x,
-            y,
+            pos,
+            current_rotation,
             kind,
             scale,
-            speed,
-            rotation,
-            rotation_speed,
-            animation,
+            animation: Animation::new(
+                asteroid_sprites.get_textures_for(&kind.sprite_kind()),
+                Vec2::splat(kind.render_size() * scale),
+                1.0,
+                None,
+            ),
+            status: AsteroidStatus::Spawning { remaining: stats.spawn_time },
+            stats,
         }
-    }
-
-    /// Default lower and upper bounds spanning the full screen width, used
-    /// when [`AsteroidField::new`](super::AsteroidField::new) generates a
-    /// field without explicit limits.
-    pub fn default_bounds() -> (Asteroid, Asteroid) {
-        (
-            Asteroid::new(
-                0.0,
-                0.0,
-                AsteroidTextureKind::Molten,
-                0.5,
-                60.0,
-                0.0,
-                -std::f32::consts::PI,
-            ),
-            Asteroid::new(
-                screen_width(),
-                0.0,
-                AsteroidTextureKind::Molten,
-                1.5,
-                220.0,
-                std::f32::consts::TAU,
-                std::f32::consts::PI,
-            ),
-        )
-    }
-
-    /// Generates a random asteroid with each numeric field drawn uniformly
-    /// from the range between the matching field in `lower` and `upper`
-    /// (order doesn't matter — each field is normalized independently).
-    /// `kind` isn't a range, so the new asteroid just takes `lower`'s.
-    pub fn random_between_range(lower: &Asteroid, upper: &Asteroid) -> Asteroid {
-        let (x_lo, x_hi) = ordered(lower.x, upper.x);
-        let (scale_lo, scale_hi) = ordered(lower.scale, upper.scale);
-        let (speed_lo, speed_hi) = ordered(lower.speed, upper.speed);
-        let (rotation_lo, rotation_hi) = ordered(lower.rotation, upper.rotation);
-        let (rotation_speed_lo, rotation_speed_hi) =
-            ordered(lower.rotation_speed, upper.rotation_speed);
-
-        Asteroid::new(
-            rand::gen_range(x_lo, x_hi),
-            0.0,
-            lower.kind,
-            rand::gen_range(scale_lo, scale_hi),
-            rand::gen_range(speed_lo, speed_hi),
-            rand::gen_range(rotation_lo, rotation_hi),
-            rand::gen_range(rotation_speed_lo, rotation_speed_hi),
-        )
     }
 
     /// Advances the asteroid downward by `speed * dt` and spins it by
     /// `rotation_speed * dt`. Once it drifts past the bottom edge it wraps
-    /// back to the top at a fresh random `x`, so the field keeps falling
-    /// indefinitely instead of running out of asteroids.
+    /// back to the top at a fresh random `x` and re-enters `Spawning` for
+    /// another `spawn_time`-frame delay, so the field keeps producing
+    /// asteroids indefinitely instead of running out, staggered the same
+    /// way a freshly-created batch is.
+    ///
+    /// While `Spawning`, this instead just counts the remaining frames down;
+    /// once it hits 0 the asteroid picks a fresh `x` and starts falling from
+    /// the next frame on.
     pub fn update_position(&mut self, dt: f32) {
-        self.y += self.speed * dt;
-        self.rotation += self.rotation_speed * dt;
-        if self.y > screen_height() {
-            self.y = 0.0;
-            self.x = rand::gen_range(0.0, screen_width());
+        if let AsteroidStatus::Spawning { remaining } = &mut self.status {
+            match remaining.checked_sub(1) {
+                Some(0) | None => {
+                    // Countdown finished — spawn now at a fresh x.
+                    self.pos.x = rand::gen_range(0.0, screen_width());
+                    self.status = AsteroidStatus::Active;
+                }
+                Some(new_remaining) => *remaining = new_remaining,
+            }
+            // Still Spawning this frame (or just became active) — skip the
+            // falling/rotation logic below until next frame.
+            return;
+        }
+
+        self.pos.y += self.stats.speed * dt;
+        self.current_rotation += self.stats.rotation_speed * dt;
+        if self.pos.y > screen_height() {
+            self.pos.y = 0.0;
+            self.pos.x = rand::gen_range(0.0, screen_width());
+            self.status = AsteroidStatus::Spawning { remaining: self.stats.spawn_time };
         }
     }
 }
@@ -147,27 +156,28 @@ impl Asteroid {
 impl Default for Asteroid {
     fn default() -> Self {
         Asteroid::new(
-            rand::gen_range(0.0, screen_width()),
-            rand::gen_range(0.0, screen_height()),
-            AsteroidTextureKind::Molten,
-            rand::gen_range(0.5, 1.5),
+            Vec2::new(rand::gen_range(0.0, screen_width()), rand::gen_range(0.0, screen_height())),
             rand::gen_range(60.0, 220.0),
-            rand::gen_range(0.0, std::f32::consts::TAU),
-            rand::gen_range(-std::f32::consts::PI, std::f32::consts::PI),
+            AsteroidKind::MoltenDarkAsteroid,
+            rand::gen_range(0.5, 1.5)
         )
     }
 }
 
 impl Drawable for Asteroid {
     fn draw(&self) {
+        // Not on screen yet — nothing to draw until its delay elapses.
+        if matches!(self.status, AsteroidStatus::Spawning { .. }) {
+            return;
+        }
         draw_texture_ex(
             self.animation.current_frame(),
-            self.x,
-            self.y,
+            self.pos.x,
+            self.pos.y,
             WHITE,
             DrawTextureParams {
                 dest_size: Some(*self.animation.frame_scale()),
-                rotation: self.rotation,
+                rotation: self.current_rotation,
                 ..Default::default()
             },
         );
