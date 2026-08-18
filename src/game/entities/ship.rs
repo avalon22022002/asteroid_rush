@@ -67,6 +67,17 @@ impl ShipKind {
             },
         }
     }
+
+    /// Stats shown on the ship-select preview card, as label/value pairs.
+    pub fn preview_stats(self) -> Vec<(String, String)> {
+        let stats = self.stats();
+        vec![
+            ("Damage".to_string(), format!("{}", stats.fire_damage() as i32)),
+            ("Defense".to_string(), format!("{}", stats.max_health() as i32)),
+            ("Speed".to_string(), format!("{}", stats.speed() as i32)),
+            ("Guns".to_string(), format!("{}", stats.gun_count())),
+        ]
+    }
 }
 
 #[derive(Debug, Clone, Copy)]

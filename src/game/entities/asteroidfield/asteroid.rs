@@ -1,17 +1,14 @@
 use macroquad::prelude::*;
 
 use crate::game::{
+    GameLevels, 
     asset_repository::{
-        sprite_repository::{traits::SpriteTextures, SpriteRepository, AsteroidV1Textures},
-        traits::Singleton,
-    },
-    entities::animation::Animation,
-    rendering::{Drawable, StateUpdatable},
-    utils::{MinMax, biased_random_in_range}
+        sprite_repository::{AsteroidV1Textures, SpriteRepository, traits::SpriteTextures}, traits::Singleton,
+    }, entities::animation::Animation, rendering::{Drawable, StateUpdatable}, utils::{MinMax, biased_random_in_range}
 };
 
 /// Identifies which asteroid texture to draw. Add a variant here (and cases
-/// in `AsteroidKind::sprite_kind`/`render_size`) to register a new
+/// in `AsteroidKind::get_texture_kind`/`render_size`) to register a new
 /// asteroid look.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AsteroidKind {
@@ -20,10 +17,18 @@ pub enum AsteroidKind {
 }
 
 impl AsteroidKind {
+    pub fn asteroid_kind_from_level(level: &GameLevels) -> AsteroidKind {
+        match level {
+            GameLevels::Level1 => AsteroidKind::MoltenDarkAsteroid,
+            GameLevels::Level2 => AsteroidKind::MoltenDarkAsteroid,
+            GameLevels::Level3 => AsteroidKind::MoltenDarkAsteroid,
+        }
+    }
+
     /// This kind's texture group in `SpriteRepository`.
-    fn sprite_kind(self) -> AsteroidV1Textures {
+    pub fn texture_kind(self) -> AsteroidV1Textures {
         match self {
-            AsteroidKind::MoltenDarkAsteroid => AsteroidV1Textures::Molten,
+            AsteroidKind::MoltenDarkAsteroid => AsteroidV1Textures::MoltenDark,
         }
     }
 
@@ -35,11 +40,11 @@ impl AsteroidKind {
         }
     }
 
-    fn stat_range(self) -> MinMax<AsteroidStats>{
+    pub fn stat_range(self) -> MinMax<AsteroidStats>{
         match self {
             AsteroidKind::MoltenDarkAsteroid =>  MinMax {
-                min: AsteroidStats { speed: 50.0, rotation_speed: 1.6, damage_to_die: 20, damage_on_collision: 10, spawn_time: 10 },
-                max: AsteroidStats { speed: 120.0, rotation_speed: 4.2, damage_to_die: 40, damage_on_collision: 25, spawn_time: 500},
+                min: AsteroidStats { speed: 50.0, rotation_speed: 1.6, health: 20, damage_on_collision: 10, spawn_time: 10 },
+                max: AsteroidStats { speed: 120.0, rotation_speed: 4.2, health: 40, damage_on_collision: 25, spawn_time: 500},
             },
         }
     }
@@ -51,7 +56,7 @@ impl AsteroidKind {
             // Bigger asteroids rotate slower: flip the sign so growing size pulls toward min.
             rotation_speed: biased_random_in_range(MinMax { min: stat_range.min.rotation_speed, max: stat_range.max.rotation_speed }, -scale),
             // Bigger asteroids take more hits to destroy: bias grows with size.
-            damage_to_die: biased_random_in_range(MinMax { min: stat_range.min.damage_to_die as f32, max: stat_range.max.damage_to_die as f32 }, scale) as u32,
+            health: biased_random_in_range(MinMax { min: stat_range.min.health as f32, max: stat_range.max.health as f32 }, scale) as u32,
             // Bigger asteroids deal more collision damage: bias grows with size.
             damage_on_collision: biased_random_in_range(MinMax { min: stat_range.min.damage_on_collision as f32, max: stat_range.max.damage_on_collision as f32 }, scale) as u32,
             // Bigger asteroids take longer to spawn: bias grows with scale.
@@ -59,14 +64,52 @@ impl AsteroidKind {
 
         }
     }
+
+    pub fn display_name(self) -> &'static str {
+        match self {
+            Self::MoltenDarkAsteroid => "Molten Dark Asteroid"
+        }
+    }
+
+    pub fn difficulty_label(self) -> &'static str {
+        match self {
+            Self::MoltenDarkAsteroid => "Beginner Level Asteroid"
+        }
+    }
+
+    /// Stats shown on the level-select preview card, as label/value pairs.
+    pub fn preview_stats(self) -> Vec<(String, String)> {
+        let max_stats = self.stat_range().max;
+        vec![
+            ("Max speed".to_string(), format!("{}", max_stats.speed())),
+            ("Max rotation speed".to_string(), format!("{}", max_stats.rotation_speed())),
+            ("Max health".to_string(), format!("{}", max_stats.health())),
+            ("Max collision damage".to_string(), format!("{}", max_stats.damage_on_collision())),
+        ]
+    }
 }
 
-struct AsteroidStats {
+pub struct AsteroidStats {
     speed: f32,
     rotation_speed: f32,
-    damage_to_die: u32,
+    health: u32,
     damage_on_collision: u32,
     spawn_time: u32,
+}
+
+impl AsteroidStats {
+    pub fn speed(&self) -> f32 {
+        self.speed
+    }
+    pub fn rotation_speed(&self) -> f32 {
+        self.rotation_speed
+    }
+    pub fn health(&self) -> u32 {
+        self.health
+    }
+    pub fn damage_on_collision(&self) -> u32 {
+        self.damage_on_collision
+    }
 }
 
 /// Where an asteroid is in its spawn lifecycle.
@@ -108,7 +151,7 @@ impl Asteroid {
             kind,
             scale,
             animation: Animation::new(
-                asteroid_sprites.get_textures_for(&kind.sprite_kind()),
+                asteroid_sprites.get_textures_for(&kind.texture_kind()),
                 Vec2::splat(kind.render_size() * scale),
                 1.0,
                 None,

@@ -57,6 +57,8 @@ impl ShipSelectionPage {
         let button_kind = ButtonKind::Basic;
         let button_size = aspect_size_from_fixed_width(BASE_WIDTH * 0.30, button_kind.aspect_ratio());
         let button_vertical_gap = 14.0; // Vertical Spacing between buttons
+        let button_title_font_size = 24;
+        let button_subtitle_font_size = 16;
         let button_x = common_pos_x + (banner_size.x - button_size.x) / 2.0; // Adjust the button's x co-ordinate so the buttons sit directly below the banners's "SELECT SHIP" title.
         let buttons_right = button_x + button_size.x; // Right edge of the button column, used to position the card beside it
 
@@ -95,18 +97,24 @@ impl ShipSelectionPage {
                 default_ship_icon(),
                 ShipKind::Vanguard.display_name().to_string(),
                 ShipKind::Vanguard.role().to_string(),
+                button_title_font_size,
+                button_subtitle_font_size,
             ),
             sentinel_button: IconLabelButton::new(
                 Rect::new(button_x, sentinel_button_y, button_size.x, button_size.y),
                 default_ship_icon(),
                 ShipKind::Sentinel.display_name().to_string(),
                 ShipKind::Sentinel.role().to_string(),
+                button_title_font_size,
+                button_subtitle_font_size,
             ),
             viper_button: IconLabelButton::new(
                 Rect::new(button_x, viper_button_y, button_size.x, button_size.y),
                 default_ship_icon(),
                 ShipKind::Viper.display_name().to_string(),
                 ShipKind::Viper.role().to_string(),
+                button_title_font_size,
+                button_subtitle_font_size,
             ),
             back_button: Button::new(
                 Rect::new(back_button_pos.x, back_button_pos.y, back_button_size.x, back_button_size.y),
@@ -119,15 +127,7 @@ impl ShipSelectionPage {
                 default_ship_icon(),
                 default_ship_kind.display_name().to_string(),
                 default_ship_kind.role().to_string(),
-                {
-                    let stats = default_ship_kind.stats();
-                    vec![
-                        ("Damage".to_string(), format!("{}", stats.fire_damage() as i32)),
-                        ("Defense".to_string(), format!("{}", stats.max_health() as i32)),
-                        ("Speed".to_string(), format!("{}", stats.speed() as i32)),
-                        ("Guns".to_string(), format!("{}", stats.gun_count())),
-                    ]
-                },
+                default_ship_kind.preview_stats(),
                 "SELECT SHIP".to_string(),
             ),
             selected_ship_kind: default_ship_kind,
@@ -153,42 +153,6 @@ impl StateUpdatable<()> for ShipSelectionPage {
         self.viper_button.update_state(());
         self.back_button.update_state(());
         self.preview_card.update_state(());
-
-        // A ship-button click pins that ship as the preview subject. The page
-        // knows which button fired, so selection lives here, not on the buttons.
-        let clicked = if matches!(self.vanguard_button.poll_event(), Some(ButtonEvents::Clicked)) {
-            Some(ShipKind::Vanguard)
-        } else if matches!(self.sentinel_button.poll_event(), Some(ButtonEvents::Clicked)) {
-            Some(ShipKind::Sentinel)
-        } else if matches!(self.viper_button.poll_event(), Some(ButtonEvents::Clicked)) {
-            Some(ShipKind::Viper)
-        } else {
-            None
-        };
-        if let Some(ship_kind) = clicked {
-            self.selected_ship_kind = ship_kind;
-
-            // Only Sentinel has art today; reuse it as a placeholder for every ship.
-            let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
-            let ship_crop = Some(ShipV1Textures::SentinelAlive.content_bounds());
-            let stats = ship_kind.stats();
-            self.preview_card.set_content(
-                Animation::new(
-                    ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
-                    Vec2::new(140.0, 178.0),
-                    12.0,
-                    ship_crop,
-                ),
-                ship_kind.display_name().to_string(),
-                ship_kind.role().to_string(),
-                vec![
-                    ("Damage".to_string(), format!("{}", stats.fire_damage() as i32)),
-                    ("Defense".to_string(), format!("{}", stats.max_health() as i32)),
-                    ("Speed".to_string(), format!("{}", stats.speed() as i32)),
-                    ("Guns".to_string(), format!("{}", stats.gun_count())),
-                ],
-            );
-        }
     }
 }
 
@@ -219,5 +183,36 @@ impl SelfEventHandler for ShipSelectionPage {
             .handle_self_event(self.back_button.poll_event());
         self.preview_card
             .handle_self_event(self.preview_card.poll_event());
+
+        // A ship-button click pins that ship as the preview subject. The page
+        // knows which button fired, so selection lives here, not on the buttons.
+        let selected_ship = if matches!(self.vanguard_button.poll_event(), Some(ButtonEvents::Clicked)) {
+            Some(ShipKind::Vanguard)
+        } else if matches!(self.sentinel_button.poll_event(), Some(ButtonEvents::Clicked)) {
+            Some(ShipKind::Sentinel)
+        } else if matches!(self.viper_button.poll_event(), Some(ButtonEvents::Clicked)) {
+            Some(ShipKind::Viper)
+        } else {
+            None
+        };
+
+        if let Some(ship_kind) = selected_ship {
+            self.selected_ship_kind = ship_kind;
+
+            // Only Sentinel has art today; reuse it as a placeholder for every ship.
+            let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
+            let ship_crop = Some(ShipV1Textures::SentinelAlive.content_bounds());
+            self.preview_card.set_content(
+                Animation::new(
+                    ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
+                    Vec2::new(140.0, 178.0),
+                    12.0,
+                    ship_crop,
+                ),
+                ship_kind.display_name().to_string(),
+                ship_kind.role().to_string(),
+                ship_kind.preview_stats(),
+            );
+        }
     }
 }

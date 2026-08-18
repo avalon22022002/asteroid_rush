@@ -2,8 +2,9 @@ use macroquad::texture::Texture2D;
 use strum::EnumIter;
 use crate::game::{
     frames::{load_frames, frame_sequence},
-    asset_repository::sprite_repository::traits::{SpriteTextures, Sprite},
+    asset_repository::sprite_repository::traits::{SpriteTextures, Sprite, SpriteBounds},
 };
+use macroquad::prelude::*;
 
 const LOG_PREFIX: &str = "[asteroid_v1]";
 
@@ -13,17 +14,29 @@ const LOG_PREFIX: &str = "[asteroid_v1]";
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum AsteroidV1Textures {
     /// Dark rock veined with glowing molten cracks.
-    Molten,
+    MoltenDark,
+}
+
+impl SpriteBounds for AsteroidV1Textures {
+    /// Bounds cover the visible asteroid and its small floating debris,
+    /// providing a stable crop for the sprite without including excess
+    /// transparent padding around the artwork.
+    fn content_bounds(&self) -> Rect {
+        match self {
+            // Art sits within a large transparent 3072×3072 frame.
+            AsteroidV1Textures::MoltenDark => Rect::new(298.0, 325.0, 2470.0, 2391.0),
+        }
+    }
 }
 
 pub struct AsteroidV1 {
-    /// Frames for `AsteroidV1Textures::Molten`.
-    molten_texture: Vec<Texture2D>,
+    /// Frames for `AsteroidV1Textures::MoltenDark`.
+    molten_dark_texture: Vec<Texture2D>,
 }
 
 impl AsteroidV1 {
     pub fn new() -> Self {
-        Self { molten_texture: Vec::new() }
+        Self { molten_dark_texture: Vec::new() }
     }
 }
 
@@ -34,11 +47,11 @@ impl SpriteTextures for AsteroidV1 {
     /// adding it here is a compile error.
     async fn load_textures_for(&mut self, texture_kind: &AsteroidV1Textures) {
         match texture_kind {
-            AsteroidV1Textures::Molten => {
-                if self.molten_texture.is_empty() {
+            AsteroidV1Textures::MoltenDark => {
+                if self.molten_dark_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.molten_texture = load_frames(
+                    self.molten_dark_texture = load_frames(
                         frame_sequence!("assets/animations/asteroid/asteroid_", ["0"])
                     ).await;
 
@@ -50,7 +63,7 @@ impl SpriteTextures for AsteroidV1 {
 
     fn get_textures_for(&self, texture_kind: &AsteroidV1Textures) -> &Vec<Texture2D> {
         match texture_kind {
-            AsteroidV1Textures::Molten => &self.molten_texture,
+            AsteroidV1Textures::MoltenDark => &self.molten_dark_texture,
         }
     }
 }
