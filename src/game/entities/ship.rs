@@ -22,7 +22,7 @@ pub enum ShipKind {
 
 impl ShipKind {
     /// Display name shown in the ship-select UI.
-    pub fn display_name(self) -> &'static str {
+    pub fn display_name(&self) -> &'static str {
         match self {
             ShipKind::Vanguard => "Vanguard",
             ShipKind::Sentinel => "Sentinel",
@@ -31,7 +31,7 @@ impl ShipKind {
     }
 
     /// One-line role blurb shown under `display_name` in the ship-select UI.
-    pub fn role(self) -> &'static str {
+    pub fn role(&self) -> &'static str {
         match self {
             ShipKind::Vanguard => "Allrounder",
             ShipKind::Sentinel => "Defender",
@@ -42,7 +42,7 @@ impl ShipKind {
     /// Base `ShipStats` for a freshly spawned ship of this kind, matching
     /// the class blurbs above (gun count, relative health, relative speed).
     /// Also drives the ship-select preview, so it's public.
-    pub fn stats(self) -> ShipStats {
+    pub fn stats(&self) -> ShipStats {
         match self {
             ShipKind::Vanguard => ShipStats {
                 max_health: 100.0,
@@ -69,7 +69,7 @@ impl ShipKind {
     }
 
     /// Stats shown on the ship-select preview card, as label/value pairs.
-    pub fn preview_stats(self) -> Vec<(String, String)> {
+    pub fn preview_stats(&self) -> Vec<(String, String)> {
         let stats = self.stats();
         vec![
             ("Damage".to_string(), format!("{}", stats.fire_damage() as i32)),

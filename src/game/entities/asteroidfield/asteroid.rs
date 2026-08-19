@@ -1,15 +1,14 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    GameLevels, 
+    GameLevels,
     asset_repository::{
-        sprite_repository::{AsteroidV1Textures, SpriteRepository, traits::SpriteTextures}, traits::Singleton,
+        sprite_repository::{AsteroidV1Textures, SpriteRepository, traits::{SpriteBounds, SpriteTextures}}, traits::Singleton,
     }, entities::animation::Animation, rendering::{Drawable, StateUpdatable}, utils::{MinMax, biased_random_in_range}
 };
 
-/// Identifies which asteroid texture to draw. Add a variant here (and cases
-/// in `AsteroidKind::get_texture_kind`/`render_size`) to register a new
-/// asteroid look.
+/// Identifies which asteroid texture to draw. Add a variant here (and a
+/// case in `AsteroidKind::texture_kind`) to register a new asteroid look.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AsteroidKind {
     /// Dark rock veined with glowing molten cracks.
@@ -26,21 +25,13 @@ impl AsteroidKind {
     }
 
     /// This kind's texture group in `SpriteRepository`.
-    pub fn texture_kind(self) -> AsteroidV1Textures {
+    pub fn texture_kind(&self) -> AsteroidV1Textures {
         match self {
             AsteroidKind::MoltenDarkAsteroid => AsteroidV1Textures::MoltenDark,
         }
     }
 
-    /// Draw size in pixels at `scale` 1.0 — independent of this kind's
-    /// source png's actual (much larger) resolution.
-    fn render_size(self) -> f32 {
-        match self {
-            AsteroidKind::MoltenDarkAsteroid => 60.0,
-        }
-    }
-
-    pub fn stat_range(self) -> MinMax<AsteroidStats>{
+    pub fn stat_range(&self) -> MinMax<AsteroidStats>{
         match self {
             AsteroidKind::MoltenDarkAsteroid =>  MinMax {
                 min: AsteroidStats { speed: 50.0, rotation_speed: 1.6, health: 20, damage_on_collision: 10, spawn_time: 10 },
@@ -48,7 +39,7 @@ impl AsteroidKind {
             },
         }
     }
-    fn random_stats_biased_by_scale(self, scale: f32)-> AsteroidStats{
+    fn random_stats_biased_by_scale(&self, scale: f32)-> AsteroidStats{
         let stat_range= self.stat_range();
         AsteroidStats {
             // Bigger asteroids are slower: flip the sign so growing size pulls toward min.
@@ -65,20 +56,20 @@ impl AsteroidKind {
         }
     }
 
-    pub fn display_name(self) -> &'static str {
+    pub fn display_name(&self) -> &'static str {
         match self {
             Self::MoltenDarkAsteroid => "Molten Dark Asteroid"
         }
     }
 
-    pub fn difficulty_label(self) -> &'static str {
+    pub fn difficulty_label(&self) -> &'static str {
         match self {
             Self::MoltenDarkAsteroid => "Beginner Level Asteroid"
         }
     }
 
     /// Stats shown on the level-select preview card, as label/value pairs.
-    pub fn preview_stats(self) -> Vec<(String, String)> {
+    pub fn preview_stats(&self) -> Vec<(String, String)> {
         let max_stats = self.stat_range().max;
         vec![
             ("Max speed".to_string(), format!("{}", max_stats.speed())),
@@ -152,7 +143,7 @@ impl Asteroid {
             scale,
             animation: Animation::new(
                 asteroid_sprites.get_textures_for(&kind.texture_kind()),
-                Vec2::splat(kind.render_size() * scale),
+                kind.texture_kind().content_size_at_logical_unit_scale() * scale,
                 1.0,
                 None,
             ),

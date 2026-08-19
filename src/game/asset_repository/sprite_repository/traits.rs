@@ -1,4 +1,4 @@
-use macroquad::{math::Rect, texture::Texture2D};
+use macroquad::{math::{Rect, Vec2}, texture::Texture2D};
 use strum::IntoEnumIterator;
 
 /// Common lazy-loading behavior shared by `sprite_repository`'s texture-group
@@ -47,5 +47,12 @@ pub trait SpriteBounds {
     fn aspect_ratio(&self) -> f32 {
         let b = self.content_bounds();
         b.w / b.h
+    }
+
+    /// Draw size at scale 1.0 — multiply by a scale factor to get the final
+    /// on-screen size. Defaults to `content_bounds`' raw (source-pixel)
+    /// size; override to shrink it if that's too large to draw as-is.
+    fn content_size_at_logical_unit_scale(&self) -> Vec2 {
+        self.content_bounds().size()
     }
 }

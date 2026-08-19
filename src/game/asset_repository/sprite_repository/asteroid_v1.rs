@@ -27,6 +27,16 @@ impl SpriteBounds for AsteroidV1Textures {
             AsteroidV1Textures::MoltenDark => Rect::new(298.0, 325.0, 2470.0, 2391.0),
         }
     }
+
+    /// Per-variant override of the default `content_bounds`-derived size,
+    /// for variants whose crop is too large to draw as-is.
+    fn content_size_at_logical_unit_scale(&self) -> Vec2 {
+        match self {
+            // The falling-field asteroid should draw much smaller than its
+            // full crop — shrink it by 97%.
+            AsteroidV1Textures::MoltenDark => self.content_bounds().size() * 0.03,
+        }
+    }
 }
 
 pub struct AsteroidV1 {
