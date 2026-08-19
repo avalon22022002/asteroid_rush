@@ -22,7 +22,7 @@ pub enum ShipKind {
 
 impl ShipKind {
     /// Display name shown in the ship-select UI.
-    pub fn display_name(self) -> &'static str {
+    pub fn display_name(&self) -> &'static str {
         match self {
             ShipKind::Vanguard => "Vanguard",
             ShipKind::Sentinel => "Sentinel",
@@ -31,7 +31,7 @@ impl ShipKind {
     }
 
     /// One-line role blurb shown under `display_name` in the ship-select UI.
-    pub fn role(self) -> &'static str {
+    pub fn role(&self) -> &'static str {
         match self {
             ShipKind::Vanguard => "Allrounder",
             ShipKind::Sentinel => "Defender",
@@ -42,7 +42,7 @@ impl ShipKind {
     /// Base `ShipStats` for a freshly spawned ship of this kind, matching
     /// the class blurbs above (gun count, relative health, relative speed).
     /// Also drives the ship-select preview, so it's public.
-    pub fn stats(self) -> ShipStats {
+    pub fn stats(&self) -> ShipStats {
         match self {
             ShipKind::Vanguard => ShipStats {
                 max_health: 100.0,
@@ -66,6 +66,17 @@ impl ShipKind {
                 fire_damage: 14.0,
             },
         }
+    }
+
+    /// Stats shown on the ship-select preview card, as label/value pairs.
+    pub fn preview_stats(&self) -> Vec<(String, String)> {
+        let stats = self.stats();
+        vec![
+            ("Damage".to_string(), format!("{}", stats.fire_damage() as i32)),
+            ("Defense".to_string(), format!("{}", stats.max_health() as i32)),
+            ("Speed".to_string(), format!("{}", stats.speed() as i32)),
+            ("Guns".to_string(), format!("{}", stats.gun_count())),
+        ]
     }
 }
 
@@ -100,6 +111,10 @@ pub struct Ship {
     alive_animation: Animation,
     dead_animation: Animation,
     is_alive: bool,
+    /// When `true`, the ship ignores player input entirely — no movement,
+    /// and (once added) no shooting either. For ships that are only ever
+    /// drawn for show, e.g. the one on the home page.
+    locked: bool,
 }
 
 impl Ship {
@@ -136,7 +151,15 @@ impl Ship {
             alive_animation,
             dead_animation,
             is_alive: true,
+            locked: false,
         }
+    }
+
+    /// Builder-style: sets whether this ship ignores player input (see
+    /// `locked`). Chain onto `new`, e.g. `Ship::new(..).locked(true)`.
+    pub fn locked(mut self, locked: bool) -> Self {
+        self.locked = locked;
+        self
     }
 
     /// Moves the ship by this frame's arrow-key input at `ship_stats.speed`
@@ -216,11 +239,12 @@ impl Drawable for Ship {
 }
 
 impl StateUpdatable<()> for Ship {
-    /// Only responds to movement input while alive — a dead ship shouldn't
-    /// steer, just play out its death animation in place.
+    /// Only responds to movement input while alive and unlocked — a dead
+    /// ship shouldn't steer (just play out its death animation in place),
+    /// and a `locked` ship ignores player input altogether.
     fn update_state(&mut self, _data: ()) {
         let dt = get_frame_time();
-        if self.is_alive {
+        if self.is_alive && !self.locked {
             self.apply_movement(dt);
         }
         self.current_animation_mut().advance(dt);

@@ -11,13 +11,20 @@ pub mod utils;
 use crate::game::rendering::{Drawable, StateUpdatable};
 use macroquad::prelude::*;
 
-/// Base window size the game is designed at. UI elements scale their visuals
-/// relative to this so proportions hold up if the window is resized.
+/// Game window reference width, in logical pixels.
 pub const BASE_WIDTH: f32 = 960.0;
+/// Game window reference height, in logical pixels.
 pub const BASE_HEIGHT: f32 = 540.0;
+
+pub enum GameLevels {
+    Level1,
+    Level2,
+    Level3
+}
 
 pub struct Game {
     background: background::Background,
+    level: GameLevels
 }
 
 impl Default for Game {
@@ -30,6 +37,7 @@ impl Game {
     pub fn new() -> Self {
         Self {
             background: background::Background::new(),
+            level: GameLevels::Level1
         }
     }
 

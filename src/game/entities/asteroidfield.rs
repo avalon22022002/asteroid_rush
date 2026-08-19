@@ -1,7 +1,7 @@
 use crate::game::{
-    entities::asteroidfield::asteroid::*,
-    rendering::{Drawable, StateUpdatable},
+    entities::asteroidfield::asteroid::*, rendering::{Drawable, StateUpdatable}, utils::MinMax,
 };
+use macroquad::{math::Vec2, window::{screen_width}};
 
 pub mod asteroid;
 
@@ -16,11 +16,17 @@ impl AsteroidField {
     /// each field is normalized independently). Defaults to
     /// [`Asteroid::default_bounds`] spanning the full screen width when
     /// `limits` is `None`.
-    pub fn new(asteroid_count: usize, limits: Option<(Asteroid, Asteroid)>) -> AsteroidField {
-        let (lower_limits, upper_limits) = limits.unwrap_or_else(Asteroid::default_bounds);
+    pub fn new(asteroid_count: usize, asteroid_kind: AsteroidKind, scale_limits: MinMax<f32>) -> AsteroidField {
 
         let asteroids = (0..asteroid_count)
-            .map(|_| Asteroid::random_between_range(&lower_limits, &upper_limits))
+            .map(|_| {
+                let random_x_coordinate = macroquad::rand::gen_range(0.0, screen_width());
+                let random_y_cordinate = macroquad::rand::gen_range(0.0, 10.0);
+                let random_scale= macroquad::rand::gen_range(scale_limits.min, scale_limits.max);
+
+                // New asteroid at near screen top  with 0 initial rotation, random scale and random x,y coordinate
+                Asteroid::new(Vec2::new(random_x_coordinate, random_y_cordinate), 0.0, asteroid_kind, random_scale)
+            })
             .collect();
 
         AsteroidField { asteroids }

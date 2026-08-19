@@ -19,17 +19,28 @@ pub struct IconLabelButton {
     icon: Animation,
     title: String,
     subtitle: String,
+    title_font_size: u16,
+    subtitle_font_size: u16,
 }
 
 impl IconLabelButton {
     /// `icon` is drawn on the left; `title`/`subtitle` are drawn as two
-    /// left-aligned lines to its right.
-    pub fn new(bounds: Rect, icon: Animation, title: String, subtitle: String) -> Self {
+    /// left-aligned lines to its right, at `title_font_size`/`subtitle_font_size`.
+    pub fn new(
+        bounds: Rect,
+        icon: Animation,
+        title: String,
+        subtitle: String,
+        title_font_size: u16,
+        subtitle_font_size: u16,
+    ) -> Self {
         Self {
             button: Button::new(bounds, String::new(), 16, ButtonKind::Basic),
             icon,
             title,
             subtitle,
+            title_font_size,
+            subtitle_font_size,
         }
     }
 
@@ -82,20 +93,18 @@ impl Drawable for IconLabelButton {
 
         let text_x = icon_x + icon_box.x + inset_x * 0.6;
         let _ = inset_y;
-        let title_font_size = 24;
-        let subtitle_font_size = 16;
         // Warm gold instead of a blue tone — a blue subtitle barely reads
         // against this button's own blue background art.
         let subtitle_color = Color::new(1.0, 0.85, 0.4, 1.0);
-        let title_ts = measure_text(&self.title, None, title_font_size, 1.0);
-        
+        let title_ts = measure_text(&self.title, None, self.title_font_size, 1.0);
+
         // Draw title
         draw_text_ex(
             &self.title,
             text_x,
             bounds.y + bounds.h / 2.0 - 4.0,
             TextParams {
-                font_size: title_font_size,
+                font_size: self.title_font_size,
                 color: WHITE,
                 ..Default::default()
             },
@@ -107,7 +116,7 @@ impl Drawable for IconLabelButton {
             text_x,
             bounds.y + bounds.h / 2.0 + title_ts.offset_y,
             TextParams {
-                font_size: subtitle_font_size,
+                font_size: self.subtitle_font_size,
                 color: subtitle_color,
                 ..Default::default()
             },
