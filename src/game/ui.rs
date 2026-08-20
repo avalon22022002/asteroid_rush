@@ -1,7 +1,7 @@
 pub mod components;
-pub mod pages;
+pub mod page_manager;
 
 pub enum UiEvents {
     ComponentEnums(components::ComponentEvents),
-    PageEvents(pages::PageEvents),
+    PageEvents(page_manager::PageEvents),
 }

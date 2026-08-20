@@ -33,6 +33,12 @@ impl AsteroidField {
     }
 }
 
+impl Default for AsteroidField {
+    fn default() -> Self {
+        AsteroidField::new(20, AsteroidKind::MoltenDarkAsteroid, MinMax{min: 0.3, max: 2.0})
+    }
+}
+
 impl Drawable for AsteroidField {
     fn draw(&self) {
         for asteroid in &self.asteroids {

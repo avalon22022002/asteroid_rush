@@ -3,7 +3,7 @@ use asteroid_rush::game::{
     asset_repository::traits::Singleton,
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
-    ui::pages::{PageEvents, PageManager, home_page::HomePageEvent},
+    ui::page_manager::{ PageManager},
     window_conf,
 };
 use macroquad::prelude::*;
@@ -28,11 +28,6 @@ async fn main() {
         page_manager.update_state(());
         page_manager.draw();
         let page_event = page_manager.poll_event();
-        match page_event {
-            Some(PageEvents::HomePageEvent(HomePageEvent::NewGame)) => {}
-            Some(PageEvents::HomePageEvent(HomePageEvent::Exit)) => {}
-            _ => {}
-        }
         page_manager.handle_self_event(page_event);
         next_frame().await;
     }

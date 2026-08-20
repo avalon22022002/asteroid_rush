@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    GameLevels,
+    game_config::GameLevels,
     asset_repository::{
         sprite_repository::{AsteroidV1Textures, SpriteRepository, traits::{SpriteBounds, SpriteTextures}}, traits::Singleton,
     }, entities::animation::Animation, rendering::{Drawable, StateUpdatable}, utils::{MinMax, biased_random_in_range}

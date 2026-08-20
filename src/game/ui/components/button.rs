@@ -187,6 +187,12 @@ impl Button {
     }
 }
 
+impl Default for Button {
+    fn default() -> Self {
+        Button::new(Rect::new(0.0, 0.0, 50.0, 25.0), "Default Button".to_string(), 10, ButtonKind::Basic)
+    }
+}
+
 impl StateUpdatable<()> for Button {
     /// Refreshes `is_mouse_over`/`clicked` from the current mouse state. This
     /// only updates the button's own state

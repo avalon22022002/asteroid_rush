@@ -1,17 +1,13 @@
+mod home_page;
+mod level_selection_page;
+mod ship_selection_page;
+mod gameplay_page;
+
 use crate::game::{
-    interaction::{Interactive, SelfEventHandler},
-    rendering::{Drawable, StateUpdatable},
-    ui::pages::{
-        home_page::HomePageEvent,
-        level_selection_page::{LevelSelectionPage, LevelSelectionPageEvent},
-        ship_selection_page::{ShipSelectionPage, ShipSelectionPageEvent},
+    game_config::GameConfig, interaction::{Interactive, SelfEventHandler}, rendering::{Drawable, StateUpdatable}, ui::page_manager::{
+        gameplay_page::GameplayPage, home_page::{HomePage,HomePageEvent}, level_selection_page::{LevelSelectionPage, LevelSelectionPageEvent}, ship_selection_page::{ShipSelectionPage, ShipSelectionPageEvent}
     },
 };
-use home_page::HomePage;
-
-pub mod home_page;
-pub mod level_selection_page;
-pub mod ship_selection_page;
 
 const LOG_PREFIX: &str = "[pages]";
 
@@ -19,12 +15,14 @@ pub enum Pages {
     HomePage(HomePage),
     ShipSelectionPage(ShipSelectionPage),
     LevelSelectionPage(LevelSelectionPage),
+    GameplayPage(GameplayPage)
 }
 
 pub enum PageEvents {
     HomePageEvent(home_page::HomePageEvent),
     ShipSelectionPageEvent(ship_selection_page::ShipSelectionPageEvent),
     LevelSelectionPageEvent(level_selection_page::LevelSelectionPageEvent),
+    GamplayPageEvent(gameplay_page::GamplayPageEvent)
 }
 
 pub struct PageManager {
@@ -57,6 +55,9 @@ impl Drawable for PageManager {
             Pages::LevelSelectionPage(level_selection_page) => {
                 level_selection_page.draw();
             }
+            Pages::GameplayPage(gameplay_page) =>{
+                gameplay_page.draw();
+            }
         }
     }
 }
@@ -72,6 +73,9 @@ impl StateUpdatable<()> for PageManager {
             }
             Pages::LevelSelectionPage(level_selection_page) => {
                 level_selection_page.update_state(data);
+            }
+            Pages::GameplayPage(gameplay_page)=>{
+                gameplay_page.update_state(data);
             }
         }
     }
@@ -90,6 +94,9 @@ impl Interactive for PageManager {
             Pages::LevelSelectionPage(level_selection_page) => level_selection_page
                 .poll_event()
                 .map(PageEvents::LevelSelectionPageEvent),
+            Pages::GameplayPage(gameplay_page)=> gameplay_page
+                .poll_event()
+                .map(PageEvents::GamplayPageEvent),
         }
     }
 }
@@ -129,9 +136,11 @@ impl SelfEventHandler for PageManager {
             Pages::LevelSelectionPage(level_selection_page) => {
                 let level_selection_page_event = level_selection_page.poll_event();
                 level_selection_page.handle_self_event(level_selection_page_event);
+
                 match level_selection_page_event {
                     Some(LevelSelectionPageEvent::Level1Selected) => {
                         println!("{LOG_PREFIX}[LevelSelectionPage] Level 1 clicked");
+                        self.current_page = Pages::GameplayPage(GameplayPage::new(GameConfig::default()))
                     }
                     Some(LevelSelectionPageEvent::Level2Selected) => {
                         println!("{LOG_PREFIX}[LevelSelectionPage] Level 2 clicked");
@@ -144,6 +153,14 @@ impl SelfEventHandler for PageManager {
                         self.current_page = Pages::ShipSelectionPage(ShipSelectionPage::new())
                     }
                     None => {}
+                }
+            }
+            Pages::GameplayPage(gameplay_page) =>{
+                let gameplay_page_event = gameplay_page.poll_event();
+                gameplay_page.handle_self_event(gameplay_page_event);
+
+                match gameplay_page_event {
+                    _ =>{}
                 }
             }
         }

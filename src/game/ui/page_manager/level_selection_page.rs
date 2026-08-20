@@ -11,7 +11,7 @@ use crate::game::{
         icon_label_button::{IconLabelButton},
         preview_card::{PreviewCard}
     },
-    GameLevels,
+    game_config::GameLevels,
     utils::{MinMax, aspect_size_from_fixed_height, aspect_size_from_fixed_width},
 };
 
@@ -113,7 +113,7 @@ impl LevelSelectionPage {
                 Rect::new(button_x, level_3_button_y, button_size.x, button_size.y),
                 default_asteroid_icon(),
                 "Level 3".to_string(),
-                "Intermediate".to_string(),
+                "Advanced".to_string(),
                 button_title_font_size,
                 button_subtitle_font_size,
             ),
