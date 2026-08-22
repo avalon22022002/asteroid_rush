@@ -7,7 +7,7 @@ mod gameplay_page;
 use crate::game::{
     game_config::GameConfig, interaction::{Interactive, SelfEventHandler}, rendering::{Drawable, StateUpdatable}, ui::page_manager::{
         briefing_page::{BriefingPage, BriefingPageEvent},
-        gameplay_page::GameplayPage,
+        gameplay_page::{GameplayPage, GamplayPageEvent},
         home_page::{HomePage,HomePageEvent},
         level_selection_page::{LevelSelectionPage, LevelSelectionPageEvent},
         ship_selection_page::{ShipSelectionPage, ShipSelectionPageEvent}
@@ -189,7 +189,17 @@ impl SelfEventHandler for PageManager {
                 gameplay_page.handle_self_event(gameplay_page_event);
 
                 match gameplay_page_event {
-                    _ =>{}
+                    Some(GamplayPageEvent::PauseButtonPressed) => {
+                        println!("{LOG_PREFIX}[GameplayPage] Pause clicked");
+                    }
+                    Some(GamplayPageEvent::ResumeButtonPressed) => {
+                        println!("{LOG_PREFIX}[GameplayPage] Resume clicked");
+                    }
+                    Some(GamplayPageEvent::ReturnToHomeButtonPressed) => {
+                        println!("{LOG_PREFIX}[GameplayPage] Return to Home clicked");
+                        self.current_page = Pages::HomePage(HomePage::new())
+                    }
+                    None => {}
                 }
             }
         }
