@@ -5,6 +5,7 @@ use macroquad::{math::Vec2, window::{screen_width}};
 
 pub mod asteroid;
 
+#[derive(Debug, Clone)]
 pub struct AsteroidField {
     asteroids: Vec<Asteroid>,
 }

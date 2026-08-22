@@ -9,6 +9,7 @@ pub enum GameLevel {
     Level3
 }
 
+#[derive(Debug, Clone)]
 pub struct GameConfig {
     level: GameLevel,
     ship_kind: ShipKind,
@@ -22,5 +23,14 @@ impl Default for GameConfig {
             ship_kind: ShipKind::Sentinel,
             asteroid_field: AsteroidField::default()
         }
+    }
+}
+
+impl GameConfig {
+    pub fn level(&self) -> GameLevel {
+        self.level
+    }
+    pub fn set_level(&mut self, level: GameLevel) {
+        self.level = level;
     }
 }

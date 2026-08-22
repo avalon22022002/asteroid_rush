@@ -80,6 +80,7 @@ impl AsteroidKind {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct AsteroidStats {
     speed: f32,
     rotation_speed: f32,
@@ -113,6 +114,7 @@ enum AsteroidStatus {
     Active,
 }
 
+#[derive(Debug, Clone)]
 pub struct Asteroid {
     pos: Vec2, // Position (x, y) of the asteroid
     current_rotation: f32, // Current rotation in radians (matches `DrawTextureParams::rotation`)
