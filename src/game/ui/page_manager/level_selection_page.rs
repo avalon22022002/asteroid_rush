@@ -9,17 +9,15 @@ use crate::game::{
         banner::{Banner, BannerKind},
         button::{Button, ButtonEvents, ButtonKind},
         icon_label_button::{IconLabelButton},
-        preview_card::{PreviewCard}
+        preview_card::{PreviewCard,PreviewCardEvent}
     },
-    game_config::GameLevels,
+    game_config::GameLevel,
     utils::{MinMax, aspect_size_from_fixed_height, aspect_size_from_fixed_width},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LevelSelectionPageEvent {
-    Level1Selected,
-    Level2Selected,
-    Level3Selected,
+    LevelConfirmed(GameLevel),
     BackButtonPressed,
 }
 
@@ -30,7 +28,7 @@ pub struct LevelSelectionPage {
     level_3_button: IconLabelButton,
     back_button: Button,
     preview_card: PreviewCard,
-    selected_level: GameLevels,
+    selected_level: GameLevel,
     asteroid_field: AsteroidField,
 }
 
@@ -123,7 +121,7 @@ impl LevelSelectionPage {
                 20,
                 ButtonKind::Basic,
             ),
-            selected_level: GameLevels::Level1,
+            selected_level: GameLevel::Level1,
             preview_card: PreviewCard::new(
                 Rect::new(preview_card_pos.x, preview_card_pos.y, preview_card_size.x, preview_card_size.y),
                 default_asteroid_icon(),
@@ -166,17 +164,8 @@ impl Interactive for LevelSelectionPage {
     /// Checks all three buttons for a click this frame. If more than one
     /// somehow fires on the same frame, the lowest level number wins.
     fn poll_event(&self) -> Self::Event {
-        if let Some(ButtonEvents::Clicked) = self.back_button.poll_event() {
-            return Some(LevelSelectionPageEvent::BackButtonPressed);
-        }
-        if let Some(ButtonEvents::Clicked) = self.level_1_button.poll_event() {
-            return Some(LevelSelectionPageEvent::Level1Selected);
-        }
-        if let Some(ButtonEvents::Clicked) = self.level_2_button.poll_event() {
-            return Some(LevelSelectionPageEvent::Level2Selected);
-        }
-        if let Some(ButtonEvents::Clicked) = self.level_3_button.poll_event() {
-            return Some(LevelSelectionPageEvent::Level3Selected);
+        if let Some(PreviewCardEvent::ActionButtonClicked) = self.preview_card.poll_event() {
+            return Some(LevelSelectionPageEvent::LevelConfirmed(self.selected_level));
         }
         None
     }
@@ -198,11 +187,11 @@ impl SelfEventHandler for LevelSelectionPage {
         // A level-button click pins that level's asteroid as the preview subject. The page
         // knows which button fired, so selection lives here, not on the buttons.
         let selected_level = if matches!(self.level_1_button.poll_event(), Some(ButtonEvents::Clicked)) {
-            Some(GameLevels::Level1)
+            Some(GameLevel::Level1)
         } else if matches!(self.level_2_button.poll_event(), Some(ButtonEvents::Clicked)) {
-            Some(GameLevels::Level2)
+            Some(GameLevel::Level2)
         } else if matches!(self.level_3_button.poll_event(), Some(ButtonEvents::Clicked)) {
-            Some(GameLevels::Level3)
+            Some(GameLevel::Level3)
         } else {
             None
         };

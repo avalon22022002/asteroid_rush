@@ -1,14 +1,16 @@
 use crate::game::{
     entities::{ship::{ShipKind}, asteroidfield::AsteroidField}
 };
-pub enum GameLevels {
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GameLevel {
     Level1,
     Level2,
     Level3
 }
 
 pub struct GameConfig {
-    level: GameLevels,
+    level: GameLevel,
     ship_kind: ShipKind,
     asteroid_field: AsteroidField
 }
@@ -16,7 +18,7 @@ pub struct GameConfig {
 impl Default for GameConfig {
     fn default() -> Self {
         GameConfig { 
-            level: GameLevels::Level1,
+            level: GameLevel::Level1,
             ship_kind: ShipKind::Sentinel,
             asteroid_field: AsteroidField::default()
         }

@@ -5,7 +5,10 @@ mod gameplay_page;
 
 use crate::game::{
     game_config::GameConfig, interaction::{Interactive, SelfEventHandler}, rendering::{Drawable, StateUpdatable}, ui::page_manager::{
-        gameplay_page::GameplayPage, home_page::{HomePage,HomePageEvent}, level_selection_page::{LevelSelectionPage, LevelSelectionPageEvent}, ship_selection_page::{ShipSelectionPage, ShipSelectionPageEvent}
+        gameplay_page::GameplayPage, 
+        home_page::{HomePage,HomePageEvent}, 
+        level_selection_page::{LevelSelectionPage, LevelSelectionPageEvent}, 
+        ship_selection_page::{ShipSelectionPage, ShipSelectionPageEvent}
     },
 };
 
@@ -138,15 +141,9 @@ impl SelfEventHandler for PageManager {
                 level_selection_page.handle_self_event(level_selection_page_event);
 
                 match level_selection_page_event {
-                    Some(LevelSelectionPageEvent::Level1Selected) => {
-                        println!("{LOG_PREFIX}[LevelSelectionPage] Level 1 clicked");
-                        self.current_page = Pages::GameplayPage(GameplayPage::new(GameConfig::default()))
-                    }
-                    Some(LevelSelectionPageEvent::Level2Selected) => {
-                        println!("{LOG_PREFIX}[LevelSelectionPage] Level 2 clicked");
-                    }
-                    Some(LevelSelectionPageEvent::Level3Selected) => {
-                        println!("{LOG_PREFIX}[LevelSelectionPage] Level 3 clicked");
+                    Some(LevelSelectionPageEvent::LevelConfirmed(level)) => {
+                        println!("{LOG_PREFIX}[LevelSelectionPage] Level {level:#?} confirmed");
+                        self.current_page= Pages::GameplayPage(GameplayPage::new(GameConfig::default()));
                     }
                     Some(LevelSelectionPageEvent::BackButtonPressed) => {
                         println!("{LOG_PREFIX}[LevelSelectionPage] Back clicked");
