@@ -5,6 +5,7 @@ use macroquad::{math::Vec2, window::{screen_width}};
 
 pub mod asteroid;
 
+#[derive(Debug, Clone)]
 pub struct AsteroidField {
     asteroids: Vec<Asteroid>,
 }
@@ -30,6 +31,12 @@ impl AsteroidField {
             .collect();
 
         AsteroidField { asteroids }
+    }
+}
+
+impl Default for AsteroidField {
+    fn default() -> Self {
+        AsteroidField::new(20, AsteroidKind::MoltenDarkAsteroid, MinMax{min: 0.3, max: 2.0})
     }
 }
 

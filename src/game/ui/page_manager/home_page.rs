@@ -67,9 +67,8 @@ impl HomePage {
             ),
             ship: Ship::new(
                 // Right-anchored, vertically aligned with the button group.
-                Vec2::new(BASE_WIDTH - 380.0, BASE_HEIGHT * 0.36),
-                ShipKind::Sentinel,
-                "Sentinel".to_string(),
+                Rect::new(BASE_WIDTH - 380.0, BASE_HEIGHT * 0.36, 236.0, 300.0),
+                ShipKind::Sentinel
             )
             // Purely decorative here — shouldn't move or shoot.
             .locked(true),

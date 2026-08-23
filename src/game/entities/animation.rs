@@ -3,6 +3,7 @@ use macroquad::{math::{Rect, Vec2}, texture::Texture2D};
 const LOG_PREFIX: &str = "[animation]";
 
 /// A sequence of sprite frames played back at a fixed rate, looping.
+#[derive(Debug, Clone)]
 pub struct Animation {
     frames: Vec<Texture2D>,
     scale: Vec2,

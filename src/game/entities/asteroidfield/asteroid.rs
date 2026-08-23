@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    GameLevels,
+    game_config::GameLevel,
     asset_repository::{
         sprite_repository::{AsteroidV1Textures, SpriteRepository, traits::{SpriteBounds, SpriteTextures}}, traits::Singleton,
     }, entities::animation::Animation, rendering::{Drawable, StateUpdatable}, utils::{MinMax, biased_random_in_range}
@@ -16,11 +16,11 @@ pub enum AsteroidKind {
 }
 
 impl AsteroidKind {
-    pub fn asteroid_kind_from_level(level: &GameLevels) -> AsteroidKind {
+    pub fn asteroid_kind_from_level(level: &GameLevel) -> AsteroidKind {
         match level {
-            GameLevels::Level1 => AsteroidKind::MoltenDarkAsteroid,
-            GameLevels::Level2 => AsteroidKind::MoltenDarkAsteroid,
-            GameLevels::Level3 => AsteroidKind::MoltenDarkAsteroid,
+            GameLevel::Level1 => AsteroidKind::MoltenDarkAsteroid,
+            GameLevel::Level2 => AsteroidKind::MoltenDarkAsteroid,
+            GameLevel::Level3 => AsteroidKind::MoltenDarkAsteroid,
         }
     }
 
@@ -80,6 +80,7 @@ impl AsteroidKind {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct AsteroidStats {
     speed: f32,
     rotation_speed: f32,
@@ -113,6 +114,7 @@ enum AsteroidStatus {
     Active,
 }
 
+#[derive(Debug, Clone)]
 pub struct Asteroid {
     pos: Vec2, // Position (x, y) of the asteroid
     current_rotation: f32, // Current rotation in radians (matches `DrawTextureParams::rotation`)
