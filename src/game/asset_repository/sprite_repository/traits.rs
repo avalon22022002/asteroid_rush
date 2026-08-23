@@ -1,6 +1,8 @@
 use macroquad::{math::{Rect, Vec2}, texture::Texture2D};
 use strum::IntoEnumIterator;
 
+use crate::game::utils::{aspect_size_from_fixed_height, aspect_size_from_fixed_width};
+
 /// Common lazy-loading behavior shared by `sprite_repository`'s texture-group
 /// types (`ButtonV1`, `ShipV1`, ...): each implementor names its texture
 /// groups with an enum (`Kind`) and loads them lazily, one group at a time,
@@ -54,5 +56,35 @@ pub trait SpriteBounds {
     /// size; override to shrink it if that's too large to draw as-is.
     fn content_size_at_logical_unit_scale(&self) -> Vec2 {
         self.content_bounds().size()
+    }
+
+    /// Takes `bounds`, the area available for drawing this sprite, and
+    /// returns the `Rect` where the sprite should actually be drawn.
+    ///
+    /// The returned `Rect` is the largest size that fits completely inside
+    /// `bounds` while preserving the sprite's `aspect_ratio`. If `bounds` is
+    /// smaller than the sprite, the sprite is scaled down. If `bounds` is
+    /// larger, the sprite is scaled up until it can no longer grow without
+    /// exceeding `bounds`.
+    ///
+    /// If the sprite doesn't have the same aspect ratio as `bounds`, the
+    /// returned `Rect` is smaller on one axis. It's positioned in the middle
+    /// of `bounds`, leaving equal unused space on opposite sides.
+    ///
+    /// In other words:
+    /// - Input:  `bounds` — the approximate area where the sprite should fit.
+    /// - Output: `Rect` — the final area the sprite should occupy within `bounds`.
+    /// - Result: the sprite is fitted as closely as possible to `bounds` while preserving its aspect ratio,
+    ///           so it is never stretched or squashed or cropped.
+    fn fit_centered_in(&self, bounds: Rect) -> Rect {
+        let aspect_ratio = self.aspect_ratio();
+        let by_width = aspect_size_from_fixed_width(bounds.w, aspect_ratio);
+        let size = if by_width.y <= bounds.h {
+            by_width
+        } else {
+            aspect_size_from_fixed_height(bounds.h, aspect_ratio)
+        };
+        let pos = bounds.point() + (bounds.size() - size) / 2.0;
+        Rect::new(pos.x, pos.y, size.x, size.y)
     }
 }

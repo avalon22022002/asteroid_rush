@@ -1,6 +1,4 @@
-use crate::game::{
-    entities::{ship::{ShipKind}, asteroidfield::AsteroidField}
-};
+use crate::game::entities::{asteroidfield::asteroid::AsteroidKind, ship::ShipKind};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GameLevel {
@@ -13,7 +11,7 @@ pub enum GameLevel {
 pub struct GameConfig {
     level: GameLevel,
     ship_kind: ShipKind,
-    asteroid_field: AsteroidField
+    asteroid_kind: AsteroidKind
 }
 
 impl Default for GameConfig {
@@ -21,7 +19,7 @@ impl Default for GameConfig {
         GameConfig { 
             level: GameLevel::Level1,
             ship_kind: ShipKind::Sentinel,
-            asteroid_field: AsteroidField::default()
+            asteroid_kind: AsteroidKind::MoltenDarkAsteroid
         }
     }
 }
@@ -32,5 +30,13 @@ impl GameConfig {
     }
     pub fn set_level(&mut self, level: GameLevel) {
         self.level = level;
+    }
+
+    pub fn ship_kind(&self) -> ShipKind {
+        self.ship_kind
+    }
+
+    pub fn set_ship_kind(&mut self, ship_kind: ShipKind) {
+        self.ship_kind = ship_kind;
     }
 }

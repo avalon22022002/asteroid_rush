@@ -96,6 +96,9 @@ impl ShipStats {
     pub fn speed(&self) -> f32 {
         self.speed
     }
+    pub fn cur_health(&self) -> f32 {
+        self.cur_health
+    }
     pub fn gun_count(&self) -> u8 {
         self.gun_count
     }
@@ -104,10 +107,12 @@ impl ShipStats {
     }
 }
 pub struct Ship {
-    pos: Vec2,
+    /// The ship's on-screen box — position and size together. Only `x`/`y`
+    /// change after construction (see `apply_movement`); `w`/`h` are fixed
+    /// once `new` fits the sprite into the bounds it was given.
+    bounds: Rect,
     kind: ShipKind,
     ship_stats: ShipStats,
-    description: String,
     alive_animation: Animation,
     dead_animation: Animation,
     is_alive: bool,
@@ -118,36 +123,61 @@ pub struct Ship {
 }
 
 impl Ship {
-    pub fn get_alive_and_dead_animations_for( kind:ShipKind ) -> (Animation, Animation) {
+    /// Creates the alive and dead animations for `kind`, sized to fit as closely
+    /// as possible inside `approx_bounds` without stretching, squashing, or
+    /// cropping the sprite. Also returns that fitted box, which becomes the
+    /// ship's starting `bounds`.
+    pub fn get_alive_and_dead_animations_for(
+        kind: ShipKind,
+        approx_bounds: Rect,
+    ) -> (Animation, Animation, Rect) {
         let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
+
         match kind {
             ShipKind::Sentinel => {
-                // Crop the transparent padding so the drawn ship fills its
-                // scale box instead of floating small inside the frame.
-                let crop = Some(ShipV1Textures::SentinelAlive.content_bounds());
-                let alive = Animation::new(ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive), Vec2::new(236.0, 300.0), 12.0, crop);
+                let sprite = ShipV1Textures::SentinelAlive;
+                let fitted_bounds = sprite.fit_centered_in(approx_bounds);
+                let crop = Some(sprite.content_bounds());
+
+                let alive = Animation::new(
+                    ship_sprites.get_textures_for(&sprite),
+                    fitted_bounds.size(),
+                    12.0,
+                    crop,
+                );
+
                 // No dedicated death sprite set yet — freeze on the last
-                // alive frame as a placeholder until one's added.
+                // alive frame as a placeholder until one is added.
                 let dead = Animation::new(
-                    ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
-                    Vec2::new(236.0, 300.0),
+                    ship_sprites.get_textures_for(&sprite),
+                    fitted_bounds.size(),
                     1.0,
                     crop,
                 );
-                return (alive, dead)
+
+                (alive, dead, fitted_bounds)
             }
+
             ShipKind::Vanguard => todo!("vanguard animation frames not added yet"),
             ShipKind::Viper => todo!("viper animation frames not added yet"),
         }
     }
 
-    pub fn new(pos: Vec2, kind: ShipKind, description: String) -> Self {
-        let (alive_animation, dead_animation) = Self::get_alive_and_dead_animations_for(kind);
+    /// Creates a ship of `kind` that fits as closely as possible inside
+    /// `approx_bounds` while preserving the sprite's aspect ratio (no cropping, stretching, or squashing).
+    ///
+    /// `approx_bounds` is the area where the caller wants the ship to appear.
+    /// The ship's actual on-screen bounds may be smaller on one axis so that
+    /// the sprite keeps its original shape without being stretched, squashed,
+    /// or cropped.
+    pub fn new(approx_bounds: Rect, kind: ShipKind) -> Self {
+        let (alive_animation, dead_animation, bounds) =
+            Self::get_alive_and_dead_animations_for(kind, approx_bounds);
+
         Self {
-            pos,
+            bounds,
             kind,
             ship_stats: kind.stats(),
-            description,
             alive_animation,
             dead_animation,
             is_alive: true,
@@ -162,15 +192,23 @@ impl Ship {
         self
     }
 
+    /// The ship's current on-screen box (position and size together).
+    pub fn bounds(&self) -> Rect {
+        self.bounds
+    }
+
     /// Moves the ship by this frame's arrow-key input at `ship_stats.speed`
     /// units/second, clamped so it can't drift outside the game's logical
-    /// `BASE_WIDTH`x`BASE_HEIGHT` bounds.
+    /// `BASE_WIDTH`x`BASE_HEIGHT` bounds. Only `bounds`' position moves —
+    /// its size was fixed at construction.
     fn apply_movement(&mut self, dt: f32) {
         let dir = movement_input();
-        self.pos = (self.pos + dir * self.ship_stats.speed * dt).clamp(
+        let pos = (self.bounds.point() + dir * self.ship_stats.speed * dt).clamp(
             Vec2::ZERO,
-            Vec2::new(BASE_WIDTH - self.ship_size().x, BASE_HEIGHT - self.ship_size().y),
+            Vec2::new(BASE_WIDTH - self.bounds.w, BASE_HEIGHT - self.bounds.h),
         );
+        self.bounds.x = pos.x;
+        self.bounds.y = pos.y;
     }
 
     /// The animation that reflects the ship's current `is_alive` state.
@@ -179,14 +217,6 @@ impl Ship {
             &self.alive_animation
         } else {
             &self.dead_animation
-        }
-    }
-
-    fn ship_size(&self) -> &Vec2 {
-        if self.is_alive {
-            &self.alive_animation.frame_scale()
-        } else {
-            &self.dead_animation.frame_scale()
         }
     }
 
@@ -226,11 +256,11 @@ impl Drawable for Ship {
     fn draw(&self) {
         draw_texture_ex(
             self.current_animation().current_frame(),
-            self.pos.x,
-            self.pos.y,
+            self.bounds.x,
+            self.bounds.y,
             WHITE,
             DrawTextureParams {
-                dest_size: Some(*self.ship_size()),
+                dest_size: Some(self.bounds.size()),
                 source: self.current_animation().frame_crop(),
                 ..Default::default()
             },

@@ -1,15 +1,16 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    BASE_WIDTH,
+    BASE_HEIGHT, BASE_WIDTH,
     asset_repository::sprite_repository::traits::SpriteBounds,
+    entities::ship::Ship,
     game_config::GameConfig,
+    interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{
         button::{Button, ButtonEvents, ButtonKind},
         overlay_v1::{OverlayV1, OverlayV1Event},
     },
-    interaction::{Interactive, SelfEventHandler},
     utils::aspect_size_from_fixed_width,
 };
 
@@ -26,6 +27,7 @@ pub struct GameplayPage {
     paused: bool,
     pause_button: Button,
     pause_overlay: OverlayV1,
+    ship: Ship,
 }
 
 impl GameplayPage {
@@ -34,6 +36,12 @@ impl GameplayPage {
         let pause_button_kind = ButtonKind::Basic;
         let pause_button_size = aspect_size_from_fixed_width(90.0, pause_button_kind.aspect_ratio());
         let pause_button_pos = Vec2::new(BASE_WIDTH - pause_button_size.x - 20.0, 15.0);
+
+        // Ship
+        let ship_size = Vec2::new(120.0, 150.0);
+        let (pos_x, pos_y) = ((BASE_WIDTH - ship_size.x) / 2.0, (BASE_HEIGHT - ship_size.y) / 2.0);
+        let ship_bounds = Rect::new(pos_x, pos_y, ship_size.x, ship_size.y);
+        let ship_kind = game_config.ship_kind();
 
         Self {
             game_config,
@@ -49,6 +57,7 @@ impl GameplayPage {
                 "Resume".to_string(),
                 "Return to Home".to_string(),
             ),
+            ship: Ship::new(ship_bounds, ship_kind),
         }
     }
 }
@@ -56,6 +65,7 @@ impl GameplayPage {
 impl Drawable for GameplayPage {
     fn draw(&self) {
         self.pause_button.draw();
+        self.ship.draw();
         if self.paused {
             self.pause_overlay.draw();
         }
@@ -68,6 +78,7 @@ impl StateUpdatable<()> for GameplayPage {
             self.pause_overlay.update_state(());
         } else {
             self.pause_button.update_state(());
+            self.ship.update_state(());
         }
     }
 }
