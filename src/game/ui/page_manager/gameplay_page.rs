@@ -1,17 +1,11 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    BASE_HEIGHT, BASE_WIDTH,
-    asset_repository::sprite_repository::traits::SpriteBounds,
-    entities::ship::Ship,
-    game_config::GameConfig,
-    interaction::{Interactive, SelfEventHandler},
-    rendering::{Drawable, StateUpdatable},
-    ui::components::{
+    BASE_HEIGHT, BASE_WIDTH, asset_repository::sprite_repository::traits::SpriteBounds, entities::{asteroidfield::AsteroidField, ship::Ship}, game_config::GameConfig, interaction::{Interactive, SelfEventHandler}, rendering::{Drawable, StateUpdatable}, ui::components::{
         button::{Button, ButtonEvents, ButtonKind},
         overlay_v1::{OverlayV1, OverlayV1Event},
-    },
-    utils::aspect_size_from_fixed_width,
+    }, 
+    utils::{aspect_size_from_fixed_width, MinMax}
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -28,6 +22,7 @@ pub struct GameplayPage {
     pause_button: Button,
     pause_overlay: OverlayV1,
     ship: Ship,
+    asteroid_field: AsteroidField
 }
 
 impl GameplayPage {
@@ -42,6 +37,11 @@ impl GameplayPage {
         let (pos_x, pos_y) = ((BASE_WIDTH - ship_size.x) / 2.0, (BASE_HEIGHT - ship_size.y) / 2.0);
         let ship_bounds = Rect::new(pos_x, pos_y, ship_size.x, ship_size.y);
         let ship_kind = game_config.ship_kind();
+
+        // Asteroid Field
+        let asteroid_count = 20;
+        let asteroid_kind = game_config.asteroid_kind();
+        let asteroid_scale_limits = MinMax{min: 0.3, max: 2.0};
 
         Self {
             game_config,
@@ -58,6 +58,7 @@ impl GameplayPage {
                 "Return to Home".to_string(),
             ),
             ship: Ship::new(ship_bounds, ship_kind),
+            asteroid_field: AsteroidField::new(asteroid_count, asteroid_kind, asteroid_scale_limits)
         }
     }
 }
@@ -66,6 +67,7 @@ impl Drawable for GameplayPage {
     fn draw(&self) {
         self.pause_button.draw();
         self.ship.draw();
+        self.asteroid_field.draw();
         if self.paused {
             self.pause_overlay.draw();
         }
@@ -79,6 +81,7 @@ impl StateUpdatable<()> for GameplayPage {
         } else {
             self.pause_button.update_state(());
             self.ship.update_state(());
+            self.asteroid_field.update_state(());
         }
     }
 }

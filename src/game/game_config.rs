@@ -36,7 +36,15 @@ impl GameConfig {
         self.ship_kind
     }
 
-    pub fn set_ship_kind(&mut self, ship_kind: ShipKind) {
-        self.ship_kind = ship_kind;
+    pub fn set_ship_kind(&mut self, kind: ShipKind) {
+        self.ship_kind = kind;
+    }
+
+    pub fn asteroid_kind(&self) -> AsteroidKind {
+        self.asteroid_kind
+    }
+
+    pub fn set_asteroid_kind(&mut self, kind: AsteroidKind ){
+        self.asteroid_kind=kind;
     }
 }
