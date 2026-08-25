@@ -6,7 +6,7 @@ use crate::game::{
         sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, BannerV1Textures},
     },
     animation::Animation,
-    rendering::Drawable,
+    traits::rendering::Drawable,
 };
 
 /// Which title banner to draw. Callers pick a `BannerKind`; the mapping to the
@@ -47,7 +47,7 @@ impl SpriteBounds for BannerKind {
 ///
 /// ```no_run
 /// use asteroid_rush::game::{
-///     rendering::Drawable,
+///     traits::rendering::Drawable,
 ///     ui::components::banner::{Banner, BannerKind},
 /// };
 /// use macroquad::prelude::*;

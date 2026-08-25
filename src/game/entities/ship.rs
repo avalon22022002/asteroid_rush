@@ -7,8 +7,8 @@ use crate::game::{
         traits::Singleton
     },
     animation::Animation,
-    object::{HasBoundingBox, HasBoundingCircle},
-    rendering::{Drawable, StateUpdatable},
+    traits::object::{HasBoundingBox, HasBoundingCircle},
+    traits::rendering::{Drawable, StateUpdatable},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

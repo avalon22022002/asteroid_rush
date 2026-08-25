@@ -3,8 +3,8 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     asset_repository::sprite_repository::traits::SpriteBounds,
-    interaction::{Interactive, SelfEventHandler},
-    rendering::{Drawable, StateUpdatable},
+    traits::interaction::{Interactive, SelfEventHandler},
+    traits::rendering::{Drawable, StateUpdatable},
     ui::components::button::{Button, ButtonEvents, ButtonKind},
     utils::aspect_size_from_fixed_width,
 };

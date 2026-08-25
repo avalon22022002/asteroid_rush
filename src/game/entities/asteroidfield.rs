@@ -1,5 +1,5 @@
 use crate::game::{
-    entities::asteroidfield::asteroid::*, rendering::{Drawable, StateUpdatable}, utils::MinMax,
+    entities::asteroidfield::asteroid::*, traits::rendering::{Drawable, StateUpdatable}, utils::MinMax,
 };
 use macroquad::{math::Vec2, window::{screen_width}};
 

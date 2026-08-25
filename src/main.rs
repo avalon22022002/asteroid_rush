@@ -1,8 +1,8 @@
 use asteroid_rush::game::{
     self,
     asset_repository::traits::Singleton,
-    interaction::{Interactive, SelfEventHandler},
-    rendering::{Drawable, StateUpdatable},
+    traits::interaction::{Interactive, SelfEventHandler},
+    traits::rendering::{Drawable, StateUpdatable},
     ui::page_manager::{ PageManager},
     window_conf,
 };

@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 
-use crate::game::rendering::Drawable;
+use crate::game::traits::rendering::Drawable;
 
 /// A type that exposes a human-readable name.
 pub trait HasName {

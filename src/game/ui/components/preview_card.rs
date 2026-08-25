@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    animation::Animation, interaction::{Interactive, SelfEventHandler}, rendering::{Drawable, StateUpdatable}, ui::components::{button::{Button, ButtonEvents, ButtonKind}},
+    animation::Animation, traits::interaction::{Interactive, SelfEventHandler}, traits::rendering::{Drawable, StateUpdatable}, ui::components::{button::{Button, ButtonEvents, ButtonKind}},
 };
 
 /// Height of one stat row in the scrollable list, in logical pixels.

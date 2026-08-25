@@ -4,7 +4,7 @@ use crate::game::{
     game_config::GameLevel,
     asset_repository::{
         sprite_repository::{AsteroidV1Textures, SpriteRepository, traits::{SpriteBounds, SpriteTextures}}, traits::Singleton,
-    }, animation::Animation, object::{HasBoundingBox, HasBoundingCircle}, rendering::{Drawable, StateUpdatable}, utils::{MinMax, biased_random_in_range}
+    }, animation::Animation, traits::object::{HasBoundingBox, HasBoundingCircle}, traits::rendering::{Drawable, StateUpdatable}, utils::{MinMax, biased_random_in_range}
 };
 
 /// Identifies which asteroid texture to draw. Add a variant here (and a

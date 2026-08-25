@@ -2,9 +2,9 @@ use macroquad::prelude::*;
 
 use crate::game::{
     animation::Animation,
-    interaction::{Interactive, SelfEventHandler},
-    object::HasId,
-    rendering::{Drawable, StateUpdatable},
+    traits::interaction::{Interactive, SelfEventHandler},
+    traits::object::HasId,
+    traits::rendering::{Drawable, StateUpdatable},
     ui::components::button::{Button, ButtonEvents, ButtonKind},
 };
 

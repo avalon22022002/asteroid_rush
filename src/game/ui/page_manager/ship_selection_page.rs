@@ -8,8 +8,8 @@ use crate::game::{
     },
     animation::Animation,
     entities::ship::ShipKind,
-    interaction::{Interactive, SelfEventHandler},
-    rendering::{Drawable, StateUpdatable},
+    traits::interaction::{Interactive, SelfEventHandler},
+    traits::rendering::{Drawable, StateUpdatable},
     ui::components::{
         banner::{Banner, BannerKind},
         button::{Button, ButtonEvents, ButtonKind},

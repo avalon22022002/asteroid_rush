@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    rendering::{Drawable, StateUpdatable},
+    traits::rendering::{Drawable, StateUpdatable},
     utils::ordered,
 };
 
