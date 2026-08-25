@@ -1,8 +1,8 @@
 use macroquad::{math::Rect, texture::Texture2D};
 use strum::EnumIter;
-use crate::game::{
-    frames::{load_frames, frame_sequence},
-    asset_repository::sprite_repository::traits::{SpriteTextures,Sprite,SpriteBounds},
+use crate::game::asset_repository::sprite_repository::{
+    utils::frames::{load_frames, frame_sequence},
+    traits::{SpriteTextures,Sprite,SpriteBounds},
 };
 
 pub const SHIP_V1_SPRITE: &str="ShipV1Sprite";
