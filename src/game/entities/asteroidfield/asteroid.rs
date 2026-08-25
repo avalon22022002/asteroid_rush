@@ -4,7 +4,7 @@ use crate::game::{
     game_config::GameLevel,
     asset_repository::{
         sprite_repository::{AsteroidV1Textures, SpriteRepository, traits::{SpriteBounds, SpriteTextures}}, traits::Singleton,
-    }, entities::animation::Animation, rendering::{Drawable, StateUpdatable}, utils::{MinMax, biased_random_in_range}
+    }, entities::animation::Animation, object::{HasBoundingBox, HasBoundingCircle}, rendering::{Drawable, StateUpdatable}, utils::{MinMax, biased_random_in_range}
 };
 
 /// Identifies which asteroid texture to draw. Add a variant here (and a
@@ -116,7 +116,8 @@ enum AsteroidStatus {
 
 #[derive(Debug, Clone)]
 pub struct Asteroid {
-    pos: Vec2, // Position (x, y) of the asteroid
+    /// The asteroid's on-screen box (`x`, `y`, `w`, `h` — position and size together)
+    bounds: Rect,
     current_rotation: f32, // Current rotation in radians (matches `DrawTextureParams::rotation`)
     kind: AsteroidKind, // The asteroid's kind
     scale: f32, // Scale factor for asteroid size variation, without needing separate art per size
@@ -138,14 +139,15 @@ impl Asteroid {
     ) -> Self {
         let asteroid_sprites = &SpriteRepository::get_instance().asteroid_v1_sprite;
         let stats = kind.random_stats_biased_by_scale(scale);
+        let size = kind.texture_kind().content_size_at_logical_unit_scale() * scale;
         Self {
-            pos,
+            bounds: Rect::new(pos.x, pos.y, size.x, size.y),
             current_rotation,
             kind,
             scale,
             animation: Animation::new(
                 asteroid_sprites.get_textures_for(&kind.texture_kind()),
-                kind.texture_kind().content_size_at_logical_unit_scale() * scale,
+                size,
                 1.0,
                 None,
             ),
@@ -169,7 +171,7 @@ impl Asteroid {
             match remaining.checked_sub(1) {
                 Some(0) | None => {
                     // Countdown finished — spawn now at a fresh x.
-                    self.pos.x = rand::gen_range(0.0, screen_width());
+                    self.bounds.x = rand::gen_range(0.0, screen_width());
                     self.status = AsteroidStatus::Active;
                 }
                 Some(new_remaining) => *remaining = new_remaining,
@@ -179,13 +181,38 @@ impl Asteroid {
             return;
         }
 
-        self.pos.y += self.stats.speed * dt;
+        self.bounds.y += self.stats.speed * dt;
         self.current_rotation += self.stats.rotation_speed * dt;
-        if self.pos.y > screen_height() {
-            self.pos.y = 0.0;
-            self.pos.x = rand::gen_range(0.0, screen_width());
-            self.status = AsteroidStatus::Spawning { remaining: self.stats.spawn_time };
+        if self.bounds.y > screen_height() {
+            self.respawn();
         }
+    }
+
+    /// Resets this asteroid back to the top of the screen at a fresh random
+    /// `x`, re-entering `Spawning` for another `spawn_time`-frame delay.
+    /// Used both when an asteroid drifts off the bottom of the screen and
+    /// when one is destroyed (e.g. by colliding with the ship).
+    pub fn respawn(&mut self) {
+        self.bounds.y = 0.0;
+        self.bounds.x = rand::gen_range(0.0, screen_width());
+        self.status = AsteroidStatus::Spawning { remaining: self.stats.spawn_time };
+    }
+
+    /// Whether this asteroid is currently on screen and collidable (i.e. not
+    /// still counting down in `Spawning`).
+    pub fn is_active(&self) -> bool {
+        matches!(self.status, AsteroidStatus::Active)
+    }
+
+    /// Damage this asteroid deals to anything it collides with.
+    pub fn damage_on_collision(&self) -> u32 {
+        self.stats.damage_on_collision()
+    }
+}
+
+impl HasBoundingBox for Asteroid {
+    fn bounding_box(&self) -> Rect {
+        self.bounds
     }
 }
 
@@ -200,19 +227,33 @@ impl Default for Asteroid {
     }
 }
 
+impl HasBoundingCircle for Asteroid {
+    /// Collision circle: centered on the asteroid's bounding box
+    /// with radius = half the box's smaller dimension.
+    /// - Circle always stays inside the box, so it never registers a hit
+    ///   the sprite's box wouldn't.
+    /// - On the longer axis, the circle doesn't reach the box's edges, so
+    ///   some of that space isn't covered by the circle.
+    fn bounding_circle(&self) -> Circle {
+        let center = self.bounds.center();
+        let radius = self.bounds.w.min(self.bounds.h) / 2.0;
+        Circle::new(center.x, center.y, radius)
+    }
+}
+
 impl Drawable for Asteroid {
     fn draw(&self) {
         // Not on screen yet — nothing to draw until its delay elapses.
-        if matches!(self.status, AsteroidStatus::Spawning { .. }) {
+        if !self.is_active() {
             return;
         }
         draw_texture_ex(
             self.animation.current_frame(),
-            self.pos.x,
-            self.pos.y,
+            self.bounds.x,
+            self.bounds.y,
             WHITE,
             DrawTextureParams {
-                dest_size: Some(*self.animation.frame_scale()),
+                dest_size: Some(self.bounds.size()),
                 rotation: self.current_rotation,
                 ..Default::default()
             },

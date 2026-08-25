@@ -8,9 +8,7 @@ use crate::game::{
 pub const SHIP_V1_SPRITE: &str="ShipV1Sprite";
 const LOG_PREFIX: &str = "[ship_v1]";
 
-/// Identifies a named texture group for `ShipV1`. Each variant pairs with
-/// a texture field on `ShipV1` below — add both together to register a
-/// new ship-v1 look.
+/// Identifies a named texture group for `ShipV1`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum ShipV1Textures {
     SentinelAlive,
@@ -30,9 +28,11 @@ impl SpriteBounds for ShipV1Textures {
 }
 
 pub struct ShipV1 {
-    /// Frames for `ShipV1Textures::Sentinel`. Add a field here per new variant.
+    /// Frames for `ShipV1Textures::Sentinel`
     sentinel_alive_texture: Vec<Texture2D>,
     sentinel_dead_texture: Vec<Texture2D>,
+
+    // Add field pair here per new variant in ShipV1Textures.
 }
 
 impl ShipV1 {
@@ -44,9 +44,9 @@ impl ShipV1 {
 impl SpriteTextures for ShipV1 {
     type Kind = ShipV1Textures;
 
-    /// Exhaustive match: adding a `ShipV1Textures` variant without adding it
-    /// here is a compile error.
     async fn load_textures_for(&mut self, texture_kind: &ShipV1Textures) {
+        
+        // Perform Exhaustive match.
         match texture_kind {
             ShipV1Textures::SentinelAlive => {
                 if self.sentinel_alive_texture.is_empty() {

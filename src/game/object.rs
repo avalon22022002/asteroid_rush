@@ -24,7 +24,7 @@ pub trait HasBoundingBox {
 
     /// Returns `true` if this object's bounding box overlaps another object's
     /// bounding box.
-    fn overlaps<T: HasBoundingBox>(&self, other: &T) -> bool {
+    fn bounding_box_overlaps<T: HasBoundingBox>(&self, other: &T) -> bool {
         self.bounding_box().overlaps(&other.bounding_box())
     }
 
@@ -38,6 +38,23 @@ pub trait HasBoundingBox {
     fn contains_current_mouse_position(&self) -> bool {
         let (x, y) = mouse_position();
         self.contains_point(Vec2::new(x, y))
+    }
+}
+
+/// A type that exposes a bounding circle for collision checks and spatial
+/// queries.
+///
+/// The returned circle is expressed in world coordinates. Preferred over
+/// `HasBoundingBox` for entities that rotate (asteroids, ships, bullets),
+/// since a circle's overlap test doesn't depend on orientation.
+pub trait HasBoundingCircle {
+    /// Returns the bounding circle of this object.
+    fn bounding_circle(&self) -> Circle;
+
+    /// Returns `true` if this object's bounding circle overlaps another
+    /// object's bounding circle.
+    fn bounding_circle_overlaps<T: HasBoundingCircle>(&self, other: &T) -> bool {
+        self.bounding_circle().overlaps(&other.bounding_circle())
     }
 }
 

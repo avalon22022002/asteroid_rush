@@ -1,12 +1,13 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    BASE_HEIGHT, BASE_WIDTH, 
+    BASE_HEIGHT, BASE_WIDTH,
     asset_repository::{
         sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures},
         traits::Singleton
-    }, 
+    },
     entities::animation::Animation,
+    object::{HasBoundingBox, HasBoundingCircle},
     rendering::{Drawable, StateUpdatable},
 };
 
@@ -192,9 +193,21 @@ impl Ship {
         self
     }
 
-    /// The ship's current on-screen box (position and size together).
-    pub fn bounds(&self) -> Rect {
-        self.bounds
+    /// Whether the ship is currently alive (i.e. hasn't been destroyed).
+    pub fn is_alive(&self) -> bool {
+        self.is_alive
+    }
+
+    /// Reduces `cur_health` by `amount`, clamped at 0, and marks the ship
+    /// dead once health reaches 0. A no-op if the ship is already dead.
+    pub fn take_damage(&mut self, amount: f32) {
+        if !self.is_alive {
+            return;
+        }
+        self.ship_stats.cur_health = (self.ship_stats.cur_health - amount).max(0.0);
+        if self.ship_stats.cur_health == 0.0 {
+            self.is_alive = false;
+        }
     }
 
     /// Moves the ship by this frame's arrow-key input at `ship_stats.speed`
@@ -250,6 +263,26 @@ fn movement_input() -> Vec2 {
         dir = dir.normalize();
     }
     dir
+}
+
+impl HasBoundingBox for Ship {
+    fn bounding_box(&self) -> Rect {
+        self.bounds
+    }
+}
+
+impl HasBoundingCircle for Ship {
+    /// Collision circle: centered on bounding box,
+    /// with radius = half the box's smaller dimension.
+    /// - Circle always stays inside the box, so it never registers a hit
+    ///   the sprite's box wouldn't.
+    /// - On the longer axis, the circle doesn't reach the bounding box's edges,
+    ///   so some of that space isn't covered by the circle.
+    fn bounding_circle(&self) -> Circle {
+        let center = self.bounds.center();
+        let radius = self.bounds.w.min(self.bounds.h) / 2.0;
+        Circle::new(center.x, center.y, radius)
+    }
 }
 
 impl Drawable for Ship {
