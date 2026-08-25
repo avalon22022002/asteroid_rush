@@ -6,7 +6,8 @@ use crate::game::{
         sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures},
         traits::Singleton,
     },
-    entities::{animation::Animation, ship::ShipKind},
+    animation::Animation,
+    entities::ship::ShipKind,
     interaction::{Interactive, SelfEventHandler},
     rendering::{Drawable, StateUpdatable},
     ui::components::{

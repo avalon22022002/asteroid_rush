@@ -5,7 +5,7 @@ use crate::game::{
         traits::Singleton,
         sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, BannerV1Textures},
     },
-    entities::animation::Animation,
+    animation::Animation,
     rendering::Drawable,
 };
 

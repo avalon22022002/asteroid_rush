@@ -1,3 +1,4 @@
+pub mod animation;
 pub mod asset_repository;
 pub mod background;
 pub mod entities;

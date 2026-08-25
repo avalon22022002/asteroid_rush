@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    entities::animation::Animation,
+    animation::Animation,
     interaction::{Interactive, SelfEventHandler},
     object::HasId,
     rendering::{Drawable, StateUpdatable},

@@ -3,7 +3,8 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     asset_repository::{ traits::Singleton, sprite_repository::{traits::{SpriteBounds,SpriteTextures}, SpriteRepository}},
-    entities::{asteroidfield::{AsteroidField, asteroid::AsteroidKind}, animation::Animation},
+    animation::Animation,
+    entities::asteroidfield::{AsteroidField, asteroid::AsteroidKind},
     interaction::{Interactive, SelfEventHandler}, rendering::{Drawable, StateUpdatable},
     ui::components::{
         banner::{Banner, BannerKind},

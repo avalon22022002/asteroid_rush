@@ -6,7 +6,7 @@ use crate::game::{
         sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures},
         traits::Singleton
     },
-    entities::animation::Animation,
+    animation::Animation,
     object::{HasBoundingBox, HasBoundingCircle},
     rendering::{Drawable, StateUpdatable},
 };

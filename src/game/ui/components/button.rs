@@ -11,7 +11,7 @@ use crate::game::{
             button_hover::ButtonHoverSound,
         },
     },
-    entities::animation::Animation,
+    animation::Animation,
     interaction::{Interactive, SelfEventHandler},
     object::HasId,
     rendering::{Drawable, StateUpdatable},
