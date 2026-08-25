@@ -8,6 +8,8 @@ use crate::game::{
     utils::{aspect_size_from_fixed_width, MinMax}
 };
 
+const LOG_PREFIX: &str = "[gameplay_page]";
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GamplayPageEvent {
     PauseButtonPressed,
@@ -82,6 +84,18 @@ impl StateUpdatable<()> for GameplayPage {
             self.pause_button.update_state(());
             self.ship.update_state(());
             self.asteroid_field.update_state(());
+
+            // Resolve ship <-> asteroid collisions here; ship and asteroid field entities remain independent of each other.
+            if self.ship.is_alive() {
+                let damage = self.asteroid_field.resolve_collision(&self.ship);
+                if damage > 0 {
+                    self.ship.take_damage(damage as f32);
+                    println!("{LOG_PREFIX} ship took {damage} damage");
+                    if !self.ship.is_alive() {
+                        println!("{LOG_PREFIX} ship destroyed");
+                    }
+                }
+            }
         }
     }
 }
