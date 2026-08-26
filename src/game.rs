@@ -1,15 +1,13 @@
+pub mod animation;
 pub mod asset_repository;
 pub mod background;
 pub mod entities;
-pub mod frames;
-pub mod interaction;
-pub mod object;
-pub mod rendering;
+pub mod traits;
 pub mod ui;
 pub mod utils;
 pub mod game_config;
 
-use crate::game::rendering::{Drawable, StateUpdatable};
+use crate::game::traits::rendering::{Drawable, StateUpdatable};
 use macroquad::prelude::*;
 
 /// Game window reference width, in logical pixels.

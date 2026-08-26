@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    BASE_HEIGHT, BASE_WIDTH, asset_repository::sprite_repository::traits::SpriteBounds, game_config::GameConfig, interaction::{Interactive, SelfEventHandler}, rendering::{Drawable, StateUpdatable}, ui::components::button::{Button, ButtonEvents, ButtonKind}, utils::aspect_size_from_fixed_width,
+    BASE_HEIGHT, BASE_WIDTH, asset_repository::sprite_repository::traits::SpriteBounds, game_config::GameConfig, traits::interaction::{Interactive, SelfEventHandler}, traits::rendering::{Drawable, StateUpdatable}, ui::components::button::{Button, ButtonEvents, ButtonKind}, utils::aspect_size_from_fixed_width,
 };
 
 /// Lines of the "how to play" body text, drawn top-to-bottom.

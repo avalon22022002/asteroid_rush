@@ -2,7 +2,7 @@ use macroquad::{color::BLACK, window::clear_background};
 
 use crate::game::{
     background::starfield::*,
-    rendering::{Drawable, StateUpdatable},
+    traits::rendering::{Drawable, StateUpdatable},
 };
 
 pub mod starfield;

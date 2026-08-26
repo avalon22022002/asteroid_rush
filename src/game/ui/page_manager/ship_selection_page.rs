@@ -6,9 +6,10 @@ use crate::game::{
         sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures},
         traits::Singleton,
     },
-    entities::{animation::Animation, ship::ShipKind},
-    interaction::{Interactive, SelfEventHandler},
-    rendering::{Drawable, StateUpdatable},
+    animation::Animation,
+    entities::ship::{ship_kind::ShipKind, ship_stats::ShipStats},
+    traits::interaction::{Interactive, SelfEventHandler},
+    traits::rendering::{Drawable, StateUpdatable},
     ui::components::{
         banner::{Banner, BannerKind},
         button::{Button, ButtonEvents, ButtonKind},
@@ -127,7 +128,7 @@ impl ShipSelectionPage {
                 default_ship_icon(),
                 default_ship_kind.display_name().to_string(),
                 default_ship_kind.role().to_string(),
-                default_ship_kind.preview_stats(),
+                ShipStats::preview_stats_for(default_ship_kind),
                 "SELECT SHIP".to_string(),
             ),
             selected_ship_kind: default_ship_kind,
@@ -211,7 +212,7 @@ impl SelfEventHandler for ShipSelectionPage {
                 ),
                 ship_kind.display_name().to_string(),
                 ship_kind.role().to_string(),
-                ship_kind.preview_stats(),
+                ShipStats::preview_stats_for(ship_kind),
             );
         }
     }

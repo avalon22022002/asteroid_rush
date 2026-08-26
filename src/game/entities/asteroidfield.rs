@@ -1,9 +1,13 @@
 use crate::game::{
-    entities::asteroidfield::asteroid::*, rendering::{Drawable, StateUpdatable}, utils::MinMax,
+    entities::asteroidfield::asteroid::*,
+    traits::{object::HasBoundingCircle, rendering::{Drawable, StateUpdatable}},
+    utils::MinMax,
 };
 use macroquad::{math::Vec2, window::{screen_width}};
 
 pub mod asteroid;
+
+const LOG_PREFIX: &str = "[asteroid_field]";
 
 #[derive(Debug, Clone)]
 pub struct AsteroidField {
@@ -31,6 +35,27 @@ impl AsteroidField {
             .collect();
 
         AsteroidField { asteroids }
+    }
+
+    /// Resolves collisions between active asteroids and `other`.
+    ///
+    /// - Brute-force checks every asteroid in the field; the small asteroid count
+    ///   makes this approach sufficient for the game.
+    /// - Respawns each asteroid whose collision circle overlaps `other`.
+    /// - Returns the total damage dealt by all collisions, or `0` if none occur.
+    /// - Accepts any type implementing `HasBoundingCircle` (e.g. ship, bullet).
+    /// - The caller is responsible for applying the returned damage.
+    pub fn resolve_collision<T: HasBoundingCircle>(&mut self, other: &T) -> u32 {
+        let mut damage = 0;
+        for asteroid in self.asteroids.iter_mut() {
+            if asteroid.is_active() && asteroid.bounding_circle_overlaps(other) {
+                let hit_damage = asteroid.damage_on_collision();
+                println!("{LOG_PREFIX} resolved a collision, dealt {hit_damage} damage");
+                damage += hit_damage;
+                asteroid.respawn();
+            }
+        }
+        damage
     }
 }
 

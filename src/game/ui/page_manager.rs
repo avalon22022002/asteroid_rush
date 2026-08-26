@@ -5,7 +5,7 @@ mod briefing_page;
 mod gameplay_page;
 
 use crate::game::{
-    game_config::GameConfig, interaction::{Interactive, SelfEventHandler}, rendering::{Drawable, StateUpdatable}, ui::page_manager::{
+    game_config::GameConfig, traits::interaction::{Interactive, SelfEventHandler}, traits::rendering::{Drawable, StateUpdatable}, ui::page_manager::{
         briefing_page::{BriefingPage, BriefingPageEvent},
         gameplay_page::{GameplayPage, GamplayPageEvent},
         home_page::{HomePage,HomePageEvent},

@@ -3,6 +3,7 @@ pub mod banner_v1;
 pub mod button_v1;
 pub mod ship_v1;
 pub mod traits;
+pub mod utils;
 
 use std::sync::OnceLock;
 

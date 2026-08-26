@@ -3,9 +3,9 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     asset_repository::sprite_repository::traits::SpriteBounds,
-    entities::ship::{Ship, ShipKind},
-    interaction::{Interactive, SelfEventHandler},
-    rendering::{Drawable, StateUpdatable},
+    entities::ship::{Ship, ship_kind::ShipKind},
+    traits::interaction::{Interactive, SelfEventHandler},
+    traits::rendering::{Drawable, StateUpdatable},
     ui::components::{
         banner::{Banner, BannerKind},
         button::{Button, ButtonEvents, ButtonKind},

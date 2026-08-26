@@ -1,10 +1,10 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    entities::animation::Animation,
-    interaction::{Interactive, SelfEventHandler},
-    object::HasId,
-    rendering::{Drawable, StateUpdatable},
+    animation::Animation,
+    traits::interaction::{Interactive, SelfEventHandler},
+    traits::object::HasId,
+    traits::rendering::{Drawable, StateUpdatable},
     ui::components::button::{Button, ButtonEvents, ButtonKind},
 };
 
