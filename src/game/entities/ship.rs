@@ -1,3 +1,4 @@
+pub mod guns;
 pub mod ship_kind;
 pub mod ship_stats;
 mod utils;
@@ -7,7 +8,12 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     animation::Animation,
-    entities::ship::{ship_kind::ShipKind, ship_stats::ShipStats, utils::user_input::movement_input},
+    entities::ship::{
+        guns::Guns,
+        ship_kind::ShipKind,
+        ship_stats::ShipStats,
+        utils::user_input::{is_fire_key_held, movement_input},
+    },
     traits::{
         object::{HasBoundingBox, HasBoundingCircle},
         rendering::{Drawable, StateUpdatable},
@@ -21,12 +27,13 @@ pub struct Ship {
     bounds: Rect,
     kind: ShipKind,
     ship_stats: ShipStats,
+    guns: Guns,
     alive_animation: Animation,
     dead_animation: Animation,
     is_alive: bool,
     /// When `true`, the ship ignores player input entirely — no movement,
-    /// and (once added) no shooting either. For ships that are only ever
-    /// drawn for show, e.g. the one on the home page.
+    /// and no shooting either. For ships that are only ever drawn for show,
+    /// e.g. the one on the home page.
     locked: bool,
 }
 
@@ -46,6 +53,7 @@ impl Ship {
             bounds,
             kind,
             ship_stats: ShipStats::stats_for(kind),
+            guns: Guns::guns_for_ship(kind, bounds),
             alive_animation,
             dead_animation,
             is_alive: true,
@@ -89,6 +97,15 @@ impl Ship {
         );
         self.bounds.x = pos.x;
         self.bounds.y = pos.y;
+    }
+
+    /// Ticks the guns' fire cooldown down and, once it's ready while the
+    /// fire key is held, fires a new volley.
+    fn apply_fire_input(&mut self, dt: f32) {
+        self.guns.tick_cooldown(dt);
+        if is_fire_key_held() && self.guns.ready_to_fire() {
+            self.guns.fire(self.kind, self.bounds);
+        }
     }
 
     /// The animation that reflects the ship's current `is_alive` state.
@@ -142,18 +159,22 @@ impl Drawable for Ship {
                 ..Default::default()
             },
         );
+        self.guns.draw();
     }
 }
 
 impl StateUpdatable<()> for Ship {
-    /// Only responds to movement input while alive and unlocked — a dead
-    /// ship shouldn't steer (just play out its death animation in place),
-    /// and a `locked` ship ignores player input altogether.
+    /// Only responds to movement/fire input while alive and unlocked — a
+    /// dead ship shouldn't steer or shoot (just play out its death
+    /// animation in place), and a `locked` ship ignores player input
+    /// altogether. Bullets already in flight keep moving regardless.
     fn update_state(&mut self, _data: ()) {
         let dt = get_frame_time();
         if self.is_alive && !self.locked {
             self.apply_movement(dt);
+            self.apply_fire_input(dt);
         }
         self.current_animation_mut().advance(dt);
+        self.guns.update();
     }
 }

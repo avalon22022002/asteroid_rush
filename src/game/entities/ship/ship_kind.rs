@@ -6,6 +6,7 @@ use crate::game::{
         sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures},
         traits::Singleton,
     },
+    entities::bullet::bullet_kind::BulletKind,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -34,6 +35,15 @@ impl ShipKind {
             ShipKind::Vanguard => "Allrounder",
             ShipKind::Sentinel => "Defender",
             ShipKind::Viper => "Attacker",
+        }
+    }
+
+    /// The bullet kind this ship's guns fire.
+    pub fn bullet_kind(&self) -> BulletKind {
+        match self {
+            ShipKind::Vanguard => BulletKind::BlueLaser,
+            ShipKind::Sentinel => BulletKind::BlueLaser,
+            ShipKind::Viper => BulletKind::RedLaser,
         }
     }
 

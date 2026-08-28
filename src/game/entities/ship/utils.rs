@@ -23,4 +23,9 @@ pub mod user_input {
         }
         dir
     }
+
+    /// Whether the fire key is currently held down.
+    pub fn is_fire_key_held() -> bool {
+        is_key_down(KeyCode::Space)
+    }
 }

@@ -1,12 +1,15 @@
-use crate::game::entities::ship::ship_kind::ShipKind;
+use macroquad::math::Rect;
 
-#[derive(Debug, Clone, Copy)]
+use crate::game::entities::{
+    bullet::bullet_stats::BulletStats,
+    ship::{ship_kind::ShipKind, guns::Guns},
+};
+
+#[derive(Debug, Clone)]
 pub struct ShipStats {
     max_health: f32,
     cur_health: f32,
     speed: f32,
-    gun_count: u8,
-    fire_damage: f32,
 }
 
 impl ShipStats {
@@ -18,12 +21,6 @@ impl ShipStats {
     }
     pub fn cur_health(&self) -> f32 {
         self.cur_health
-    }
-    pub fn gun_count(&self) -> u8 {
-        self.gun_count
-    }
-    pub fn fire_damage(&self) -> f32 {
-        self.fire_damage
     }
 
     /// Reduces `cur_health` by `amount`, clamped at 0.
@@ -37,22 +34,16 @@ impl ShipStats {
                 max_health: 100.0,
                 cur_health: 100.0,
                 speed: 200.0,
-                gun_count: 1,
-                fire_damage: 10.0,
             },
             ShipKind::Sentinel => ShipStats {
                 max_health: 150.0,
                 cur_health: 150.0,
                 speed: 120.0,
-                gun_count: 2,
-                fire_damage: 8.0,
             },
             ShipKind::Viper => ShipStats {
                 max_health: 60.0,
                 cur_health: 60.0,
                 speed: 280.0,
-                gun_count: 3,
-                fire_damage: 14.0,
             },
         }
     }
@@ -60,11 +51,14 @@ impl ShipStats {
     /// Stats shown on the ship-select preview card, as label/value pairs.
     pub fn preview_stats_for(ship_kind: ShipKind) -> Vec<(String, String)> {
         let stats = ShipStats::stats_for(ship_kind);
+        let bullet_damage = BulletStats::stats_for(ship_kind.bullet_kind()).damage();
+        // Bounds don't affect gun count, so an empty `Rect` is sufficient here.
+        let gun_count = Guns::guns_for_ship(ship_kind, Rect::new(0.0, 0.0, 0.0, 0.0)).gun_count();
         vec![
-            ("Damage".to_string(), format!("{}", stats.fire_damage() as i32)),
+            ("Damage".to_string(), format!("{}", bullet_damage as i32)),
             ("Defense".to_string(), format!("{}", stats.max_health() as i32)),
             ("Speed".to_string(), format!("{}", stats.speed() as i32)),
-            ("Guns".to_string(), format!("{}", stats.gun_count())),
+            ("Guns".to_string(), format!("{}", gun_count)),
         ]
     }
 }
