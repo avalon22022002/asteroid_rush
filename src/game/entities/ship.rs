@@ -9,11 +9,14 @@ use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     animation::Animation,
     blink::Blink,
-    entities::ship::{
-        guns::Guns,
-        ship_kind::ShipKind,
-        ship_stats::ShipStats,
-        utils::user_input::{is_fire_key_held, movement_input},
+    entities::{
+        asteroidfield::AsteroidField,
+        ship::{
+            guns::Guns,
+            ship_kind::ShipKind,
+            ship_stats::ShipStats,
+            utils::user_input::{is_fire_key_held, movement_input},
+        },
     },
     traits::{
         object::{HasBoundingBox, HasBoundingCircle},
@@ -83,17 +86,25 @@ impl Ship {
     }
 
     /// Reduces `cur_health` by `amount`, clamped at 0, and marks the ship
-    /// dead once health reaches 0. A no-op if the ship is already dead.
-    pub fn take_damage(&mut self, amount: f32) {
+    /// dead once health reaches 0. Otherwise flashes briefly to signal the
+    /// hit. A no-op if the ship is already dead.
+    pub fn take_damage(&mut self, amount: u32) {
         if !self.is_alive {
             return;
         }
         self.ship_stats.apply_damage(amount);
-        if self.ship_stats.cur_health() == 0.0 {
+        if self.ship_stats.cur_health() == 0 {
             self.is_alive = false;
         } else {
             self.blink.trigger(HIT_BLINK_DURATION);
         }
+    }
+
+    /// Resolves collisions between this ship's in-flight bullets and
+    /// `asteroid_field`, damaging whichever asteroid each bullet hits and
+    /// removing that bullet.
+    pub fn resolve_bullet_collisions(&mut self, asteroid_field: &mut AsteroidField) {
+        self.guns.resolve_collisions(asteroid_field);
     }
 
     /// Moves the ship by this frame's arrow-key input at `ship_stats.speed`

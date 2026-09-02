@@ -39,6 +39,11 @@ impl Bullet {
         }
     }
 
+    /// Damage this bullet deals to whatever it hits.
+    pub fn damage(&self) -> u32 {
+        self.stats.damage()
+    }
+
     /// Moves the bullet by `stats.speed() * dt` along `direction`.
     fn apply_movement(&mut self, dt: f32) {
         let dir_angle_in_degrees= self.direction;

@@ -2,7 +2,7 @@ use macroquad::prelude::*;
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH, entities::{
-        bullet::{Bullet, bullet_direction::BulletDirection}, ship::ship_kind::ShipKind,
+        asteroidfield::AsteroidField, bullet::{Bullet, bullet_direction::BulletDirection}, ship::ship_kind::ShipKind,
     }, traits::{object::HasBoundingBox, rendering::{Drawable, StateUpdatable}},
 };
 
@@ -98,6 +98,15 @@ impl Guns {
                 && bounds.y < BASE_HEIGHT
                 && bounds.x + bounds.w > 0.0
                 && bounds.x < BASE_WIDTH
+        });
+    }
+
+    /// Checks every in-flight bullet against `asteroid_field`, damaging
+    /// whichever asteroid each hits, and drops any bullet that hit
+    /// something — a bullet is consumed on impact.
+    pub fn resolve_collisions(&mut self, asteroid_field: &mut AsteroidField) {
+        self.bullets.retain(|bullet| {
+            !asteroid_field.resolve_bullet_collision(bullet, bullet.damage())
         });
     }
 }

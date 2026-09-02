@@ -89,13 +89,18 @@ impl StateUpdatable<()> for GameplayPage {
             if self.ship.is_alive() {
                 let damage = self.asteroid_field.resolve_collision(&self.ship);
                 if damage > 0 {
-                    self.ship.take_damage(damage as f32);
+                    self.ship.take_damage(damage);
                     println!("{LOG_PREFIX} ship took {damage} damage");
                     if !self.ship.is_alive() {
                         println!("{LOG_PREFIX} ship destroyed");
                     }
                 }
             }
+
+            // Resolve bullet <-> asteroid collisions
+            // Note: bullets already in flight keep hitting asteroids
+            // even after the ship that fired them has died.
+            self.ship.resolve_bullet_collisions(&mut self.asteroid_field);
         }
     }
 }
