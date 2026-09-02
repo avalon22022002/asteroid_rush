@@ -1,7 +1,5 @@
 use macroquad::{math::{Rect, Vec2}, texture::Texture2D};
 
-const LOG_PREFIX: &str = "[animation]";
-
 /// A sequence of sprite frames played back at a fixed rate. Repeats by
 /// default; call `.play_once()` at construction to freeze on the last frame
 /// instead.
@@ -13,7 +11,9 @@ pub struct Animation {
     /// `None` draws the whole frame; a crop strips transparent padding so the
     /// art fills its `scale` box (see `SpriteBounds`).
     crop: Option<Rect>,
+    /// Seconds each frame is shown for (`1.0 / fps`).
     frame_duration: f32,
+    /// Seconds accumulated since the current frame started.
     elapsed: f32,
     current: usize,
     repeats: bool,

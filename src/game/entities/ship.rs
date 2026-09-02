@@ -8,6 +8,7 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     animation::Animation,
+    blink::Blink,
     entities::ship::{
         guns::Guns,
         ship_kind::ShipKind,
@@ -20,6 +21,11 @@ use crate::game::{
     },
 };
 
+/// How long a ship flashes for after collision, in seconds.
+const HIT_BLINK_DURATION: f32 = 0.6;
+/// How long each visible/invisible phase lasts while flashing, in seconds.
+const HIT_BLINK_INTERVAL: f32 = 0.08;
+
 pub struct Ship {
     /// The ship's on-screen box — position and size together. Only `x`/`y`
     /// change after construction (see `apply_movement`); `w`/`h` are fixed
@@ -31,6 +37,8 @@ pub struct Ship {
     alive_animation: Animation,
     dead_animation: Animation,
     is_alive: bool,
+    /// Flashes briefly after taking damage; see `HIT_BLINK_DURATION`.
+    blink: Blink,
     /// When `true`, the ship ignores player input entirely — no movement,
     /// and no shooting either. For ships that are only ever drawn for show,
     /// e.g. the one on the home page.
@@ -57,6 +65,7 @@ impl Ship {
             alive_animation,
             dead_animation,
             is_alive: true,
+            blink: Blink::new(HIT_BLINK_INTERVAL),
             locked: false,
         }
     }
@@ -82,6 +91,8 @@ impl Ship {
         self.ship_stats.apply_damage(amount);
         if self.ship_stats.cur_health() == 0.0 {
             self.is_alive = false;
+        } else {
+            self.blink.trigger(HIT_BLINK_DURATION);
         }
     }
 
@@ -148,6 +159,9 @@ impl HasBoundingCircle for Ship {
 
 impl Drawable for Ship {
     fn draw(&self) {
+        if !self.blink.is_visible() {
+            return;
+        }
         draw_texture_ex(
             self.current_animation().current_frame(),
             self.bounds.x,
@@ -175,6 +189,7 @@ impl StateUpdatable<()> for Ship {
             self.apply_fire_input(dt);
         }
         self.current_animation_mut().advance(dt);
+        self.blink.advance(dt);
         self.guns.update();
     }
 }
