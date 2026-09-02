@@ -12,6 +12,7 @@ const LOG_PREFIX: &str = "[ship_v1]";
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum ShipV1Textures {
     SentinelAlive,
+    SentinelDead,
 }
 
 impl SpriteBounds for ShipV1Textures {
@@ -23,6 +24,8 @@ impl SpriteBounds for ShipV1Textures {
         match self {
             // 488×620 source frames; drawn ship occupies this sub-rect.
             ShipV1Textures::SentinelAlive => Rect::new(83.0, 23.0, 363.0, 462.0),
+            // 252×264 source frames; drawn explosion occupies this sub-rect.
+            ShipV1Textures::SentinelDead => Rect::new(26.0, 0.0, 207.0, 264.0),
         }
     }
 }
@@ -59,12 +62,25 @@ impl SpriteTextures for ShipV1 {
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
             }
+
+            ShipV1Textures::SentinelDead => {
+                if self.sentinel_dead_texture.is_empty() {
+                    println!("{LOG_PREFIX} loading {texture_kind:?}...");
+
+                    self.sentinel_dead_texture = load_frames(
+                        frame_sequence!("assets/animations/ships/sentinel/dead/sentinel_dead_", ["00","01","02","03","04"])
+                    ).await;
+
+                    println!("{LOG_PREFIX} {texture_kind:?} load complete");
+                }
+            }
         }
     }
 
     fn get_textures_for(&self, texture_kind: &Self::Kind) -> &Vec<Texture2D> {
         match texture_kind {
-            ShipV1Textures::SentinelAlive => &self.sentinel_alive_texture
+            ShipV1Textures::SentinelAlive => &self.sentinel_alive_texture,
+            ShipV1Textures::SentinelDead => &self.sentinel_dead_texture,
         }
     }
 }

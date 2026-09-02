@@ -59,25 +59,23 @@ impl ShipKind {
 
         match self {
             ShipKind::Sentinel => {
-                let sprite = ShipV1Textures::SentinelAlive;
-                let fitted_bounds = sprite.fit_centered_in(approx_bounds);
-                let crop = Some(sprite.content_bounds());
+                let alive_sprite = ShipV1Textures::SentinelAlive;
+                let fitted_bounds = alive_sprite.fit_centered_in(approx_bounds);
 
                 let alive = Animation::new(
-                    ship_sprites.get_textures_for(&sprite),
+                    ship_sprites.get_textures_for(&alive_sprite),
                     fitted_bounds.size(),
                     12.0,
-                    crop,
+                    Some(alive_sprite.content_bounds()),
                 );
 
-                // No dedicated death sprite set yet — freeze on the last
-                // alive frame as a placeholder until one is added.
+                let dead_sprite = ShipV1Textures::SentinelDead;
                 let dead = Animation::new(
-                    ship_sprites.get_textures_for(&sprite),
+                    ship_sprites.get_textures_for(&dead_sprite),
                     fitted_bounds.size(),
-                    1.0,
-                    crop,
-                );
+                    12.0,
+                    Some(dead_sprite.content_bounds()),
+                ).play_once();
 
                 (alive, dead, fitted_bounds)
             }
