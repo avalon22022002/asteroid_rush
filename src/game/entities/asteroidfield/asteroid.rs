@@ -4,8 +4,13 @@ use crate::game::{
     game_config::GameLevel,
     asset_repository::{
         sprite_repository::{AsteroidV1Textures, SpriteRepository, traits::{SpriteBounds, SpriteTextures}}, traits::Singleton,
-    }, animation::Animation, traits::object::{HasBoundingBox, HasBoundingCircle}, traits::rendering::{Drawable, StateUpdatable}, utils::{MinMax, biased_random_in_range}
+    }, animation::Animation, blink::Blink, traits::object::{HasBoundingBox, HasBoundingCircle}, traits::rendering::{Drawable, StateUpdatable}, utils::{MinMax, biased_random_in_range}
 };
+
+/// How long an asteroid flashes for after taking damage, in seconds.
+const HIT_BLINK_DURATION: f32 = 0.6;
+/// How long each visible/invisible phase lasts while flashing, in seconds.
+const HIT_BLINK_INTERVAL: f32 = 0.08;
 
 /// Identifies which asteroid texture to draw. Add a variant here (and a
 /// case in `AsteroidKind::texture_kind`) to register a new asteroid look.
@@ -34,20 +39,24 @@ impl AsteroidKind {
     pub fn stat_range(&self) -> MinMax<AsteroidStats>{
         match self {
             AsteroidKind::MoltenDarkAsteroid =>  MinMax {
-                min: AsteroidStats { speed: 50.0, rotation_speed: 1.6, health: 20, damage_on_collision: 10, spawn_time: 10 },
-                max: AsteroidStats { speed: 120.0, rotation_speed: 4.2, health: 40, damage_on_collision: 25, spawn_time: 500},
+                min: AsteroidStats { speed: 50.0, rotation_speed: 1.6, max_health: 20, cur_health: 20, damage_on_collision: 10, spawn_time: 10 },
+                max: AsteroidStats { speed: 120.0, rotation_speed: 4.2, max_health: 40, cur_health: 40, damage_on_collision: 25, spawn_time: 500},
             },
         }
     }
     fn random_stats_biased_by_scale(&self, scale: f32)-> AsteroidStats{
         let stat_range= self.stat_range();
+        // Bigger asteroids take more hits to destroy: bias grows with size.
+        let max_health = biased_random_in_range(MinMax { min: stat_range.min.max_health as f32, max: stat_range.max.max_health as f32 }, scale) as u32;
+
         AsteroidStats {
             // Bigger asteroids are slower: flip the sign so growing size pulls toward min.
             speed: biased_random_in_range(MinMax { min:stat_range.min.speed, max: stat_range.max.speed }, -scale),
             // Bigger asteroids rotate slower: flip the sign so growing size pulls toward min.
             rotation_speed: biased_random_in_range(MinMax { min: stat_range.min.rotation_speed, max: stat_range.max.rotation_speed }, -scale),
-            // Bigger asteroids take more hits to destroy: bias grows with size.
-            health: biased_random_in_range(MinMax { min: stat_range.min.health as f32, max: stat_range.max.health as f32 }, scale) as u32,
+            max_health,
+            // Freshly rolled, so current health starts at max.
+            cur_health: max_health,
             // Bigger asteroids deal more collision damage: bias grows with size.
             damage_on_collision: biased_random_in_range(MinMax { min: stat_range.min.damage_on_collision as f32, max: stat_range.max.damage_on_collision as f32 }, scale) as u32,
             // Bigger asteroids take longer to spawn: bias grows with scale.
@@ -74,7 +83,7 @@ impl AsteroidKind {
         vec![
             ("Max speed".to_string(), format!("{}", max_stats.speed())),
             ("Max rotation speed".to_string(), format!("{}", max_stats.rotation_speed())),
-            ("Max health".to_string(), format!("{}", max_stats.health())),
+            ("Max health".to_string(), format!("{}", max_stats.max_health())),
             ("Max collision damage".to_string(), format!("{}", max_stats.damage_on_collision())),
         ]
     }
@@ -84,7 +93,8 @@ impl AsteroidKind {
 pub struct AsteroidStats {
     speed: f32,
     rotation_speed: f32,
-    health: u32,
+    max_health: u32,
+    cur_health: u32,
     damage_on_collision: u32,
     spawn_time: u32,
 }
@@ -96,11 +106,24 @@ impl AsteroidStats {
     pub fn rotation_speed(&self) -> f32 {
         self.rotation_speed
     }
-    pub fn health(&self) -> u32 {
-        self.health
+    pub fn max_health(&self) -> u32 {
+        self.max_health
+    }
+    pub fn cur_health(&self) -> u32 {
+        self.cur_health
     }
     pub fn damage_on_collision(&self) -> u32 {
         self.damage_on_collision
+    }
+
+    /// Reduces `cur_health` by `amount`, clamped at 0.
+    pub fn apply_damage(&mut self, amount: u32) {
+        self.cur_health = self.cur_health.saturating_sub(amount);
+    }
+
+    /// Resets `cur_health` back to `max_health` (e.g. when an asteroid respawns).
+    pub fn reset_health(&mut self) {
+        self.cur_health = self.max_health;
     }
 }
 
@@ -124,6 +147,8 @@ pub struct Asteroid {
     stats: AsteroidStats,
     animation: Animation,
     status: AsteroidStatus,
+    /// Flashes briefly after taking damage; see `HIT_BLINK_DURATION`.
+    blink: Blink,
 }
 
 impl Asteroid {
@@ -153,6 +178,7 @@ impl Asteroid {
             ),
             status: AsteroidStatus::Spawning { remaining: stats.spawn_time },
             stats,
+            blink: Blink::new(HIT_BLINK_INTERVAL),
         }
     }
 
@@ -189,13 +215,26 @@ impl Asteroid {
     }
 
     /// Resets this asteroid back to the top of the screen at a fresh random
-    /// `x`, re-entering `Spawning` for another `spawn_time`-frame delay.
-    /// Used both when an asteroid drifts off the bottom of the screen and
-    /// when one is destroyed (e.g. by colliding with the ship).
+    /// `x` with health restored to full, re-entering `Spawning` for another
+    /// `spawn_time`-frame delay. Used both when an asteroid drifts off the
+    /// bottom of the screen and when one is destroyed (e.g. by colliding
+    /// with the ship, or having its health depleted by bullets).
     pub fn respawn(&mut self) {
         self.bounds.y = 0.0;
         self.bounds.x = rand::gen_range(0.0, screen_width());
         self.status = AsteroidStatus::Spawning { remaining: self.stats.spawn_time };
+        self.stats.reset_health();
+    }
+
+    /// Reduces this asteroid's health by `amount`, respawning (destroying)
+    /// it once health reaches 0. Otherwise flashes briefly to signal the hit.
+    pub fn take_damage(&mut self, amount: u32) {
+        self.stats.apply_damage(amount);
+        if self.stats.cur_health() == 0 {
+            self.respawn();
+        } else {
+            self.blink.trigger(HIT_BLINK_DURATION);
+        }
     }
 
     /// Whether this asteroid is currently on screen and collidable (i.e. not
@@ -244,7 +283,7 @@ impl HasBoundingCircle for Asteroid {
 impl Drawable for Asteroid {
     fn draw(&self) {
         // Not on screen yet — nothing to draw until its delay elapses.
-        if !self.is_active() {
+        if !self.is_active() || !self.blink.is_visible() {
             return;
         }
         draw_texture_ex(
@@ -263,6 +302,8 @@ impl Drawable for Asteroid {
 
 impl StateUpdatable<()> for Asteroid {
     fn update_state(&mut self, _data: ()) {
-        self.update_position(get_frame_time());
+        let dt = get_frame_time();
+        self.update_position(dt);
+        self.blink.advance(dt);
     }
 }

@@ -57,6 +57,23 @@ impl AsteroidField {
         }
         damage
     }
+
+    /// Resolves a collision between `bullet` and (at most) the first active
+    /// asteroid it overlaps — a bullet can't pass through an asteroid, so it
+    /// won't hit multiple in one frame. Applies `bullet_damage` to that
+    /// asteroid's health.
+    ///
+    /// Returns whether the bullet hit something, so the caller can drop it.
+    pub fn resolve_bullet_collision<T: HasBoundingCircle>(&mut self, bullet: &T, bullet_damage: u32) -> bool {
+        for asteroid in self.asteroids.iter_mut() {
+            if asteroid.is_active() && asteroid.bounding_circle_overlaps(bullet) {
+                println!("{LOG_PREFIX} resolved a bullet collision, dealt {bullet_damage} damage");
+                asteroid.take_damage(bullet_damage);
+                return true;
+            }
+        }
+        false
+    }
 }
 
 impl Default for AsteroidField {

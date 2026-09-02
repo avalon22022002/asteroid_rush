@@ -1,8 +1,8 @@
 use macroquad::{math::{Rect, Vec2}, texture::Texture2D};
 
-const LOG_PREFIX: &str = "[animation]";
-
-/// A sequence of sprite frames played back at a fixed rate, looping.
+/// A sequence of sprite frames played back at a fixed rate. Repeats by
+/// default; call `.play_once()` at construction to freeze on the last frame
+/// instead.
 #[derive(Debug, Clone)]
 pub struct Animation {
     frames: Vec<Texture2D>,
@@ -11,9 +11,12 @@ pub struct Animation {
     /// `None` draws the whole frame; a crop strips transparent padding so the
     /// art fills its `scale` box (see `SpriteBounds`).
     crop: Option<Rect>,
+    /// Seconds each frame is shown for (`1.0 / fps`).
     frame_duration: f32,
+    /// Seconds accumulated since the current frame started.
     elapsed: f32,
     current: usize,
+    repeats: bool,
 }
 
 impl Animation {
@@ -30,7 +33,19 @@ impl Animation {
             frame_duration: 1.0 / fps,
             elapsed: 0.0,
             current: 0,
+            repeats: true,
         }
+    }
+
+    /// Marks this animation as playing once: the full animation plays
+    /// through, then the end frame is displayed forever, instead of looping
+    /// back to the first frame. Use for animations that shouldn't repeat —
+    /// e.g. a ship's death explosion, which should play through once and
+    /// hold on the settled-debris end frame, rather than replaying the
+    /// explosion animation on a loop.
+    pub fn play_once(mut self) -> Self {
+        self.repeats = false;
+        self
     }
 
     /// The crop rect, if one was set — pass straight into
@@ -51,16 +66,33 @@ impl Animation {
         }
     }
 
-    /// Advances playback by `dt` seconds, looping back to the first frame
-    /// once the current one's duration elapses.
+    /// Advances playback by `dt` seconds. When repeating is enabled, loops
+    /// back to the first frame once the current frame's duration elapses.
+    /// Otherwise, stops on the final frame.
     pub fn advance(&mut self, dt: f32) {
         if self.frames.len() <= 1 {
             return;
         }
+
         self.elapsed += dt;
+
         while self.elapsed >= self.frame_duration {
             self.elapsed -= self.frame_duration;
-            self.current = (self.current + 1) % self.frames.len();
+
+            if self.current + 1 >= self.frames.len() {
+                if self.repeats {
+                    // End of sequence — loop back to the start.
+                    self.current = 0;
+                } else {
+                    // End of sequence — hold on the last frame since repeat is disabled.
+                    self.current = self.frames.len() - 1;
+                    self.elapsed = 0.0;
+                    break;
+                }
+            } else {
+                // Mid-sequence — advance to the next frame.
+                self.current += 1;
+            }
         }
     }
 

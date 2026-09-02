@@ -1,6 +1,7 @@
 pub mod animation;
 pub mod asset_repository;
 pub mod background;
+pub mod blink;
 pub mod entities;
 pub mod traits;
 pub mod ui;

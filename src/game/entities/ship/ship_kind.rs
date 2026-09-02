@@ -6,6 +6,7 @@ use crate::game::{
         sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures},
         traits::Singleton,
     },
+    entities::bullet::bullet_kind::BulletKind,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -37,6 +38,15 @@ impl ShipKind {
         }
     }
 
+    /// The bullet kind this ship's guns fire.
+    pub fn bullet_kind(&self) -> BulletKind {
+        match self {
+            ShipKind::Vanguard => BulletKind::BlueLaser,
+            ShipKind::Sentinel => BulletKind::BlueLaser,
+            ShipKind::Viper => BulletKind::RedLaser,
+        }
+    }
+
     /// Creates the alive and dead animations for this kind, sized to fit as
     /// closely as possible inside `approx_bounds` without stretching,
     /// squashing, or cropping the sprite. Also returns that fitted box,
@@ -49,25 +59,23 @@ impl ShipKind {
 
         match self {
             ShipKind::Sentinel => {
-                let sprite = ShipV1Textures::SentinelAlive;
-                let fitted_bounds = sprite.fit_centered_in(approx_bounds);
-                let crop = Some(sprite.content_bounds());
+                let alive_sprite = ShipV1Textures::SentinelAlive;
+                let fitted_bounds = alive_sprite.fit_centered_in(approx_bounds);
 
                 let alive = Animation::new(
-                    ship_sprites.get_textures_for(&sprite),
+                    ship_sprites.get_textures_for(&alive_sprite),
                     fitted_bounds.size(),
                     12.0,
-                    crop,
+                    Some(alive_sprite.content_bounds()),
                 );
 
-                // No dedicated death sprite set yet — freeze on the last
-                // alive frame as a placeholder until one is added.
+                let dead_sprite = ShipV1Textures::SentinelDead;
                 let dead = Animation::new(
-                    ship_sprites.get_textures_for(&sprite),
+                    ship_sprites.get_textures_for(&dead_sprite),
                     fitted_bounds.size(),
-                    1.0,
-                    crop,
-                );
+                    12.0,
+                    Some(dead_sprite.content_bounds()),
+                ).play_once();
 
                 (alive, dead, fitted_bounds)
             }

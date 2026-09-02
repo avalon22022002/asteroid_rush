@@ -1,3 +1,4 @@
+pub mod guns;
 pub mod ship_kind;
 pub mod ship_stats;
 mod utils;
@@ -7,12 +8,26 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     animation::Animation,
-    entities::ship::{ship_kind::ShipKind, ship_stats::ShipStats, utils::user_input::movement_input},
+    blink::Blink,
+    entities::{
+        asteroidfield::AsteroidField,
+        ship::{
+            guns::Guns,
+            ship_kind::ShipKind,
+            ship_stats::ShipStats,
+            utils::user_input::{is_fire_key_held, movement_input},
+        },
+    },
     traits::{
         object::{HasBoundingBox, HasBoundingCircle},
         rendering::{Drawable, StateUpdatable},
     },
 };
+
+/// How long a ship flashes for after collision, in seconds.
+const HIT_BLINK_DURATION: f32 = 0.6;
+/// How long each visible/invisible phase lasts while flashing, in seconds.
+const HIT_BLINK_INTERVAL: f32 = 0.08;
 
 pub struct Ship {
     /// The ship's on-screen box — position and size together. Only `x`/`y`
@@ -21,12 +36,15 @@ pub struct Ship {
     bounds: Rect,
     kind: ShipKind,
     ship_stats: ShipStats,
+    guns: Guns,
     alive_animation: Animation,
     dead_animation: Animation,
     is_alive: bool,
+    /// Flashes briefly after taking damage; see `HIT_BLINK_DURATION`.
+    blink: Blink,
     /// When `true`, the ship ignores player input entirely — no movement,
-    /// and (once added) no shooting either. For ships that are only ever
-    /// drawn for show, e.g. the one on the home page.
+    /// and no shooting either. For ships that are only ever drawn for show,
+    /// e.g. the one on the home page.
     locked: bool,
 }
 
@@ -46,9 +64,11 @@ impl Ship {
             bounds,
             kind,
             ship_stats: ShipStats::stats_for(kind),
+            guns: Guns::guns_for_ship(kind, bounds),
             alive_animation,
             dead_animation,
             is_alive: true,
+            blink: Blink::new(HIT_BLINK_INTERVAL),
             locked: false,
         }
     }
@@ -66,15 +86,25 @@ impl Ship {
     }
 
     /// Reduces `cur_health` by `amount`, clamped at 0, and marks the ship
-    /// dead once health reaches 0. A no-op if the ship is already dead.
-    pub fn take_damage(&mut self, amount: f32) {
+    /// dead once health reaches 0. Otherwise flashes briefly to signal the
+    /// hit. A no-op if the ship is already dead.
+    pub fn take_damage(&mut self, amount: u32) {
         if !self.is_alive {
             return;
         }
         self.ship_stats.apply_damage(amount);
-        if self.ship_stats.cur_health() == 0.0 {
+        if self.ship_stats.cur_health() == 0 {
             self.is_alive = false;
+        } else {
+            self.blink.trigger(HIT_BLINK_DURATION);
         }
+    }
+
+    /// Resolves collisions between this ship's in-flight bullets and
+    /// `asteroid_field`, damaging whichever asteroid each bullet hits and
+    /// removing that bullet.
+    pub fn resolve_bullet_collisions(&mut self, asteroid_field: &mut AsteroidField) {
+        self.guns.resolve_collisions(asteroid_field);
     }
 
     /// Moves the ship by this frame's arrow-key input at `ship_stats.speed`
@@ -89,6 +119,15 @@ impl Ship {
         );
         self.bounds.x = pos.x;
         self.bounds.y = pos.y;
+    }
+
+    /// Ticks the guns' fire cooldown down and, once it's ready while the
+    /// fire key is held, fires a new volley.
+    fn apply_fire_input(&mut self, dt: f32) {
+        self.guns.tick_cooldown(dt);
+        if is_fire_key_held() && self.guns.ready_to_fire() {
+            self.guns.fire(self.kind, self.bounds);
+        }
     }
 
     /// The animation that reflects the ship's current `is_alive` state.
@@ -131,6 +170,9 @@ impl HasBoundingCircle for Ship {
 
 impl Drawable for Ship {
     fn draw(&self) {
+        if !self.blink.is_visible() {
+            return;
+        }
         draw_texture_ex(
             self.current_animation().current_frame(),
             self.bounds.x,
@@ -142,18 +184,23 @@ impl Drawable for Ship {
                 ..Default::default()
             },
         );
+        self.guns.draw();
     }
 }
 
 impl StateUpdatable<()> for Ship {
-    /// Only responds to movement input while alive and unlocked — a dead
-    /// ship shouldn't steer (just play out its death animation in place),
-    /// and a `locked` ship ignores player input altogether.
+    /// Only responds to movement/fire input while alive and unlocked — a
+    /// dead ship shouldn't steer or shoot (just play out its death
+    /// animation in place), and a `locked` ship ignores player input
+    /// altogether. Bullets already in flight keep moving regardless.
     fn update_state(&mut self, _data: ()) {
         let dt = get_frame_time();
         if self.is_alive && !self.locked {
             self.apply_movement(dt);
+            self.apply_fire_input(dt);
         }
         self.current_animation_mut().advance(dt);
+        self.blink.advance(dt);
+        self.guns.update();
     }
 }
