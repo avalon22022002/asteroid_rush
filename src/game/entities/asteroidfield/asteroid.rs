@@ -1,131 +1,25 @@
+pub mod asteroid_kind;
+pub mod asteroid_stats;
+
 use macroquad::prelude::*;
 
 use crate::game::{
-    game_config::GameLevel,
+    animation::Animation,
     asset_repository::{
-        sprite_repository::{AsteroidV1Textures, SpriteRepository, traits::{SpriteBounds, SpriteTextures}}, traits::Singleton,
-    }, animation::Animation, blink::Blink, traits::object::{HasBoundingBox, HasBoundingCircle}, traits::rendering::{Drawable, StateUpdatable}, utils::{MinMax, biased_random_in_range}
+        sprite_repository::{SpriteRepository, traits::{SpriteBounds, SpriteTextures}}, traits::Singleton,
+    },
+    blink::Blink,
+    entities::asteroidfield::asteroid::{asteroid_kind::AsteroidKind, asteroid_stats::AsteroidStats},
+    traits::{
+        object::{HasBoundingBox, HasBoundingCircle},
+        rendering::{Drawable, StateUpdatable},
+    }
 };
 
 /// How long an asteroid flashes for after taking damage, in seconds.
 const HIT_BLINK_DURATION: f32 = 0.6;
 /// How long each visible/invisible phase lasts while flashing, in seconds.
 const HIT_BLINK_INTERVAL: f32 = 0.08;
-
-/// Identifies which asteroid texture to draw. Add a variant here (and a
-/// case in `AsteroidKind::texture_kind`) to register a new asteroid look.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum AsteroidKind {
-    /// Dark rock veined with glowing molten cracks.
-    MoltenDarkAsteroid,
-}
-
-impl AsteroidKind {
-    pub fn asteroid_kind_from_level(level: &GameLevel) -> AsteroidKind {
-        match level {
-            GameLevel::Level1 => AsteroidKind::MoltenDarkAsteroid,
-            GameLevel::Level2 => AsteroidKind::MoltenDarkAsteroid,
-            GameLevel::Level3 => AsteroidKind::MoltenDarkAsteroid,
-        }
-    }
-
-    /// This kind's texture group in `SpriteRepository`.
-    pub fn texture_kind(&self) -> AsteroidV1Textures {
-        match self {
-            AsteroidKind::MoltenDarkAsteroid => AsteroidV1Textures::MoltenDark,
-        }
-    }
-
-    pub fn stat_range(&self) -> MinMax<AsteroidStats>{
-        match self {
-            AsteroidKind::MoltenDarkAsteroid =>  MinMax {
-                min: AsteroidStats { speed: 50.0, rotation_speed: 1.6, max_health: 20, cur_health: 20, damage_on_collision: 10, spawn_time: 10 },
-                max: AsteroidStats { speed: 120.0, rotation_speed: 4.2, max_health: 40, cur_health: 40, damage_on_collision: 25, spawn_time: 500},
-            },
-        }
-    }
-    fn random_stats_biased_by_scale(&self, scale: f32)-> AsteroidStats{
-        let stat_range= self.stat_range();
-        // Bigger asteroids take more hits to destroy: bias grows with size.
-        let max_health = biased_random_in_range(MinMax { min: stat_range.min.max_health as f32, max: stat_range.max.max_health as f32 }, scale) as u32;
-
-        AsteroidStats {
-            // Bigger asteroids are slower: flip the sign so growing size pulls toward min.
-            speed: biased_random_in_range(MinMax { min:stat_range.min.speed, max: stat_range.max.speed }, -scale),
-            // Bigger asteroids rotate slower: flip the sign so growing size pulls toward min.
-            rotation_speed: biased_random_in_range(MinMax { min: stat_range.min.rotation_speed, max: stat_range.max.rotation_speed }, -scale),
-            max_health,
-            // Freshly rolled, so current health starts at max.
-            cur_health: max_health,
-            // Bigger asteroids deal more collision damage: bias grows with size.
-            damage_on_collision: biased_random_in_range(MinMax { min: stat_range.min.damage_on_collision as f32, max: stat_range.max.damage_on_collision as f32 }, scale) as u32,
-            // Bigger asteroids take longer to spawn: bias grows with scale.
-            spawn_time: biased_random_in_range(MinMax { min: stat_range.min.spawn_time as f32, max: stat_range.max.spawn_time as f32 }, scale) as u32
-
-        }
-    }
-
-    pub fn display_name(&self) -> &'static str {
-        match self {
-            Self::MoltenDarkAsteroid => "Molten Dark Asteroid"
-        }
-    }
-
-    pub fn difficulty_label(&self) -> &'static str {
-        match self {
-            Self::MoltenDarkAsteroid => "Beginner Level Asteroid"
-        }
-    }
-
-    /// Stats shown on the level-select preview card, as label/value pairs.
-    pub fn preview_stats(&self) -> Vec<(String, String)> {
-        let max_stats = self.stat_range().max;
-        vec![
-            ("Max speed".to_string(), format!("{}", max_stats.speed())),
-            ("Max rotation speed".to_string(), format!("{}", max_stats.rotation_speed())),
-            ("Max health".to_string(), format!("{}", max_stats.max_health())),
-            ("Max collision damage".to_string(), format!("{}", max_stats.damage_on_collision())),
-        ]
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct AsteroidStats {
-    speed: f32,
-    rotation_speed: f32,
-    max_health: u32,
-    cur_health: u32,
-    damage_on_collision: u32,
-    spawn_time: u32,
-}
-
-impl AsteroidStats {
-    pub fn speed(&self) -> f32 {
-        self.speed
-    }
-    pub fn rotation_speed(&self) -> f32 {
-        self.rotation_speed
-    }
-    pub fn max_health(&self) -> u32 {
-        self.max_health
-    }
-    pub fn cur_health(&self) -> u32 {
-        self.cur_health
-    }
-    pub fn damage_on_collision(&self) -> u32 {
-        self.damage_on_collision
-    }
-
-    /// Reduces `cur_health` by `amount`, clamped at 0.
-    pub fn apply_damage(&mut self, amount: u32) {
-        self.cur_health = self.cur_health.saturating_sub(amount);
-    }
-
-    /// Resets `cur_health` back to `max_health` (e.g. when an asteroid respawns).
-    pub fn reset_health(&mut self) {
-        self.cur_health = self.max_health;
-    }
-}
 
 /// Where an asteroid is in its spawn lifecycle.
 #[derive(Debug, Clone, Copy)]
@@ -163,7 +57,7 @@ impl Asteroid {
         scale: f32,
     ) -> Self {
         let asteroid_sprites = &SpriteRepository::get_instance().asteroid_v1_sprite;
-        let stats = kind.random_stats_biased_by_scale(scale);
+        let stats = AsteroidStats::random_biased_by_scale_for(kind, scale);
         let size = kind.texture_kind().content_size_at_logical_unit_scale() * scale;
         Self {
             bounds: Rect::new(pos.x, pos.y, size.x, size.y),
@@ -176,7 +70,7 @@ impl Asteroid {
                 1.0,
                 None,
             ),
-            status: AsteroidStatus::Spawning { remaining: stats.spawn_time },
+            status: AsteroidStatus::Spawning { remaining: stats.spawn_time() },
             stats,
             blink: Blink::new(HIT_BLINK_INTERVAL),
         }
@@ -207,8 +101,8 @@ impl Asteroid {
             return;
         }
 
-        self.bounds.y += self.stats.speed * dt;
-        self.current_rotation += self.stats.rotation_speed * dt;
+        self.bounds.y += self.stats.speed() * dt;
+        self.current_rotation += self.stats.rotation_speed() * dt;
         if self.bounds.y > screen_height() {
             self.respawn();
         }
@@ -222,7 +116,7 @@ impl Asteroid {
     pub fn respawn(&mut self) {
         self.bounds.y = 0.0;
         self.bounds.x = rand::gen_range(0.0, screen_width());
-        self.status = AsteroidStatus::Spawning { remaining: self.stats.spawn_time };
+        self.status = AsteroidStatus::Spawning { remaining: self.stats.spawn_time() };
         self.stats.reset_health();
     }
 

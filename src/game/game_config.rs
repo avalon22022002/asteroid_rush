@@ -1,4 +1,4 @@
-use crate::game::entities::{asteroidfield::asteroid::AsteroidKind, ship::ship_kind::ShipKind};
+use crate::game::entities::{asteroidfield::asteroid::asteroid_kind::AsteroidKind, ship::ship_kind::ShipKind};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GameLevel {

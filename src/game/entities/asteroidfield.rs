@@ -1,5 +1,5 @@
 use crate::game::{
-    entities::asteroidfield::asteroid::*,
+    entities::asteroidfield::asteroid::{Asteroid, asteroid_kind::AsteroidKind},
     traits::{object::HasBoundingCircle, rendering::{Drawable, StateUpdatable}},
     utils::MinMax,
 };
