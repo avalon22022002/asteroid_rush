@@ -1,6 +1,6 @@
 use crate::game::{
     entities::asteroidfield::asteroid::{Asteroid, asteroid_kind::AsteroidKind},
-    traits::{object::HasBoundingCircle, rendering::{Drawable, StateUpdatable}},
+    traits::{damage::Damageable, object::HasBoundingCircle, rendering::{Drawable, StateUpdatable}},
     utils::MinMax,
 };
 use macroquad::{math::Vec2, window::{screen_width}};

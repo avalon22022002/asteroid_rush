@@ -11,6 +11,7 @@ use crate::game::{
     blink::Blink,
     entities::asteroidfield::asteroid::{asteroid_kind::AsteroidKind, asteroid_stats::AsteroidStats},
     traits::{
+        damage::{Damageable, DamageResult},
         object::{HasBoundingBox, HasBoundingCircle},
         rendering::{Drawable, StateUpdatable},
     }
@@ -120,17 +121,6 @@ impl Asteroid {
         self.stats.reset_health();
     }
 
-    /// Reduces this asteroid's health by `amount`, respawning (destroying)
-    /// it once health reaches 0. Otherwise flashes briefly to signal the hit.
-    pub fn take_damage(&mut self, amount: u32) {
-        self.stats.apply_damage(amount);
-        if self.stats.cur_health() == 0 {
-            self.respawn();
-        } else {
-            self.blink.trigger(HIT_BLINK_DURATION);
-        }
-    }
-
     /// Whether this asteroid is currently on screen and collidable (i.e. not
     /// still counting down in `Spawning`).
     pub fn is_active(&self) -> bool {
@@ -140,6 +130,21 @@ impl Asteroid {
     /// Damage this asteroid deals to anything it collides with.
     pub fn damage_on_collision(&self) -> u32 {
         self.stats.damage_on_collision()
+    }
+}
+
+impl Damageable for Asteroid {
+    /// Reduces this asteroid's health by `amount`, respawning (destroying)
+    /// it once health reaches 0. Otherwise flashes briefly to signal the hit.
+    fn take_damage(&mut self, amount: u32) -> DamageResult {
+        self.stats.apply_damage(amount);
+        if self.stats.cur_health() == 0 {
+            self.respawn();
+            DamageResult::Destroyed
+        } else {
+            self.blink.trigger(HIT_BLINK_DURATION);
+            DamageResult::Alive
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    BASE_HEIGHT, BASE_WIDTH, asset_repository::sprite_repository::traits::SpriteBounds, entities::{asteroidfield::AsteroidField, ship::Ship}, game_config::GameConfig, traits::interaction::{Interactive, SelfEventHandler}, traits::rendering::{Drawable, StateUpdatable}, ui::components::{
+    BASE_HEIGHT, BASE_WIDTH, asset_repository::sprite_repository::traits::SpriteBounds, entities::{asteroidfield::AsteroidField, ship::Ship}, game_config::GameConfig, traits::damage::Damageable, traits::interaction::{Interactive, SelfEventHandler}, traits::rendering::{Drawable, StateUpdatable}, ui::components::{
         button::{Button, ButtonEvents, ButtonKind},
         overlay_v1::{OverlayV1, OverlayV1Event},
     }, 
