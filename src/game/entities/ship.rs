@@ -88,11 +88,12 @@ impl Ship {
 
     /// Resolves collisions between this ship's in-flight bullets and
     /// `asteroid_field`, damaging whichever asteroid each bullet hits and
-    /// removing that bullet.
-    pub fn resolve_bullet_collisions(&mut self, asteroid_field: &mut AsteroidField) {
-        self.guns.resolve_collisions(asteroid_field);
+    /// removing that bullet. Destroyed asteroids add their point value to
+    /// `score`.
+    pub fn resolve_bullet_collisions(&mut self, asteroid_field: &mut AsteroidField, score: &mut u32) {
+        self.guns.resolve_collisions(asteroid_field, score);
     }
-
+ 
     /// Moves the ship by this frame's arrow-key input at `ship_stats.speed`
     /// units/second, clamped so it can't drift outside the game's logical
     /// `BASE_WIDTH`x`BASE_HEIGHT` bounds. Only `bounds`' position moves —

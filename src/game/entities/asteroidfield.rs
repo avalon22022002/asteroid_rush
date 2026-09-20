@@ -1,6 +1,6 @@
 use crate::game::{
     entities::asteroidfield::asteroid::{Asteroid, asteroid_kind::AsteroidKind},
-    traits::{damage::Damageable, object::HasBoundingCircle, rendering::{Drawable, StateUpdatable}},
+    traits::{damage::{Damageable, DamageResult}, object::HasBoundingCircle, rendering::{Drawable, StateUpdatable}},
     utils::MinMax,
 };
 use macroquad::{math::Vec2, window::{screen_width}};
@@ -61,14 +61,19 @@ impl AsteroidField {
     /// Resolves a collision between `bullet` and (at most) the first active
     /// asteroid it overlaps — a bullet can't pass through an asteroid, so it
     /// won't hit multiple in one frame. Applies `bullet_damage` to that
-    /// asteroid's health.
+    /// asteroid's health, adding its point value to `score` if this kills it.
     ///
     /// Returns whether the bullet hit something, so the caller can drop it.
-    pub fn resolve_bullet_collision<T: HasBoundingCircle>(&mut self, bullet: &T, bullet_damage: u32) -> bool {
+    pub fn resolve_bullet_collision<T: HasBoundingCircle>(&mut self, bullet: &T, bullet_damage: u32, score: &mut u32) -> bool {
         for asteroid in self.asteroids.iter_mut() {
             if asteroid.is_active() && asteroid.bounding_circle_overlaps(bullet) {
-                println!("{LOG_PREFIX} resolved a bullet collision, dealt {bullet_damage} damage");
-                asteroid.take_damage(bullet_damage);
+                if asteroid.take_damage(bullet_damage) == DamageResult::Destroyed {
+                    let points = asteroid.points_on_destruction();
+                    *score += points;
+                    println!("{LOG_PREFIX} resolved a bullet collision, destroyed asteroid worth {points} points");
+                } else {
+                    println!("{LOG_PREFIX} resolved a bullet collision, dealt {bullet_damage} damage");
+                }
                 return true;
             }
         }

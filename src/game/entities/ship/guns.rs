@@ -103,10 +103,11 @@ impl Guns {
 
     /// Checks every in-flight bullet against `asteroid_field`, damaging
     /// whichever asteroid each hits, and drops any bullet that hit
-    /// something — a bullet is consumed on impact.
-    pub fn resolve_collisions(&mut self, asteroid_field: &mut AsteroidField) {
+    /// something — a bullet is consumed on impact. Destroyed asteroids add
+    /// their point value to `score`.
+    pub fn resolve_collisions(&mut self, asteroid_field: &mut AsteroidField, score: &mut u32) {
         self.bullets.retain(|bullet| {
-            !asteroid_field.resolve_bullet_collision(bullet, bullet.damage())
+            !asteroid_field.resolve_bullet_collision(bullet, bullet.damage(), score)
         });
     }
 }

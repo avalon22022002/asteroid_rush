@@ -24,7 +24,9 @@ pub struct GameplayPage {
     pause_button: Button,
     pause_overlay: OverlayV1,
     ship: Ship,
-    asteroid_field: AsteroidField
+    asteroid_field: AsteroidField,
+    /// Points earned by destroying asteroids so far this run.
+    score: u32,
 }
 
 impl GameplayPage {
@@ -60,8 +62,14 @@ impl GameplayPage {
                 "Return to Home".to_string(),
             ),
             ship: Ship::new(ship_bounds, ship_kind),
-            asteroid_field: AsteroidField::new(asteroid_count, asteroid_kind, asteroid_scale_limits)
+            asteroid_field: AsteroidField::new(asteroid_count, asteroid_kind, asteroid_scale_limits),
+            score: 0,
         }
+    }
+
+    /// Points earned by destroying asteroids so far this run.
+    pub fn score(&self) -> u32 {
+        self.score
     }
 }
 
@@ -100,7 +108,7 @@ impl StateUpdatable<()> for GameplayPage {
             // Resolve bullet <-> asteroid collisions
             // Note: bullets already in flight keep hitting asteroids
             // even after the ship that fired them has died.
-            self.ship.resolve_bullet_collisions(&mut self.asteroid_field);
+            self.ship.resolve_bullet_collisions(&mut self.asteroid_field, &mut self.score);
         }
     }
 }

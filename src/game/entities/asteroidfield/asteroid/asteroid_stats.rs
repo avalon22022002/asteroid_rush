@@ -11,6 +11,7 @@ pub struct AsteroidStats {
     cur_health: u32,
     damage_on_collision: u32,
     spawn_time: u32,
+    points_on_destruction: u32,
 }
 
 impl AsteroidStats {
@@ -32,6 +33,9 @@ impl AsteroidStats {
     pub fn spawn_time(&self) -> u32 {
         self.spawn_time
     }
+    pub fn points_on_destruction(&self) -> u32 {
+        self.points_on_destruction
+    }
 
     /// Reduces `cur_health` by `amount`, clamped at 0.
     pub fn apply_damage(&mut self, amount: u32) {
@@ -46,8 +50,8 @@ impl AsteroidStats {
     pub fn range_for(kind: AsteroidKind) -> MinMax<AsteroidStats> {
         match kind {
             AsteroidKind::MoltenDarkAsteroid => MinMax {
-                min: AsteroidStats { speed: 50.0, rotation_speed: 1.6, max_health: 20, cur_health: 20, damage_on_collision: 10, spawn_time: 10 },
-                max: AsteroidStats { speed: 120.0, rotation_speed: 4.2, max_health: 40, cur_health: 40, damage_on_collision: 25, spawn_time: 500},
+                min: AsteroidStats { speed: 50.0, rotation_speed: 1.6, max_health: 20, cur_health: 20, damage_on_collision: 10, spawn_time: 10, points_on_destruction: 10 },
+                max: AsteroidStats { speed: 120.0, rotation_speed: 4.2, max_health: 40, cur_health: 40, damage_on_collision: 25, spawn_time: 500, points_on_destruction: 50},
             },
         }
     }
@@ -70,7 +74,9 @@ impl AsteroidStats {
             // Bigger asteroids deal more collision damage: bias grows with size.
             damage_on_collision: biased_random_in_range(MinMax { min: stat_range.min.damage_on_collision as f32, max: stat_range.max.damage_on_collision as f32 }, scale) as u32,
             // Bigger asteroids take longer to spawn: bias grows with scale.
-            spawn_time: biased_random_in_range(MinMax { min: stat_range.min.spawn_time as f32, max: stat_range.max.spawn_time as f32 }, scale) as u32
+            spawn_time: biased_random_in_range(MinMax { min: stat_range.min.spawn_time as f32, max: stat_range.max.spawn_time as f32 }, scale) as u32,
+            // Bigger asteroids are worth more points: bias grows with size.
+            points_on_destruction: biased_random_in_range(MinMax { min: stat_range.min.points_on_destruction as f32, max: stat_range.max.points_on_destruction as f32 }, scale) as u32
 
         }
     }

@@ -131,6 +131,11 @@ impl Asteroid {
     pub fn damage_on_collision(&self) -> u32 {
         self.stats.damage_on_collision()
     }
+
+    /// Points earned for destroying this asteroid.
+    pub fn points_on_destruction(&self) -> u32 {
+        self.stats.points_on_destruction()
+    }
 }
 
 impl Damageable for Asteroid {
