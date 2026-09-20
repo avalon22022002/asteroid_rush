@@ -3,8 +3,9 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH, asset_repository::sprite_repository::traits::SpriteBounds, entities::{asteroidfield::AsteroidField, ship::Ship}, game_config::GameConfig, traits::damage::Damageable, traits::interaction::{Interactive, SelfEventHandler}, traits::rendering::{Drawable, StateUpdatable}, ui::components::{
         button::{Button, ButtonEvents, ButtonKind},
+        hud::{Hud, HudData},
         overlay_v1::{OverlayV1, OverlayV1Event},
-    }, 
+    },
     utils::{aspect_size_from_fixed_width, MinMax}
 };
 
@@ -27,6 +28,7 @@ pub struct GameplayPage {
     asteroid_field: AsteroidField,
     /// Points earned by destroying asteroids so far this run.
     score: u32,
+    hud: Hud,
 }
 
 impl GameplayPage {
@@ -64,6 +66,7 @@ impl GameplayPage {
             ship: Ship::new(ship_bounds, ship_kind),
             asteroid_field: AsteroidField::new(asteroid_count, asteroid_kind, asteroid_scale_limits),
             score: 0,
+            hud: Hud::new(),
         }
     }
 
@@ -78,6 +81,7 @@ impl Drawable for GameplayPage {
         self.pause_button.draw();
         self.ship.draw();
         self.asteroid_field.draw();
+        self.hud.draw();
         if self.paused {
             self.pause_overlay.draw();
         }
@@ -109,6 +113,12 @@ impl StateUpdatable<()> for GameplayPage {
             // Note: bullets already in flight keep hitting asteroids
             // even after the ship that fired them has died.
             self.ship.resolve_bullet_collisions(&mut self.asteroid_field, &mut self.score);
+
+            self.hud.update_state(HudData {
+                score: self.score,
+                cur_health: self.ship.cur_health(),
+                max_health: self.ship.max_health(),
+            });
         }
     }
 }

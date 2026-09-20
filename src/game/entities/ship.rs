@@ -86,6 +86,16 @@ impl Ship {
         self.is_alive
     }
 
+    /// The ship's current health, for HUD display.
+    pub fn cur_health(&self) -> u32 {
+        self.ship_stats.cur_health()
+    }
+
+    /// The ship's max health, for HUD display.
+    pub fn max_health(&self) -> u32 {
+        self.ship_stats.max_health()
+    }
+
     /// Resolves collisions between this ship's in-flight bullets and
     /// `asteroid_field`, damaging whichever asteroid each bullet hits and
     /// removing that bullet. Destroyed asteroids add their point value to
