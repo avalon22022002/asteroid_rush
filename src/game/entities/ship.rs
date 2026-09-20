@@ -19,6 +19,7 @@ use crate::game::{
         },
     },
     traits::{
+        damage::{Damageable, DamageResult},
         object::{HasBoundingBox, HasBoundingCircle},
         rendering::{Drawable, StateUpdatable},
     },
@@ -85,28 +86,24 @@ impl Ship {
         self.is_alive
     }
 
-    /// Reduces `cur_health` by `amount`, clamped at 0, and marks the ship
-    /// dead once health reaches 0. Otherwise flashes briefly to signal the
-    /// hit. A no-op if the ship is already dead.
-    pub fn take_damage(&mut self, amount: u32) {
-        if !self.is_alive {
-            return;
-        }
-        self.ship_stats.apply_damage(amount);
-        if self.ship_stats.cur_health() == 0 {
-            self.is_alive = false;
-        } else {
-            self.blink.trigger(HIT_BLINK_DURATION);
-        }
+    /// The ship's current health, for HUD display.
+    pub fn cur_health(&self) -> u32 {
+        self.ship_stats.cur_health()
+    }
+
+    /// The ship's max health, for HUD display.
+    pub fn max_health(&self) -> u32 {
+        self.ship_stats.max_health()
     }
 
     /// Resolves collisions between this ship's in-flight bullets and
     /// `asteroid_field`, damaging whichever asteroid each bullet hits and
-    /// removing that bullet.
-    pub fn resolve_bullet_collisions(&mut self, asteroid_field: &mut AsteroidField) {
-        self.guns.resolve_collisions(asteroid_field);
+    /// removing that bullet. Destroyed asteroids add their point value to
+    /// `score`.
+    pub fn resolve_bullet_collisions(&mut self, asteroid_field: &mut AsteroidField, score: &mut u32) {
+        self.guns.resolve_collisions(asteroid_field, score);
     }
-
+ 
     /// Moves the ship by this frame's arrow-key input at `ship_stats.speed`
     /// units/second, clamped so it can't drift outside the game's logical
     /// `BASE_WIDTH`x`BASE_HEIGHT` bounds. Only `bounds`' position moves —
@@ -144,6 +141,25 @@ impl Ship {
             &mut self.alive_animation
         } else {
             &mut self.dead_animation
+        }
+    }
+}
+
+impl Damageable for Ship {
+    /// Reduces `cur_health` by `amount`, clamped at 0, and marks the ship
+    /// dead once health reaches 0. Otherwise flashes briefly to signal the
+    /// hit. A no-op (reporting `Destroyed`) if the ship is already dead.
+    fn take_damage(&mut self, amount: u32) -> DamageResult {
+        if !self.is_alive {
+            return DamageResult::Destroyed;
+        }
+        self.ship_stats.apply_damage(amount);
+        if self.ship_stats.cur_health() == 0 {
+            self.is_alive = false;
+            DamageResult::Destroyed
+        } else {
+            self.blink.trigger(HIT_BLINK_DURATION);
+            DamageResult::Alive
         }
     }
 }

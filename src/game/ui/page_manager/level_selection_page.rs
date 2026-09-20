@@ -4,7 +4,7 @@ use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     asset_repository::{ traits::Singleton, sprite_repository::{traits::{SpriteBounds,SpriteTextures}, SpriteRepository}},
     animation::Animation,
-    entities::asteroidfield::{AsteroidField, asteroid::AsteroidKind},
+    entities::asteroidfield::{AsteroidField, asteroid::asteroid_kind::AsteroidKind},
     traits::interaction::{Interactive, SelfEventHandler}, traits::rendering::{Drawable, StateUpdatable},
     ui::components::{
         banner::{Banner, BannerKind},
