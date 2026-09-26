@@ -28,6 +28,8 @@ pub struct GameplayPage {
     asteroid_field: AsteroidField,
     /// Points earned by destroying asteroids so far this run.
     score: u32,
+    /// Counts down from the level's `duration_secs` to 0; the HUD displays it.
+    time_remaining: f32,
     hud: Hud,
 }
 
@@ -49,6 +51,8 @@ impl GameplayPage {
         let asteroid_kind = game_config.asteroid_kind();
         let asteroid_scale_limits = MinMax{min: 0.3, max: 2.0};
 
+        let time_remaining = game_config.level().duration_secs();
+
         Self {
             game_config,
             paused: false,
@@ -66,6 +70,7 @@ impl GameplayPage {
             ship: Ship::new(ship_bounds, ship_kind),
             asteroid_field: AsteroidField::new(asteroid_count, asteroid_kind, asteroid_scale_limits),
             score: 0,
+            time_remaining,
             hud: Hud::new(),
         }
     }
@@ -114,10 +119,13 @@ impl StateUpdatable<()> for GameplayPage {
             // even after the ship that fired them has died.
             self.ship.resolve_bullet_collisions(&mut self.asteroid_field, &mut self.score);
 
+            self.time_remaining = (self.time_remaining - get_frame_time()).max(0.0);
+
             self.hud.update_state(HudData {
                 score: self.score,
                 cur_health: self.ship.cur_health(),
                 max_health: self.ship.max_health(),
+                time_remaining: self.time_remaining,
             });
         }
     }
