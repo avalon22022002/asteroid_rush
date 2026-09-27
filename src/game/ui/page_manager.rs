@@ -199,6 +199,10 @@ impl SelfEventHandler for PageManager {
                         println!("{LOG_PREFIX}[GameplayPage] Return to Home clicked");
                         self.current_page = Pages::HomePage(HomePage::new())
                     }
+                    Some(GamplayPageEvent::RetryButtonPressed) => {
+                        println!("{LOG_PREFIX}[GameplayPage] Retry clicked");
+                        self.current_page = Pages::GameplayPage(GameplayPage::new(self.game_config.clone()))
+                    }
                     None => {}
                 }
             }

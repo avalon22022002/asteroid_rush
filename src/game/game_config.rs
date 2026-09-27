@@ -11,9 +11,9 @@ impl GameLevel {
     /// Time allotted to complete this level, in seconds, counted down by the HUD's timer.
     pub fn duration_secs(&self) -> f32 {
         match self {
-            GameLevel::Level1 => 90.0,
-            GameLevel::Level2 => 120.0,
-            GameLevel::Level3 => 150.0,
+            GameLevel::Level1 => 30.0,
+            GameLevel::Level2 => 90.0,
+            GameLevel::Level3 => 180.0,
         }
     }
 }
