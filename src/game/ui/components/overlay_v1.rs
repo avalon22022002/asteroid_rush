@@ -21,6 +21,8 @@ struct OverlayV1Layout {
     panel_bounds: Rect,
     title_position: Vec2,
     title_font_size: u16,
+    subtitle_position: Option<Vec2>,
+    subtitle_font_size: u16,
     option_1_button_bounds: Rect,
     option_2_button_bounds: Rect,
 }
@@ -32,20 +34,23 @@ struct OverlayV1Layout {
 /// dialog, etc.
 pub struct OverlayV1 {
     title_label: String,
+    subtitle_label: Option<String>,
     option_1_button: Button,
     option_2_button: Button,
     layout: OverlayV1Layout,
 }
 
 impl OverlayV1 {
-    /// Sizes the panel to fit its own content — a title and two stacked
-    /// buttons — instead of a hardcoded height the buttons could outgrow,
-    /// centers it on screen, and derives every sub-element's position from
-    /// that panel, measuring `title` so it can be centered exactly.
-    fn calculate_layout(title: &str) -> OverlayV1Layout {
+    /// Sizes the panel to fit its own content — a title, an optional
+    /// subtitle, and two stacked buttons — instead of a hardcoded height the
+    /// buttons could outgrow, centers it on screen, and derives every
+    /// sub-element's position from that panel.
+    fn calculate_layout(title: &str, subtitle: Option<&str>) -> OverlayV1Layout {
         // Panel config
         let panel_width = 360.0;
-        let top_panel_padding = 80.0; // Space above the buttons, reserved for the title
+        let subtitle_font_size = 20;
+        // Space above the buttons, reserved for the title (and subtitle, if any).
+        let top_panel_padding = if subtitle.is_some() { 110.0 } else { 80.0 };
         let bottom_panel_padding = 24.0;
 
         // Option button common config
@@ -69,28 +74,38 @@ impl OverlayV1 {
         let option_1_button_y = panel_bounds.y + top_panel_padding;
         let option_2_button_y = option_1_button_y + option_button_size.y + option_button_vertical_gap;
 
-        // Title sits centered above the buttons, in the padding reserved for it.
+        // Title sits centered near the panel's top, at a fixed offset so
+        // adding a subtitle doesn't shift it.
         let title_font_size = 32;
         let title_size = measure_text(title, None, title_font_size, 1.0);
         let title_position = Vec2::new(
             panel_bounds.x + (panel_size.x - title_size.width) / 2.0,
-            panel_bounds.y + top_panel_padding * 0.5,
+            panel_bounds.y + 40.0,
         );
+
+        // Subtitle, if any, sits centered just below the title.
+        let subtitle_position = subtitle.map(|subtitle| {
+            let subtitle_size = measure_text(subtitle, None, subtitle_font_size, 1.0);
+            Vec2::new(panel_bounds.x + (panel_size.x - subtitle_size.width) / 2.0, title_position.y + 34.0)
+        });
 
         OverlayV1Layout {
             panel_bounds,
             title_position,
             title_font_size,
+            subtitle_position,
+            subtitle_font_size,
             option_1_button_bounds: Rect::new(option_button_x, option_1_button_y, option_button_size.x, option_button_size.y),
             option_2_button_bounds: Rect::new(option_button_x, option_2_button_y, option_button_size.x, option_button_size.y),
         }
     }
 
-    pub fn new(title_label: String, option_1_label: String, option_2_label: String) -> Self {
-        let layout = Self::calculate_layout(&title_label);
+    pub fn new(title_label: String, subtitle_label: Option<String>, option_1_label: String, option_2_label: String) -> Self {
+        let layout = Self::calculate_layout(&title_label, subtitle_label.as_deref());
 
         Self {
             title_label,
+            subtitle_label,
             option_1_button: Button::new(layout.option_1_button_bounds, option_1_label, 28, ButtonKind::Basic),
             option_2_button: Button::new(layout.option_2_button_bounds, option_2_label, 28, ButtonKind::Basic),
             layout,
@@ -117,6 +132,16 @@ impl OverlayV1 {
             TextParams { font_size: self.layout.title_font_size, color: WHITE, ..Default::default() },
         );
     }
+
+    fn draw_subtitle(&self) {
+        let (Some(subtitle), Some(position)) = (&self.subtitle_label, self.layout.subtitle_position) else { return };
+        draw_text_ex(
+            subtitle,
+            position.x,
+            position.y,
+            TextParams { font_size: self.layout.subtitle_font_size, color: Color::new(1.0, 0.85, 0.4, 1.0), ..Default::default() },
+        );
+    }
 }
 
 impl Drawable for OverlayV1 {
@@ -124,6 +149,7 @@ impl Drawable for OverlayV1 {
         self.draw_overlay_background();
         self.draw_panel();
         self.draw_title();
+        self.draw_subtitle();
         self.option_1_button.draw();
         self.option_2_button.draw();
     }

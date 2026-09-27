@@ -16,18 +16,31 @@ pub enum GamplayPageEvent {
     PauseButtonPressed,
     ResumeButtonPressed,
     ReturnToHomeButtonPressed,
+    RetryButtonPressed,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum GameOutcome {
+    Victory,
+    Defeat,
 }
 
 pub struct GameplayPage {
     game_config: GameConfig,
     /// Whether the game is currently paused.
     paused: bool,
+    /// Set once the run ends; freezes gameplay like `paused`, but there's no resuming from it.
+    outcome: Option<GameOutcome>,
+    /// Built once `outcome` is set, so it can show the final score.
+    end_overlay: Option<OverlayV1>,
     pause_button: Button,
     pause_overlay: OverlayV1,
     ship: Ship,
     asteroid_field: AsteroidField,
     /// Points earned by destroying asteroids so far this run.
     score: u32,
+    /// Counts down from the level's `duration_secs` to 0; the HUD displays it.
+    time_remaining: f32,
     hud: Hud,
 }
 
@@ -49,9 +62,13 @@ impl GameplayPage {
         let asteroid_kind = game_config.asteroid_kind();
         let asteroid_scale_limits = MinMax{min: 0.3, max: 2.0};
 
+        let time_remaining = game_config.level().duration_secs();
+
         Self {
             game_config,
             paused: false,
+            outcome: None,
+            end_overlay: None,
             pause_button: Button::new(
                 Rect::new(pause_button_pos.x, pause_button_pos.y, pause_button_size.x, pause_button_size.y),
                 "Pause".to_string(),
@@ -60,12 +77,14 @@ impl GameplayPage {
             ),
             pause_overlay: OverlayV1::new(
                 "Paused".to_string(),
+                None,
                 "Resume".to_string(),
                 "Return to Home".to_string(),
             ),
             ship: Ship::new(ship_bounds, ship_kind),
             asteroid_field: AsteroidField::new(asteroid_count, asteroid_kind, asteroid_scale_limits),
             score: 0,
+            time_remaining,
             hud: Hud::new(),
         }
     }
@@ -73,6 +92,21 @@ impl GameplayPage {
     /// Points earned by destroying asteroids so far this run.
     pub fn score(&self) -> u32 {
         self.score
+    }
+
+    fn set_outcome(&mut self, outcome: GameOutcome) {
+        let title = match outcome {
+            GameOutcome::Victory => "Victory!",
+            GameOutcome::Defeat => "Game Over",
+        };
+        self.end_overlay = Some(OverlayV1::new(
+            title.to_string(),
+            Some(format!("Score: {}", self.score)),
+            "Retry".to_string(),
+            "Return to Home".to_string(),
+        ));
+        self.outcome = Some(outcome);
+        println!("{LOG_PREFIX} Game ended: {outcome:?}");
     }
 }
 
@@ -82,7 +116,9 @@ impl Drawable for GameplayPage {
         self.ship.draw();
         self.asteroid_field.draw();
         self.hud.draw();
-        if self.paused {
+        if let Some(overlay) = &self.end_overlay {
+            overlay.draw();
+        } else if self.paused {
             self.pause_overlay.draw();
         }
     }
@@ -90,7 +126,15 @@ impl Drawable for GameplayPage {
 
 impl StateUpdatable<()> for GameplayPage {
     fn update_state(&mut self, _args: ()) {
-        if self.paused {
+        if let Some(overlay) = &mut self.end_overlay {
+            overlay.update_state(());
+
+            // Keep animating the destroyed ship so its explosion plays out;
+            // the player can't move or shoot once it's dead either way.
+            if matches!(self.outcome, Some(GameOutcome::Defeat)) {
+                self.ship.update_state(());
+            }
+        } else if self.paused {
             self.pause_overlay.update_state(());
         } else {
             self.pause_button.update_state(());
@@ -114,11 +158,20 @@ impl StateUpdatable<()> for GameplayPage {
             // even after the ship that fired them has died.
             self.ship.resolve_bullet_collisions(&mut self.asteroid_field, &mut self.score);
 
+            self.time_remaining = (self.time_remaining - get_frame_time()).max(0.0);
+
             self.hud.update_state(HudData {
                 score: self.score,
                 cur_health: self.ship.cur_health(),
                 max_health: self.ship.max_health(),
+                time_remaining: self.time_remaining,
             });
+
+            if !self.ship.is_alive() {
+                self.set_outcome(GameOutcome::Defeat);
+            } else if self.time_remaining <= 0.0 {
+                self.set_outcome(GameOutcome::Victory);
+            }
         }
     }
 }
@@ -126,6 +179,13 @@ impl StateUpdatable<()> for GameplayPage {
 impl Interactive for GameplayPage {
     type Event = Option<GamplayPageEvent>;
     fn poll_event(&self) -> Self::Event {
+        if let Some(overlay) = &self.end_overlay {
+            return match overlay.poll_event() {
+                Some(OverlayV1Event::Option1Clicked) => Some(GamplayPageEvent::RetryButtonPressed),
+                Some(OverlayV1Event::Option2Clicked) => Some(GamplayPageEvent::ReturnToHomeButtonPressed),
+                None => None,
+            };
+        }
         if self.paused {
             return match self.pause_overlay.poll_event() {
                 Some(OverlayV1Event::Option1Clicked) => Some(GamplayPageEvent::ResumeButtonPressed),
@@ -142,12 +202,15 @@ impl Interactive for GameplayPage {
 
 impl SelfEventHandler for GameplayPage {
     fn handle_self_event(&mut self, _event: Self::Event) {
-        if self.paused {
+        if let Some(overlay) = &mut self.end_overlay {
+            let event = overlay.poll_event();
+            overlay.handle_self_event(event);
+        } else if self.paused {
             let event = self.pause_overlay.poll_event();
 
             self.pause_overlay.handle_self_event(event);
 
-            if matches!(event, Some(OverlayV1Event::Option1Clicked)) { 
+            if matches!(event, Some(OverlayV1Event::Option1Clicked)) {
                 // Option 1: Resume button was clicked
                 self.paused = false;
             }

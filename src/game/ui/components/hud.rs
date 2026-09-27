@@ -6,6 +6,7 @@ pub struct HudData {
     pub score: u32,
     pub cur_health: u32,
     pub max_health: u32,
+    pub time_remaining: f32,
 }
 
 /// The gameplay HUD (heads-up display): the always-on overlay showing the
@@ -17,7 +18,13 @@ pub struct Hud {
 
 impl Hud {
     pub fn new() -> Self {
-        Self { data: HudData { score: 0, cur_health: 0, max_health: 0 } }
+        Self { data: HudData { score: 0, cur_health: 0, max_health: 0, time_remaining: 0.0 } }
+    }
+
+    /// Formats seconds as `MM:SS`, floored to the nearest whole second.
+    fn format_time(seconds: f32) -> String {
+        let total = seconds.max(0.0) as u32;
+        format!("{:02}:{:02}", total / 60, total % 60)
     }
 
     /// Draws `text` with a dark drop-shadow so it stays legible over the starfield.
@@ -56,6 +63,8 @@ impl Hud {
     fn draw_center_panel(&self) {
         const DIVIDER_COLOR: Color = Color::new(0.4, 0.7, 1.0, 0.5);
         const SCORE_COLOR: Color = Color::new(1.0, 0.85, 0.4, 1.0);
+        const LOW_TIME_COLOR: Color = Color::new(1.0, 0.36, 0.36, 1.0);
+        const LOW_TIME_THRESHOLD_SECS: f32 = 10.0;
 
         let bounds = Rect::new((BASE_WIDTH - 260.0) / 2.0, 15.0, 260.0, 62.0);
 
@@ -66,8 +75,9 @@ impl Hud {
         let score_text = self.data.score.to_string();
         Self::draw_stat(bounds.x + bounds.w / 4.0, top, "SCORE", &score_text, SCORE_COLOR);
 
-        // Time-remaining isn't wired up yet.
-        Self::draw_stat(bounds.x + bounds.w * 3.0 / 4.0, top, "TIME", "--:--", WHITE);
+        let time_text = Self::format_time(self.data.time_remaining);
+        let time_color = if self.data.time_remaining <= LOW_TIME_THRESHOLD_SECS { LOW_TIME_COLOR } else { WHITE };
+        Self::draw_stat(bounds.x + bounds.w * 3.0 / 4.0, top, "TIME", &time_text, time_color);
     }
 
     /// Draws one stat column: `label` above `value`, both centered on `center_x`.
