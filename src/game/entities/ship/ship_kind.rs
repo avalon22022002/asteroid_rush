@@ -11,9 +11,9 @@ use crate::game::{
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ShipKind {
-    // Allrounder: 1 Gun, Medium Health, Medium Speed
+    // Allrounder: 2 Gun, Medium Health, Medium Speed
     Vanguard,
-    // Defender: 3 Guns, High Health, Slow
+    // Defender: 4 Guns, High Health, Slow
     Sentinel,
     // Attacker: 3 Guns, Low Health, Fast
     Viper,
