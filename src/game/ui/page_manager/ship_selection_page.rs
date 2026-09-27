@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     asset_repository::{
-        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures},
+        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository},
         traits::Singleton,
     },
     animation::Animation,
@@ -78,16 +78,16 @@ impl ShipSelectionPage {
         let preview_card_pos = Vec2::new(buttons_right + ((BASE_WIDTH - buttons_right) - preview_card_size.x) / 2.0 + 40.0, 100.0);
         let default_ship_kind = ShipKind::Vanguard; // The preview opens on the first so the card is never empty.
 
-        // Only Sentinel has art today; reuse it as a placeholder for every ship, later on can use the first button's ship Vanguard
         let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
         let ship_icon_size = Vec2::splat(button_size.y * 0.7);
-        let default_ship_icon_textures = ShipV1Textures::SentinelAlive;
-        let default_ship_icon = || {
+        
+        let ship_icon_for = |kind: ShipKind| {
+            let textures = kind.ship_v1_texture_kind();
             Animation::new(
-                ship_sprites.get_textures_for(&default_ship_icon_textures),
+                ship_sprites.get_textures_for(&textures),
                 ship_icon_size,
                 12.0,
-                Some(default_ship_icon_textures.content_bounds()), // Crop the ship art's transparent padding, so it fills its icon/panel
+                Some(textures.content_bounds()), // Crop the ship art's transparent padding, so it fills its icon/panel
             )
         };
 
@@ -95,7 +95,7 @@ impl ShipSelectionPage {
             main_banner: Banner::new(banner_kind, banner_pos, banner_size),
             vanguard_button: IconLabelButton::new(
                 Rect::new(button_x, vanguard_button_y, button_size.x, button_size.y),
-                default_ship_icon(),
+                ship_icon_for(ShipKind::Vanguard),
                 ShipKind::Vanguard.display_name().to_string(),
                 ShipKind::Vanguard.role().to_string(),
                 button_title_font_size,
@@ -103,7 +103,7 @@ impl ShipSelectionPage {
             ),
             sentinel_button: IconLabelButton::new(
                 Rect::new(button_x, sentinel_button_y, button_size.x, button_size.y),
-                default_ship_icon(),
+                ship_icon_for(ShipKind::Sentinel),
                 ShipKind::Sentinel.display_name().to_string(),
                 ShipKind::Sentinel.role().to_string(),
                 button_title_font_size,
@@ -111,7 +111,7 @@ impl ShipSelectionPage {
             ),
             viper_button: IconLabelButton::new(
                 Rect::new(button_x, viper_button_y, button_size.x, button_size.y),
-                default_ship_icon(),
+                ship_icon_for(ShipKind::Viper),
                 ShipKind::Viper.display_name().to_string(),
                 ShipKind::Viper.role().to_string(),
                 button_title_font_size,
@@ -125,7 +125,7 @@ impl ShipSelectionPage {
             ),
             preview_card: PreviewCard::new(
                 Rect::new(preview_card_pos.x, preview_card_pos.y, preview_card_size.x, preview_card_size.y),
-                default_ship_icon(),
+                ship_icon_for(default_ship_kind),
                 default_ship_kind.display_name().to_string(),
                 default_ship_kind.role().to_string(),
                 ShipStats::preview_stats_for(default_ship_kind),
@@ -200,15 +200,14 @@ impl SelfEventHandler for ShipSelectionPage {
         if let Some(ship_kind) = selected_ship {
             self.selected_ship_kind = ship_kind;
 
-            // Only Sentinel has art today; reuse it as a placeholder for every ship.
             let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
-            let ship_crop = Some(ShipV1Textures::SentinelAlive.content_bounds());
+            let textures = ship_kind.ship_v1_texture_kind();
             self.preview_card.set_content(
                 Animation::new(
-                    ship_sprites.get_textures_for(&ShipV1Textures::SentinelAlive),
+                    ship_sprites.get_textures_for(&textures),
                     Vec2::new(140.0, 178.0),
                     12.0,
-                    ship_crop,
+                    Some(textures.content_bounds()),
                 ),
                 ship_kind.display_name().to_string(),
                 ship_kind.role().to_string(),
