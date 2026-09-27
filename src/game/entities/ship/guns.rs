@@ -51,9 +51,16 @@ impl Guns {
                 Vec2::new(ship_bounds.x + ship_bounds.w * 0.55, ship_bounds.y * 1.2),
                 Vec2::new(ship_bounds.x + ship_bounds.w * 0.65, ship_bounds.y),
             ],
-            // Single nose-mounted gun, centered — placeholder until each
-            // kind's real sprite and gun layout are added.
-            ShipKind::Vanguard => vec![Vec2::new(ship_bounds.x + ship_bounds.w * 0.5, ship_bounds.y)],
+            // Vanguard has 3 barrels: a centered nose gun flush with the top
+            // of the sprite, and a wing-mounted turret on each side, recessed
+            // behind it (1.05x the nose gun's y).
+            ShipKind::Vanguard => vec![
+                Vec2::new(ship_bounds.x + ship_bounds.w * 0.30, ship_bounds.y * 1.05),
+                Vec2::new(ship_bounds.x + ship_bounds.w * 0.5, ship_bounds.y),
+                Vec2::new(ship_bounds.x + ship_bounds.w * 0.70, ship_bounds.y * 1.05),
+            ],
+            // Single nose-mounted gun, centered — placeholder until Viper's
+            // real sprite and gun layout are added.
             ShipKind::Viper => vec![Vec2::new(ship_bounds.x + ship_bounds.w * 0.5, ship_bounds.y)],
         }
     }

@@ -142,6 +142,7 @@ impl SelfEventHandler for PageManager {
                 match ship_selection_page_event {
                     Some(ShipSelectionPageEvent::ShipConfirmed(kind)) => {
                         println!("{LOG_PREFIX}[ShipSelectionPage] {kind:?} confirmed");
+                        self.game_config.set_ship_kind(kind);
                         self.current_page = Pages::LevelSelectionPage(LevelSelectionPage::new())
                     }
                     Some(ShipSelectionPageEvent::BackButtonPressed) => {

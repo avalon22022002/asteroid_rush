@@ -1,4 +1,4 @@
-use macroquad::{math::Rect, texture::Texture2D};
+use macroquad::{math::{Rect, Vec2}, texture::Texture2D};
 use strum::EnumIter;
 use crate::game::asset_repository::sprite_repository::{
     utils::frames::{load_frames, frame_sequence},
@@ -13,6 +13,8 @@ const LOG_PREFIX: &str = "[ship_v1]";
 pub enum ShipV1Textures {
     SentinelAlive,
     SentinelDead,
+    VanguardAlive,
+    VanguardDead,
 }
 
 impl SpriteBounds for ShipV1Textures {
@@ -26,6 +28,22 @@ impl SpriteBounds for ShipV1Textures {
             ShipV1Textures::SentinelAlive => Rect::new(83.0, 23.0, 363.0, 462.0),
             // 252×264 source frames; drawn explosion occupies this sub-rect.
             ShipV1Textures::SentinelDead => Rect::new(26.0, 0.0, 207.0, 264.0),
+            // 505×492 source frames; drawn ship occupies this sub-rect.
+            ShipV1Textures::VanguardAlive => Rect::new(8.0, 22.0, 490.0, 456.0),
+            // 505×492 source frames; the debris scatters to the frame edges
+            // in the later frames, so the crop is the full canvas.
+            ShipV1Textures::VanguardDead => Rect::new(0.0, 0.0, 505.0, 492.0),
+        }
+    }
+
+    /// Per-variant override of the default `content_bounds`-derived size.
+    fn content_size_at_logical_unit_scale(&self) -> Vec2 {
+        match self {
+            // Vanguard's silhouette is wide and splayed (unlike Sentinel's
+            // tall, compact one), so it reads visually smaller than Sentinel
+            // when fit into the same box. Draw it 40% larger to compensate.
+            ShipV1Textures::VanguardAlive => self.content_bounds().size() * 1.4,
+            _ => self.content_bounds().size(),
         }
     }
 }
@@ -34,13 +52,21 @@ pub struct ShipV1 {
     /// Frames for `ShipV1Textures::Sentinel`
     sentinel_alive_texture: Vec<Texture2D>,
     sentinel_dead_texture: Vec<Texture2D>,
+    /// Frames for `ShipV1Textures::VanguardAlive`
+    vanguard_alive_texture: Vec<Texture2D>,
+    vanguard_dead_texture: Vec<Texture2D>,
 
     // Add field pair here per new variant in ShipV1Textures.
 }
 
 impl ShipV1 {
     pub fn new() -> Self {
-        Self { sentinel_alive_texture: Vec::new(), sentinel_dead_texture: Vec::new() }
+        Self {
+            sentinel_alive_texture: Vec::new(),
+            sentinel_dead_texture: Vec::new(),
+            vanguard_alive_texture: Vec::new(),
+            vanguard_dead_texture: Vec::new(),
+        }
     }
 }
 
@@ -74,6 +100,30 @@ impl SpriteTextures for ShipV1 {
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
             }
+
+            ShipV1Textures::VanguardAlive => {
+                if self.vanguard_alive_texture.is_empty() {
+                    println!("{LOG_PREFIX} loading {texture_kind:?}...");
+
+                    self.vanguard_alive_texture = load_frames(
+                        frame_sequence!("assets/animations/ships/vanguard/alive/vanguard_", ["00","01","02"])
+                    ).await;
+
+                    println!("{LOG_PREFIX} {texture_kind:?} load complete");
+                }
+            }
+
+            ShipV1Textures::VanguardDead => {
+                if self.vanguard_dead_texture.is_empty() {
+                    println!("{LOG_PREFIX} loading {texture_kind:?}...");
+
+                    self.vanguard_dead_texture = load_frames(
+                        frame_sequence!("assets/animations/ships/vanguard/dead/vanguard_dead_", ["00","01","02","03","04"])
+                    ).await;
+
+                    println!("{LOG_PREFIX} {texture_kind:?} load complete");
+                }
+            }
         }
     }
 
@@ -81,6 +131,8 @@ impl SpriteTextures for ShipV1 {
         match texture_kind {
             ShipV1Textures::SentinelAlive => &self.sentinel_alive_texture,
             ShipV1Textures::SentinelDead => &self.sentinel_dead_texture,
+            ShipV1Textures::VanguardAlive => &self.vanguard_alive_texture,
+            ShipV1Textures::VanguardDead => &self.vanguard_dead_texture,
         }
     }
 }

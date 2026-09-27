@@ -169,6 +169,9 @@ impl Interactive for LevelSelectionPage {
     /// Checks all three buttons for a click this frame. If more than one
     /// somehow fires on the same frame, the lowest level number wins.
     fn poll_event(&self) -> Self::Event {
+        if let Some(ButtonEvents::Clicked) = self.back_button.poll_event() {
+            return Some(LevelSelectionPageEvent::BackButtonPressed);
+        }
         if let Some(PreviewCardEvent::ActionButtonClicked) = self.preview_card.poll_event() {
             return Some(LevelSelectionPageEvent::LevelConfirmed(self.selected_level));
         }
