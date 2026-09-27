@@ -72,6 +72,7 @@ impl LevelSelectionPage {
         let preview_card_size = Vec2::new(320.0, 410.0);
         let preview_card_pos = Vec2::new(buttons_right + ((BASE_WIDTH - buttons_right) - preview_card_size.x) / 2.0 + 40.0, 100.0);
         let default_asteroid_kind = AsteroidKind::MoltenDarkAsteroid; // The preview opens on the first so the card is never empty.
+        let default_level = GameLevel::Level1;
 
         // Only Molten Asteroid has art today; reuse it as a placeholder for every asteroid level for now
         let asteroid_sprites = &SpriteRepository::get_instance().asteroid_v1_sprite;
@@ -85,6 +86,9 @@ impl LevelSelectionPage {
                 Some(default_asteroid_icon_textures.content_bounds()), // Crop the asteroid art's transparent padding, so it fills its icon/panel
             )
         };
+
+        let mut default_preview_stats = default_asteroid_kind.preview_stats();
+        default_preview_stats.push(("Time limit".to_string(), default_level.duration_label()));
 
         Self {
             main_banner: Banner::new(
@@ -128,7 +132,7 @@ impl LevelSelectionPage {
                 default_asteroid_icon(),
                 default_asteroid_kind.display_name().to_string(),
                 default_asteroid_kind.difficulty_label().to_string(),
-                default_asteroid_kind.preview_stats(),
+                default_preview_stats,
                 "SELECT LEVEL".to_string(),
             ),
             asteroid_field: AsteroidField::new(15, AsteroidKind::MoltenDarkAsteroid, MinMax{min: 0.3, max: 2.0}),
@@ -205,7 +209,10 @@ impl SelfEventHandler for LevelSelectionPage {
             let asteroid_kind=AsteroidKind::asteroid_kind_from_level(&self.selected_level);
             let asteroid_textures= asteroid_sprite.get_textures_for(&asteroid_kind.texture_kind());
             let asteroid_crop = Some(asteroid_kind.texture_kind().content_bounds());
-            
+
+            let mut preview_stats = asteroid_kind.preview_stats();
+            preview_stats.push(("Time limit".to_string(), level.duration_label()));
+
             self.preview_card.set_content(
                 Animation::new(
                     asteroid_textures,
@@ -215,7 +222,7 @@ impl SelfEventHandler for LevelSelectionPage {
                 ),
                 asteroid_kind.display_name().to_string(),
                 asteroid_kind.difficulty_label().to_string(),
-                asteroid_kind.preview_stats(),
+                preview_stats,
             );
         }
     }

@@ -16,6 +16,12 @@ impl GameLevel {
             GameLevel::Level3 => 180.0,
         }
     }
+
+    /// `duration_secs` formatted as `M:SS`, for display in level-select UI.
+    pub fn duration_label(&self) -> String {
+        let total = self.duration_secs() as u32;
+        format!("{}:{:02}", total / 60, total % 60)
+    }
 }
 
 #[derive(Debug, Clone)]
