@@ -42,7 +42,7 @@ impl ShipKind {
     pub fn bullet_kind(&self) -> BulletKind {
         match self {
             ShipKind::Vanguard => BulletKind::BlueLaser,
-            ShipKind::Sentinel => BulletKind::RedLaser,
+            ShipKind::Sentinel => BulletKind::BlueLaser,
             ShipKind::Viper => BulletKind::RedLaser,
         }
     }
