@@ -15,6 +15,8 @@ const LOG_PREFIX: &str = "[asteroid_v1]";
 pub enum AsteroidV1Textures {
     /// Dark rock veined with glowing molten cracks.
     MoltenDark,
+    /// Dark rock wreathed in cold blue flame, veined with purple energy.
+    Cryoflare,
 }
 
 impl SpriteBounds for AsteroidV1Textures {
@@ -25,6 +27,8 @@ impl SpriteBounds for AsteroidV1Textures {
         match self {
             // Art sits within a large transparent 3072×3072 frame.
             AsteroidV1Textures::MoltenDark => Rect::new(298.0, 325.0, 2470.0, 2391.0),
+            // Art sits within a 500×500 frame.
+            AsteroidV1Textures::Cryoflare => Rect::new(22.0, 41.0, 454.0, 421.0),
         }
     }
 
@@ -33,8 +37,11 @@ impl SpriteBounds for AsteroidV1Textures {
     fn content_size_at_logical_unit_scale(&self) -> Vec2 {
         match self {
             // The falling-field asteroid should draw much smaller than its
-            // full crop — shrink it by 97%.
+            // full crop, shrink it by 97%.
             AsteroidV1Textures::MoltenDark => self.content_bounds().size() * 0.03,
+            // Source canvas is much smaller than MoltenDark's (500×500 vs
+            // 3072×3072), shrink it to match its on-screen size.
+            AsteroidV1Textures::Cryoflare => self.content_bounds().size() * 0.1,
         }
     }
 }
@@ -42,11 +49,13 @@ impl SpriteBounds for AsteroidV1Textures {
 pub struct AsteroidV1 {
     /// Frames for `AsteroidV1Textures::MoltenDark`.
     molten_dark_texture: Vec<Texture2D>,
+    /// Frames for `AsteroidV1Textures::Cryoflare`.
+    cryoflare_texture: Vec<Texture2D>,
 }
 
 impl AsteroidV1 {
     pub fn new() -> Self {
-        Self { molten_dark_texture: Vec::new() }
+        Self { molten_dark_texture: Vec::new(), cryoflare_texture: Vec::new() }
     }
 }
 
@@ -68,12 +77,25 @@ impl SpriteTextures for AsteroidV1 {
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
             }
+
+            AsteroidV1Textures::Cryoflare => {
+                if self.cryoflare_texture.is_empty() {
+                    println!("{LOG_PREFIX} loading {texture_kind:?}...");
+
+                    self.cryoflare_texture = load_frames(
+                        frame_sequence!("assets/animations/asteroid/asteroid_", ["1"])
+                    ).await;
+
+                    println!("{LOG_PREFIX} {texture_kind:?} load complete");
+                }
+            }
         }
     }
 
     fn get_textures_for(&self, texture_kind: &AsteroidV1Textures) -> &Vec<Texture2D> {
         match texture_kind {
             AsteroidV1Textures::MoltenDark => &self.molten_dark_texture,
+            AsteroidV1Textures::Cryoflare => &self.cryoflare_texture,
         }
     }
 }

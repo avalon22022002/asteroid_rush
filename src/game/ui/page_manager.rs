@@ -5,6 +5,7 @@ mod briefing_page;
 mod gameplay_page;
 
 use crate::game::{
+    entities::asteroidfield::asteroid::asteroid_kind::AsteroidKind,
     game_config::GameConfig, traits::interaction::{Interactive, SelfEventHandler}, traits::rendering::{Drawable, StateUpdatable}, ui::page_manager::{
         briefing_page::{BriefingPage, BriefingPageEvent},
         gameplay_page::{GameplayPage, GamplayPageEvent},
@@ -160,6 +161,7 @@ impl SelfEventHandler for PageManager {
                     Some(LevelSelectionPageEvent::LevelConfirmed(level)) => {
                         println!("{LOG_PREFIX}[LevelSelectionPage] Level {level:#?} confirmed");
                         self.game_config.set_level(level);
+                        self.game_config.set_asteroid_kind(AsteroidKind::asteroid_kind_from_level(&level));
                         self.current_page = Pages::BriefingPage(BriefingPage::new(self.game_config.clone()));
                     }
                     Some(LevelSelectionPageEvent::BackButtonPressed) => {

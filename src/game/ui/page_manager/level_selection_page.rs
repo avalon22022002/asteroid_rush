@@ -74,7 +74,6 @@ impl LevelSelectionPage {
         let default_asteroid_kind = AsteroidKind::MoltenDarkAsteroid; // The preview opens on the first so the card is never empty.
         let default_level = GameLevel::Level1;
 
-        // Only Molten Asteroid has art today; reuse it as a placeholder for every asteroid level for now
         let asteroid_sprites = &SpriteRepository::get_instance().asteroid_v1_sprite;
         let asteroid_icon_size = Vec2::splat(button_size.y * 0.5);
         let default_asteroid_icon_textures = default_asteroid_kind.texture_kind();
@@ -84,6 +83,16 @@ impl LevelSelectionPage {
                 asteroid_icon_size,
                 12.0,
                 Some(default_asteroid_icon_textures.content_bounds()), // Crop the asteroid art's transparent padding, so it fills its icon/panel
+            )
+        };
+        // Each level button's icon shows that level's own asteroid kind.
+        let asteroid_icon_for = |level: GameLevel| {
+            let textures = AsteroidKind::asteroid_kind_from_level(&level).texture_kind();
+            Animation::new(
+                asteroid_sprites.get_textures_for(&textures),
+                asteroid_icon_size,
+                12.0,
+                Some(textures.content_bounds()),
             )
         };
 
@@ -98,7 +107,7 @@ impl LevelSelectionPage {
             ),
             level_1_button: IconLabelButton::new(
                 Rect::new(button_x, level_1_button_y, button_size.x, button_size.y),
-                default_asteroid_icon(),
+                asteroid_icon_for(GameLevel::Level1),
                 "Level 1".to_string(),
                 "Beginner".to_string(),
                 button_title_font_size,
@@ -106,7 +115,7 @@ impl LevelSelectionPage {
             ),
             level_2_button: IconLabelButton::new(
                 Rect::new(button_x, level_2_button_y, button_size.x, button_size.y),
-                default_asteroid_icon(),
+                asteroid_icon_for(GameLevel::Level2),
                 "Level 2".to_string(),
                 "Intermediate".to_string(),
                 button_title_font_size,
@@ -114,7 +123,7 @@ impl LevelSelectionPage {
             ),
             level_3_button: IconLabelButton::new(
                 Rect::new(button_x, level_3_button_y, button_size.x, button_size.y),
-                default_asteroid_icon(),
+                asteroid_icon_for(GameLevel::Level3),
                 "Level 3".to_string(),
                 "Advanced".to_string(),
                 button_title_font_size,

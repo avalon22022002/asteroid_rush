@@ -53,6 +53,10 @@ impl AsteroidStats {
                 min: AsteroidStats { speed: 50.0, rotation_speed: 1.6, max_health: 20, cur_health: 20, damage_on_collision: 10, spawn_time: 10, points_on_destruction: 10 },
                 max: AsteroidStats { speed: 120.0, rotation_speed: 4.2, max_health: 40, cur_health: 40, damage_on_collision: 25, spawn_time: 500, points_on_destruction: 50},
             },
+            AsteroidKind::CryoflareAsteroid => MinMax {
+                min: AsteroidStats { speed: 65.0, rotation_speed: 2.0, max_health: 35, cur_health: 35, damage_on_collision: 18, spawn_time: 10, points_on_destruction: 20 },
+                max: AsteroidStats { speed: 150.0, rotation_speed: 5.0, max_health: 65, cur_health: 65, damage_on_collision: 35, spawn_time: 500, points_on_destruction: 80},
+            },
         }
     }
 

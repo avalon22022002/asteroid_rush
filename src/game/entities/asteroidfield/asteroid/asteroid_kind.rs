@@ -11,14 +11,16 @@ use crate::game::{
 pub enum AsteroidKind {
     /// Dark rock veined with glowing molten cracks.
     MoltenDarkAsteroid,
+    /// Dark rock wreathed in cold blue flame, veined with purple energy.
+    CryoflareAsteroid,
 }
 
 impl AsteroidKind {
     pub fn asteroid_kind_from_level(level: &GameLevel) -> AsteroidKind {
         match level {
             GameLevel::Level1 => AsteroidKind::MoltenDarkAsteroid,
-            GameLevel::Level2 => AsteroidKind::MoltenDarkAsteroid,
-            GameLevel::Level3 => AsteroidKind::MoltenDarkAsteroid,
+            GameLevel::Level2 => AsteroidKind::CryoflareAsteroid,
+            GameLevel::Level3 => AsteroidKind::CryoflareAsteroid,
         }
     }
 
@@ -26,6 +28,7 @@ impl AsteroidKind {
     pub fn texture_kind(&self) -> AsteroidV1Textures {
         match self {
             AsteroidKind::MoltenDarkAsteroid => AsteroidV1Textures::MoltenDark,
+            AsteroidKind::CryoflareAsteroid => AsteroidV1Textures::Cryoflare,
         }
     }
 
@@ -35,13 +38,15 @@ impl AsteroidKind {
 
     pub fn display_name(&self) -> &'static str {
         match self {
-            Self::MoltenDarkAsteroid => "Molten Dark Asteroid"
+            Self::MoltenDarkAsteroid => "Molten Dark Asteroid",
+            Self::CryoflareAsteroid => "Cryoflare Asteroid",
         }
     }
 
     pub fn difficulty_label(&self) -> &'static str {
         match self {
-            Self::MoltenDarkAsteroid => "Beginner Level Asteroid"
+            Self::MoltenDarkAsteroid => "Beginner Level Asteroid",
+            Self::CryoflareAsteroid => "Intermediate Level Asteroid",
         }
     }
 
