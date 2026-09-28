@@ -15,6 +15,8 @@ pub enum ShipV1Textures {
     SentinelDead,
     VanguardAlive,
     VanguardDead,
+    ViperAlive,
+    ViperDead,
 }
 
 impl SpriteBounds for ShipV1Textures {
@@ -33,6 +35,12 @@ impl SpriteBounds for ShipV1Textures {
             // 505×492 source frames; the debris scatters to the frame edges
             // in the later frames, so the crop is the full canvas.
             ShipV1Textures::VanguardDead => Rect::new(0.0, 0.0, 505.0, 492.0),
+            // 382×742 source frames; drawn ship occupies this sub-rect.
+            ShipV1Textures::ViperAlive => Rect::new(3.0, 4.0, 373.0, 723.0),
+            // 662×922 source frames — each frame was individually generated
+            // at its own resolution, then centered onto this shared canvas
+            // (required so one crop rect applies correctly to every frame).
+            ShipV1Textures::ViperDead => Rect::new(143.0, 24.0, 373.0, 723.0),
         }
     }
 
@@ -43,6 +51,9 @@ impl SpriteBounds for ShipV1Textures {
             // tall, compact one), so it reads visually smaller than Sentinel
             // when fit into the same box. Draw it 40% larger to compensate.
             ShipV1Textures::VanguardAlive => self.content_bounds().size() * 1.4,
+            // Viper reads small next to the other ships at the same fit box;
+            // draw it 20% larger.
+            ShipV1Textures::ViperAlive => self.content_bounds().size() * 1.2,
             _ => self.content_bounds().size(),
         }
     }
@@ -55,6 +66,8 @@ pub struct ShipV1 {
     /// Frames for `ShipV1Textures::VanguardAlive`
     vanguard_alive_texture: Vec<Texture2D>,
     vanguard_dead_texture: Vec<Texture2D>,
+    viper_alive_texture: Vec<Texture2D>,
+    viper_dead_texture: Vec<Texture2D>,
 
     // Add field pair here per new variant in ShipV1Textures.
 }
@@ -66,6 +79,8 @@ impl ShipV1 {
             sentinel_dead_texture: Vec::new(),
             vanguard_alive_texture: Vec::new(),
             vanguard_dead_texture: Vec::new(),
+            viper_alive_texture: Vec::new(),
+            viper_dead_texture: Vec::new(),
         }
     }
 }
@@ -124,6 +139,30 @@ impl SpriteTextures for ShipV1 {
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
             }
+
+            ShipV1Textures::ViperAlive => {
+                if self.viper_alive_texture.is_empty() {
+                    println!("{LOG_PREFIX} loading {texture_kind:?}...");
+
+                    self.viper_alive_texture = load_frames(
+                        frame_sequence!("assets/animations/ships/viper/alive/viper_", ["00","01","02","03"])
+                    ).await;
+
+                    println!("{LOG_PREFIX} {texture_kind:?} load complete");
+                }
+            }
+
+            ShipV1Textures::ViperDead => {
+                if self.viper_dead_texture.is_empty() {
+                    println!("{LOG_PREFIX} loading {texture_kind:?}...");
+
+                    self.viper_dead_texture = load_frames(
+                        frame_sequence!("assets/animations/ships/viper/dead/viper_dead_", ["00","01","02","03","04"])
+                    ).await;
+
+                    println!("{LOG_PREFIX} {texture_kind:?} load complete");
+                }
+            }
         }
     }
 
@@ -133,6 +172,8 @@ impl SpriteTextures for ShipV1 {
             ShipV1Textures::SentinelDead => &self.sentinel_dead_texture,
             ShipV1Textures::VanguardAlive => &self.vanguard_alive_texture,
             ShipV1Textures::VanguardDead => &self.vanguard_dead_texture,
+            ShipV1Textures::ViperAlive => &self.viper_alive_texture,
+            ShipV1Textures::ViperDead => &self.viper_dead_texture,
         }
     }
 }

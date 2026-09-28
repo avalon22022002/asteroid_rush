@@ -15,7 +15,7 @@ pub enum ShipKind {
     Vanguard,
     // Defender: 4 Guns, High Health, Slow
     Sentinel,
-    // Attacker: 3 Guns, Low Health, Fast
+    // Attacker: 2 Guns, Low Health, Fast
     Viper,
 }
 
@@ -43,7 +43,7 @@ impl ShipKind {
         match self {
             ShipKind::Vanguard => BulletKind::BlueLaser,
             ShipKind::Sentinel => BulletKind::BlueLaser,
-            ShipKind::Viper => BulletKind::RedLaser,
+            ShipKind::Viper => BulletKind::BlueLaser,
         }
     }
 
@@ -53,7 +53,7 @@ impl ShipKind {
         match self {
             ShipKind::Vanguard => ShipV1Textures::VanguardAlive,
             ShipKind::Sentinel => ShipV1Textures::SentinelAlive,
-            ShipKind::Viper => ShipV1Textures::SentinelAlive,
+            ShipKind::Viper => ShipV1Textures::ViperAlive,
         }
     }
 
@@ -112,7 +112,27 @@ impl ShipKind {
                 (alive, dead, fitted_bounds)
             }
 
-            ShipKind::Viper => todo!("viper animation frames not added yet"),
+            ShipKind::Viper => {
+                let alive_sprite = ShipV1Textures::ViperAlive;
+                let fitted_bounds = Self::fit_at_logical_scale(alive_sprite, approx_bounds);
+
+                let alive = Animation::new(
+                    ship_sprites.get_textures_for(&alive_sprite),
+                    fitted_bounds.size(),
+                    12.0,
+                    Some(alive_sprite.content_bounds()),
+                );
+
+                let dead_sprite = ShipV1Textures::ViperDead;
+                let dead = Animation::new(
+                    ship_sprites.get_textures_for(&dead_sprite),
+                    fitted_bounds.size(),
+                    12.0,
+                    Some(dead_sprite.content_bounds()),
+                ).play_once();
+
+                (alive, dead, fitted_bounds)
+            }
         }
     }
 
