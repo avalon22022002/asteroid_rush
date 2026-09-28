@@ -10,7 +10,9 @@ pub struct AsteroidStats {
     max_health: u32,
     cur_health: u32,
     damage_on_collision: u32,
-    spawn_time: u32,
+    /// Frames to wait (not milliseconds) before this asteroid spawns —
+    /// counted down once per rendered frame, not by elapsed time.
+    spawn_delay_frames: u32,
     points_on_destruction: u32,
 }
 
@@ -30,8 +32,8 @@ impl AsteroidStats {
     pub fn damage_on_collision(&self) -> u32 {
         self.damage_on_collision
     }
-    pub fn spawn_time(&self) -> u32 {
-        self.spawn_time
+    pub fn spawn_delay_frames(&self) -> u32 {
+        self.spawn_delay_frames
     }
     pub fn points_on_destruction(&self) -> u32 {
         self.points_on_destruction
@@ -50,12 +52,12 @@ impl AsteroidStats {
     pub fn range_for(kind: AsteroidKind) -> MinMax<AsteroidStats> {
         match kind {
             AsteroidKind::MoltenDarkAsteroid => MinMax {
-                min: AsteroidStats { speed: 50.0, rotation_speed: 1.6, max_health: 20, cur_health: 20, damage_on_collision: 10, spawn_time: 10, points_on_destruction: 10 },
-                max: AsteroidStats { speed: 120.0, rotation_speed: 4.2, max_health: 40, cur_health: 40, damage_on_collision: 25, spawn_time: 500, points_on_destruction: 50},
+                min: AsteroidStats { speed: 50.0, rotation_speed: 1.6, max_health: 20, cur_health: 20, damage_on_collision: 10, spawn_delay_frames: 10, points_on_destruction: 10 },
+                max: AsteroidStats { speed: 120.0, rotation_speed: 4.2, max_health: 40, cur_health: 40, damage_on_collision: 25, spawn_delay_frames: 500, points_on_destruction: 50},
             },
             AsteroidKind::CryoflareAsteroid => MinMax {
-                min: AsteroidStats { speed: 65.0, rotation_speed: 2.0, max_health: 35, cur_health: 35, damage_on_collision: 18, spawn_time: 10, points_on_destruction: 20 },
-                max: AsteroidStats { speed: 150.0, rotation_speed: 5.0, max_health: 65, cur_health: 65, damage_on_collision: 35, spawn_time: 500, points_on_destruction: 80},
+                min: AsteroidStats { speed: 65.0, rotation_speed: 2.0, max_health: 35, cur_health: 35, damage_on_collision: 18, spawn_delay_frames: 10, points_on_destruction: 20 },
+                max: AsteroidStats { speed: 150.0, rotation_speed: 5.0, max_health: 65, cur_health: 65, damage_on_collision: 35, spawn_delay_frames: 500, points_on_destruction: 80},
             },
         }
     }
@@ -78,7 +80,7 @@ impl AsteroidStats {
             // Bigger asteroids deal more collision damage: bias grows with size.
             damage_on_collision: biased_random_in_range(MinMax { min: stat_range.min.damage_on_collision as f32, max: stat_range.max.damage_on_collision as f32 }, scale) as u32,
             // Bigger asteroids take longer to spawn: bias grows with scale.
-            spawn_time: biased_random_in_range(MinMax { min: stat_range.min.spawn_time as f32, max: stat_range.max.spawn_time as f32 }, scale) as u32,
+            spawn_delay_frames: biased_random_in_range(MinMax { min: stat_range.min.spawn_delay_frames as f32, max: stat_range.max.spawn_delay_frames as f32 }, scale) as u32,
             // Bigger asteroids are worth more points: bias grows with size.
             points_on_destruction: biased_random_in_range(MinMax { min: stat_range.min.points_on_destruction as f32, max: stat_range.max.points_on_destruction as f32 }, scale) as u32
 

@@ -21,6 +21,14 @@ use crate::game::{
 const HIT_BLINK_DURATION: f32 = 0.6;
 /// How long each visible/invisible phase lasts while flashing, in seconds.
 const HIT_BLINK_INTERVAL: f32 = 0.08;
+/// Maximum random jitter (in frames, not milliseconds — see
+/// `AsteroidStats::spawn_delay_frames`) added to the spawn delay.
+const MAX_SPAWN_DELAY_JITTER_FRAMES: u32 = 100;
+
+/// `stats.spawn_delay_frames()` plus a random jitter, for more random spawn delays.
+fn jittered_spawn_delay(stats: &AsteroidStats) -> u32 {
+    stats.spawn_delay_frames() + rand::gen_range(0, MAX_SPAWN_DELAY_JITTER_FRAMES)
+}
 
 /// Where an asteroid is in its spawn lifecycle.
 #[derive(Debug, Clone, Copy)]
@@ -71,7 +79,7 @@ impl Asteroid {
                 1.0,
                 None,
             ),
-            status: AsteroidStatus::Spawning { remaining: stats.spawn_time() },
+            status: AsteroidStatus::Spawning { remaining: jittered_spawn_delay(&stats) },
             stats,
             blink: Blink::new(HIT_BLINK_INTERVAL),
         }
@@ -80,7 +88,7 @@ impl Asteroid {
     /// Advances the asteroid downward by `speed * dt` and spins it by
     /// `rotation_speed * dt`. Once it drifts past the bottom edge it wraps
     /// back to the top at a fresh random `x` and re-enters `Spawning` for
-    /// another `spawn_time`-frame delay, so the field keeps producing
+    /// another `spawn_delay_frames`-frame delay, so the field keeps producing
     /// asteroids indefinitely instead of running out, staggered the same
     /// way a freshly-created batch is.
     ///
@@ -111,13 +119,13 @@ impl Asteroid {
 
     /// Resets this asteroid back to the top of the screen at a fresh random
     /// `x` with health restored to full, re-entering `Spawning` for another
-    /// `spawn_time`-frame delay. Used both when an asteroid drifts off the
+    /// `spawn_delay_frames`-frame delay. Used both when an asteroid drifts off the
     /// bottom of the screen and when one is destroyed (e.g. by colliding
     /// with the ship, or having its health depleted by bullets).
     pub fn respawn(&mut self) {
         self.bounds.y = 0.0;
         self.bounds.x = rand::gen_range(0.0, screen_width());
-        self.status = AsteroidStatus::Spawning { remaining: self.stats.spawn_time() };
+        self.status = AsteroidStatus::Spawning { remaining: jittered_spawn_delay(&self.stats) };
         self.stats.reset_health();
     }
 
