@@ -17,6 +17,8 @@ pub enum AsteroidV1Textures {
     MoltenDark,
     /// Dark rock wreathed in cold blue flame, veined with purple energy.
     Cryoflare,
+    /// Grey rock studded with jagged blue crystal shards, veined with electric cracks.
+    Crystalshard,
 }
 
 impl SpriteBounds for AsteroidV1Textures {
@@ -29,6 +31,8 @@ impl SpriteBounds for AsteroidV1Textures {
             AsteroidV1Textures::MoltenDark => Rect::new(298.0, 325.0, 2470.0, 2391.0),
             // Art sits within a 500×500 frame.
             AsteroidV1Textures::Cryoflare => Rect::new(22.0, 41.0, 454.0, 421.0),
+            // Art sits within a 500×500 frame.
+            AsteroidV1Textures::Crystalshard => Rect::new(15.0, 26.0, 472.0, 465.0),
         }
     }
 
@@ -42,6 +46,8 @@ impl SpriteBounds for AsteroidV1Textures {
             // Source canvas is much smaller than MoltenDark's (500×500 vs
             // 3072×3072), shrink it to match its on-screen size.
             AsteroidV1Textures::Cryoflare => self.content_bounds().size() * 0.1,
+            // Same 500×500-canvas scale as Cryoflare.
+            AsteroidV1Textures::Crystalshard => self.content_bounds().size() * 0.1,
         }
     }
 }
@@ -51,11 +57,13 @@ pub struct AsteroidV1 {
     molten_dark_texture: Vec<Texture2D>,
     /// Frames for `AsteroidV1Textures::Cryoflare`.
     cryoflare_texture: Vec<Texture2D>,
+    /// Frames for `AsteroidV1Textures::Crystalshard`.
+    crystalshard_texture: Vec<Texture2D>,
 }
 
 impl AsteroidV1 {
     pub fn new() -> Self {
-        Self { molten_dark_texture: Vec::new(), cryoflare_texture: Vec::new() }
+        Self { molten_dark_texture: Vec::new(), cryoflare_texture: Vec::new(), crystalshard_texture: Vec::new() }
     }
 }
 
@@ -89,6 +97,18 @@ impl SpriteTextures for AsteroidV1 {
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
             }
+
+            AsteroidV1Textures::Crystalshard => {
+                if self.crystalshard_texture.is_empty() {
+                    println!("{LOG_PREFIX} loading {texture_kind:?}...");
+
+                    self.crystalshard_texture = load_frames(
+                        frame_sequence!("assets/animations/asteroid/asteroid_", ["3"])
+                    ).await;
+
+                    println!("{LOG_PREFIX} {texture_kind:?} load complete");
+                }
+            }
         }
     }
 
@@ -96,6 +116,7 @@ impl SpriteTextures for AsteroidV1 {
         match texture_kind {
             AsteroidV1Textures::MoltenDark => &self.molten_dark_texture,
             AsteroidV1Textures::Cryoflare => &self.cryoflare_texture,
+            AsteroidV1Textures::Crystalshard => &self.crystalshard_texture,
         }
     }
 }

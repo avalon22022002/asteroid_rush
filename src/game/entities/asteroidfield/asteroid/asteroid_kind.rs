@@ -13,6 +13,8 @@ pub enum AsteroidKind {
     MoltenDarkAsteroid,
     /// Dark rock wreathed in cold blue flame, veined with purple energy.
     CryoflareAsteroid,
+    /// Grey rock studded with jagged blue crystal shards, veined with electric cracks.
+    CrystalshardAsteroid,
 }
 
 impl AsteroidKind {
@@ -20,7 +22,7 @@ impl AsteroidKind {
         match level {
             GameLevel::Level1 => AsteroidKind::MoltenDarkAsteroid,
             GameLevel::Level2 => AsteroidKind::CryoflareAsteroid,
-            GameLevel::Level3 => AsteroidKind::CryoflareAsteroid,
+            GameLevel::Level3 => AsteroidKind::CrystalshardAsteroid,
         }
     }
 
@@ -29,6 +31,7 @@ impl AsteroidKind {
         match self {
             AsteroidKind::MoltenDarkAsteroid => AsteroidV1Textures::MoltenDark,
             AsteroidKind::CryoflareAsteroid => AsteroidV1Textures::Cryoflare,
+            AsteroidKind::CrystalshardAsteroid => AsteroidV1Textures::Crystalshard,
         }
     }
 
@@ -40,6 +43,7 @@ impl AsteroidKind {
         match self {
             Self::MoltenDarkAsteroid => "Molten Dark Asteroid",
             Self::CryoflareAsteroid => "Cryoflare Asteroid",
+            Self::CrystalshardAsteroid => "Crystalshard Asteroid",
         }
     }
 
@@ -47,6 +51,7 @@ impl AsteroidKind {
         match self {
             Self::MoltenDarkAsteroid => "Beginner Level Asteroid",
             Self::CryoflareAsteroid => "Intermediate Level Asteroid",
+            Self::CrystalshardAsteroid => "Advanced Level Asteroid",
         }
     }
 
