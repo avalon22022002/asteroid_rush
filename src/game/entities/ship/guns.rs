@@ -1,10 +1,15 @@
-use macroquad::prelude::*;
+use macroquad::{audio, prelude::*};
 
 use crate::game::{
-    BASE_HEIGHT, BASE_WIDTH, entities::{
+    BASE_HEIGHT, BASE_WIDTH, asset_repository::{
+        audio_repository::{AudioRepository, gun_fire::GunFireSound, traits::AudioClips},
+        traits::Singleton,
+    }, entities::{
         asteroidfield::AsteroidField, bullet::{Bullet, bullet_direction::BulletDirection}, ship::ship_kind::ShipKind,
     }, traits::{object::HasBoundingBox, rendering::{Drawable, StateUpdatable}},
 };
+
+const LOG_PREFIX: &str = "[guns]";
 
 /// Manages a ship's guns, firing cooldown, and active bullets.
 ///
@@ -93,6 +98,14 @@ impl Guns {
             self.bullets.push(Bullet::new(pos, BulletDirection::Up, bullet_kind));
         }
         self.cur_cooldown = self.max_cooldown;
+
+        // play the gun fire sound once, not once per muzzle (gun)
+        audio::play_sound_once(
+            AudioRepository::get_instance()
+                .gun_fire_sounds
+                .get_clip_for(&GunFireSound::Laser)
+                .unwrap_or_else(|| panic!("{LOG_PREFIX} gun fire sound not loaded")),
+        );
     }
 
     /// Advances every in-flight bullet and drops the ones that have left
