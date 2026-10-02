@@ -1,11 +1,14 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    asset_repository::{
-        traits::Singleton,
-        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, BannerV1Textures},
-    },
     animation::Animation,
+    asset_repository::{
+        sprite_repository::{
+            BannerV1Textures, SpriteRepository,
+            traits::{SpriteBounds, SpriteTextures},
+        },
+        traits::Singleton,
+    },
     traits::rendering::Drawable,
 };
 

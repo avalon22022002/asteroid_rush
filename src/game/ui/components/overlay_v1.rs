@@ -3,8 +3,10 @@ use macroquad::prelude::*;
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     asset_repository::sprite_repository::traits::SpriteBounds,
-    traits::interaction::{Interactive, SelfEventHandler},
-    traits::rendering::{Drawable, StateUpdatable},
+    traits::{
+        interaction::{Interactive, SelfEventHandler},
+        rendering::{Drawable, StateUpdatable},
+    },
     ui::components::button::{Button, ButtonEvents, ButtonKind},
     utils::aspect_size_from_fixed_width,
 };
@@ -55,12 +57,16 @@ impl OverlayV1 {
 
         // Option button common config
         let option_button_kind = ButtonKind::Basic;
-        let option_button_size = aspect_size_from_fixed_width(panel_width - 60.0, option_button_kind.aspect_ratio());
+        let option_button_size =
+            aspect_size_from_fixed_width(panel_width - 60.0, option_button_kind.aspect_ratio());
         let option_button_vertical_gap = 14.0; // Vertical spacing between the two buttons
 
         // Panel height is derived from its content: title space, two buttons,
         // the gap between them, and the top and bottom padding.
-        let panel_height = top_panel_padding + option_button_size.y * 2.0 + option_button_vertical_gap + bottom_panel_padding;
+        let panel_height = top_panel_padding
+            + option_button_size.y * 2.0
+            + option_button_vertical_gap
+            + bottom_panel_padding;
         let panel_size = Vec2::new(panel_width, panel_height);
         let panel_bounds = Rect::new(
             (BASE_WIDTH - panel_size.x) / 2.0,
@@ -72,7 +78,8 @@ impl OverlayV1 {
         // Adjust each button's position so they're centered horizontally and stacked with a vertical gap between them.
         let option_button_x = panel_bounds.x + (panel_size.x - option_button_size.x) / 2.0;
         let option_1_button_y = panel_bounds.y + top_panel_padding;
-        let option_2_button_y = option_1_button_y + option_button_size.y + option_button_vertical_gap;
+        let option_2_button_y =
+            option_1_button_y + option_button_size.y + option_button_vertical_gap;
 
         // Title sits centered near the panel's top, at a fixed offset so
         // adding a subtitle doesn't shift it.
@@ -86,7 +93,10 @@ impl OverlayV1 {
         // Subtitle, if any, sits centered just below the title.
         let subtitle_position = subtitle.map(|subtitle| {
             let subtitle_size = measure_text(subtitle, None, subtitle_font_size, 1.0);
-            Vec2::new(panel_bounds.x + (panel_size.x - subtitle_size.width) / 2.0, title_position.y + 34.0)
+            Vec2::new(
+                panel_bounds.x + (panel_size.x - subtitle_size.width) / 2.0,
+                title_position.y + 34.0,
+            )
         });
 
         OverlayV1Layout {
@@ -95,19 +105,44 @@ impl OverlayV1 {
             title_font_size,
             subtitle_position,
             subtitle_font_size,
-            option_1_button_bounds: Rect::new(option_button_x, option_1_button_y, option_button_size.x, option_button_size.y),
-            option_2_button_bounds: Rect::new(option_button_x, option_2_button_y, option_button_size.x, option_button_size.y),
+            option_1_button_bounds: Rect::new(
+                option_button_x,
+                option_1_button_y,
+                option_button_size.x,
+                option_button_size.y,
+            ),
+            option_2_button_bounds: Rect::new(
+                option_button_x,
+                option_2_button_y,
+                option_button_size.x,
+                option_button_size.y,
+            ),
         }
     }
 
-    pub fn new(title_label: String, subtitle_label: Option<String>, option_1_label: String, option_2_label: String) -> Self {
+    pub fn new(
+        title_label: String,
+        subtitle_label: Option<String>,
+        option_1_label: String,
+        option_2_label: String,
+    ) -> Self {
         let layout = Self::calculate_layout(&title_label, subtitle_label.as_deref());
 
         Self {
             title_label,
             subtitle_label,
-            option_1_button: Button::new(layout.option_1_button_bounds, option_1_label, 28, ButtonKind::Basic),
-            option_2_button: Button::new(layout.option_2_button_bounds, option_2_label, 28, ButtonKind::Basic),
+            option_1_button: Button::new(
+                layout.option_1_button_bounds,
+                option_1_label,
+                28,
+                ButtonKind::Basic,
+            ),
+            option_2_button: Button::new(
+                layout.option_2_button_bounds,
+                option_2_label,
+                28,
+                ButtonKind::Basic,
+            ),
             layout,
         }
     }
@@ -115,13 +150,32 @@ impl OverlayV1 {
     /// Draws a black rectangle with 60% opacity over the entire screen,
     /// dimming the content behind the overlay.
     fn draw_overlay_background(&self) {
-        draw_rectangle(0.0, 0.0, BASE_WIDTH, BASE_HEIGHT, Color::new(0.0, 0.0, 0.0, 0.6));
+        draw_rectangle(
+            0.0,
+            0.0,
+            BASE_WIDTH,
+            BASE_HEIGHT,
+            Color::new(0.0, 0.0, 0.0, 0.6),
+        );
     }
 
     fn draw_panel(&self) {
         let bounds = self.layout.panel_bounds;
-        draw_rectangle(bounds.x, bounds.y, bounds.w, bounds.h, Color::new(0.05, 0.08, 0.15, 0.9));
-        draw_rectangle_lines(bounds.x, bounds.y, bounds.w, bounds.h, 2.0, Color::new(0.4, 0.7, 1.0, 0.6));
+        draw_rectangle(
+            bounds.x,
+            bounds.y,
+            bounds.w,
+            bounds.h,
+            Color::new(0.05, 0.08, 0.15, 0.9),
+        );
+        draw_rectangle_lines(
+            bounds.x,
+            bounds.y,
+            bounds.w,
+            bounds.h,
+            2.0,
+            Color::new(0.4, 0.7, 1.0, 0.6),
+        );
     }
 
     fn draw_title(&self) {
@@ -129,17 +183,29 @@ impl OverlayV1 {
             &self.title_label,
             self.layout.title_position.x,
             self.layout.title_position.y,
-            TextParams { font_size: self.layout.title_font_size, color: WHITE, ..Default::default() },
+            TextParams {
+                font_size: self.layout.title_font_size,
+                color: WHITE,
+                ..Default::default()
+            },
         );
     }
 
     fn draw_subtitle(&self) {
-        let (Some(subtitle), Some(position)) = (&self.subtitle_label, self.layout.subtitle_position) else { return };
+        let (Some(subtitle), Some(position)) =
+            (&self.subtitle_label, self.layout.subtitle_position)
+        else {
+            return;
+        };
         draw_text_ex(
             subtitle,
             position.x,
             position.y,
-            TextParams { font_size: self.layout.subtitle_font_size, color: Color::new(1.0, 0.85, 0.4, 1.0), ..Default::default() },
+            TextParams {
+                font_size: self.layout.subtitle_font_size,
+                color: Color::new(1.0, 0.85, 0.4, 1.0),
+                ..Default::default()
+            },
         );
     }
 }

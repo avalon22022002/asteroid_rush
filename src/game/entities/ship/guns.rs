@@ -1,12 +1,20 @@
 use macroquad::{audio, prelude::*};
 
 use crate::game::{
-    BASE_HEIGHT, BASE_WIDTH, asset_repository::{
+    BASE_HEIGHT, BASE_WIDTH,
+    asset_repository::{
         audio_repository::{AudioRepository, gun_fire::GunFireSound, traits::AudioClips},
         traits::Singleton,
-    }, entities::{
-        asteroidfield::AsteroidField, bullet::{Bullet, bullet_direction::BulletDirection}, ship::ship_kind::ShipKind,
-    }, traits::{object::HasBoundingBox, rendering::{Drawable, StateUpdatable}},
+    },
+    entities::{
+        asteroidfield::AsteroidField,
+        bullet::{Bullet, bullet_direction::BulletDirection},
+        ship::ship_kind::ShipKind,
+    },
+    traits::{
+        object::HasBoundingBox,
+        rendering::{Drawable, StateUpdatable},
+    },
 };
 
 const LOG_PREFIX: &str = "[guns]";
@@ -30,9 +38,9 @@ impl Guns {
     /// Builds the gun loadout for `ship_kind`: how many guns and how fast
     /// they fire.
     pub fn guns_for_ship(ship_kind: ShipKind, ship_bounds: Rect) -> Guns {
-        let max_cooldown= match ship_kind {
+        let max_cooldown = match ship_kind {
             ShipKind::Vanguard => 0.3,
-            ShipKind::Sentinel =>  0.45,
+            ShipKind::Sentinel => 0.45,
             ShipKind::Viper => 0.2,
         };
 
@@ -95,7 +103,8 @@ impl Guns {
     pub fn fire(&mut self, ship_kind: ShipKind, ship_bounds: Rect) {
         let bullet_kind = ship_kind.bullet_kind();
         for pos in Guns::gun_muzzle_positions(ship_kind, ship_bounds) {
-            self.bullets.push(Bullet::new(pos, BulletDirection::Up, bullet_kind));
+            self.bullets
+                .push(Bullet::new(pos, BulletDirection::Up, bullet_kind));
         }
         self.cur_cooldown = self.max_cooldown;
 

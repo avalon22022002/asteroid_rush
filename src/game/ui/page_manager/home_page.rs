@@ -4,8 +4,10 @@ use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     asset_repository::sprite_repository::traits::SpriteBounds,
     entities::ship::{Ship, ship_kind::ShipKind},
-    traits::interaction::{Interactive, SelfEventHandler},
-    traits::rendering::{Drawable, StateUpdatable},
+    traits::{
+        interaction::{Interactive, SelfEventHandler},
+        rendering::{Drawable, StateUpdatable},
+    },
     ui::components::{
         banner::{Banner, BannerKind},
         button::{Button, ButtonEvents, ButtonKind},
@@ -35,15 +37,16 @@ impl Default for HomePage {
 
 impl HomePage {
     pub fn new() -> Self {
-
         // HomePage main banner config
         let banner_kind = BannerKind::HomeTitle;
         let banner_pos = Vec2::new(40.0, BASE_HEIGHT * 0.09);
-        let banner_size = aspect_size_from_fixed_height(BASE_HEIGHT * 0.24, banner_kind.aspect_ratio());
+        let banner_size =
+            aspect_size_from_fixed_height(BASE_HEIGHT * 0.24, banner_kind.aspect_ratio());
 
         // HomePage button common config
         let button_kind = ButtonKind::Basic;
-        let button_size = aspect_size_from_fixed_width(BASE_WIDTH * 0.3, button_kind.aspect_ratio());
+        let button_size =
+            aspect_size_from_fixed_width(BASE_WIDTH * 0.3, button_kind.aspect_ratio());
         let button_pos_x = banner_pos.x + (banner_size.x - button_size.x) / 2.0; // Adjust the button's x co-ordinate so the buttons sit directly below the banner's "Space shooter Classic" title.
         let button_vertical_gap = 14.0; // Vertical Spacing between buttons
 
@@ -54,7 +57,12 @@ impl HomePage {
         Self {
             main_banner: Banner::new(banner_kind, banner_pos, banner_size),
             new_game_button: Button::new(
-                Rect::new(button_pos_x, new_game_button_y, button_size.x, button_size.y),
+                Rect::new(
+                    button_pos_x,
+                    new_game_button_y,
+                    button_size.x,
+                    button_size.y,
+                ),
                 "New Game".to_string(),
                 34,
                 button_kind,
@@ -68,7 +76,7 @@ impl HomePage {
             ship: Ship::new(
                 // Right-anchored, vertically aligned with the button group.
                 Rect::new(BASE_WIDTH - 380.0, BASE_HEIGHT * 0.36, 236.0, 300.0),
-                ShipKind::Sentinel
+                ShipKind::Sentinel,
             )
             // Purely decorative here — shouldn't move or shoot.
             .locked(true),

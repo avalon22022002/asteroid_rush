@@ -1,9 +1,9 @@
+use crate::game::asset_repository::sprite_repository::{
+    traits::{Sprite, SpriteBounds, SpriteTextures},
+    utils::frames::{frame_sequence, load_frames},
+};
 use macroquad::{math::Rect, texture::Texture2D};
 use strum::EnumIter;
-use crate::game::asset_repository::sprite_repository::{
-    utils::frames::{load_frames, frame_sequence},
-    traits::{SpriteTextures, Sprite, SpriteBounds},
-};
 
 const LOG_PREFIX: &str = "[banner_v1]";
 
@@ -59,9 +59,8 @@ impl SpriteTextures for BannerV1 {
                 if self.home_page_main_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.home_page_main_texture = load_frames(
-                        frame_sequence!("assets/ui/text/home_page_title", [""])
-                    ).await;
+                    self.home_page_main_texture =
+                        load_frames(frame_sequence!("assets/ui/text/home_page_title", [""])).await;
 
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
@@ -70,9 +69,11 @@ impl SpriteTextures for BannerV1 {
                 if self.level_selection_page_main_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.level_selection_page_main_texture = load_frames(
-                        frame_sequence!("assets/ui/text/level_selection_page_title", [""])
-                    ).await;
+                    self.level_selection_page_main_texture = load_frames(frame_sequence!(
+                        "assets/ui/text/level_selection_page_title",
+                        [""]
+                    ))
+                    .await;
 
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
@@ -81,9 +82,11 @@ impl SpriteTextures for BannerV1 {
                 if self.ship_selection_page_main_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.ship_selection_page_main_texture = load_frames(
-                        frame_sequence!("assets/ui/text/ship_selection_page_title", [""])
-                    ).await;
+                    self.ship_selection_page_main_texture = load_frames(frame_sequence!(
+                        "assets/ui/text/ship_selection_page_title",
+                        [""]
+                    ))
+                    .await;
 
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }

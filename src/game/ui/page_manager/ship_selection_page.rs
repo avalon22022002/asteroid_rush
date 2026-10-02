@@ -2,14 +2,19 @@ use macroquad::prelude::*;
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
+    animation::Animation,
     asset_repository::{
-        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository},
+        sprite_repository::{
+            SpriteRepository,
+            traits::{SpriteBounds, SpriteTextures},
+        },
         traits::Singleton,
     },
-    animation::Animation,
     entities::ship::{ship_kind::ShipKind, ship_stats::ShipStats},
-    traits::interaction::{Interactive, SelfEventHandler},
-    traits::rendering::{Drawable, StateUpdatable},
+    traits::{
+        interaction::{Interactive, SelfEventHandler},
+        rendering::{Drawable, StateUpdatable},
+    },
     ui::components::{
         banner::{Banner, BannerKind},
         button::{Button, ButtonEvents, ButtonKind},
@@ -52,11 +57,13 @@ impl ShipSelectionPage {
         // Title banner Config
         let banner_kind = BannerKind::ShipSelectionTitle;
         let banner_pos = Vec2::new(common_pos_x, 12.0);
-        let banner_size = aspect_size_from_fixed_height(BASE_HEIGHT * 0.18, banner_kind.aspect_ratio());
+        let banner_size =
+            aspect_size_from_fixed_height(BASE_HEIGHT * 0.18, banner_kind.aspect_ratio());
 
         // Ship Selection Page button common config
         let button_kind = ButtonKind::Basic;
-        let button_size = aspect_size_from_fixed_width(BASE_WIDTH * 0.30, button_kind.aspect_ratio());
+        let button_size =
+            aspect_size_from_fixed_width(BASE_WIDTH * 0.30, button_kind.aspect_ratio());
         let button_vertical_gap = 14.0; // Vertical Spacing between buttons
         let button_title_font_size = 24;
         let button_subtitle_font_size = 16;
@@ -75,12 +82,15 @@ impl ShipSelectionPage {
         // Ship Selection Page preview card config
         // Adjust the preview card so its centered in the right space beside the buttons column
         let preview_card_size = Vec2::new(320.0, 410.0);
-        let preview_card_pos = Vec2::new(buttons_right + ((BASE_WIDTH - buttons_right) - preview_card_size.x) / 2.0 + 40.0, 100.0);
+        let preview_card_pos = Vec2::new(
+            buttons_right + ((BASE_WIDTH - buttons_right) - preview_card_size.x) / 2.0 + 40.0,
+            100.0,
+        );
         let default_ship_kind = ShipKind::Vanguard; // The preview opens on the first so the card is never empty.
 
         let ship_sprites = &SpriteRepository::get_instance().ship_v1_sprite;
         let ship_icon_size = Vec2::splat(button_size.y * 0.7);
-        
+
         let ship_icon_for = |kind: ShipKind| {
             let textures = kind.ship_v1_texture_kind();
             Animation::new(
@@ -118,13 +128,23 @@ impl ShipSelectionPage {
                 button_subtitle_font_size,
             ),
             back_button: Button::new(
-                Rect::new(back_button_pos.x, back_button_pos.y, back_button_size.x, back_button_size.y),
+                Rect::new(
+                    back_button_pos.x,
+                    back_button_pos.y,
+                    back_button_size.x,
+                    back_button_size.y,
+                ),
                 "Back".to_string(),
                 20,
                 button_kind,
             ),
             preview_card: PreviewCard::new(
-                Rect::new(preview_card_pos.x, preview_card_pos.y, preview_card_size.x, preview_card_size.y),
+                Rect::new(
+                    preview_card_pos.x,
+                    preview_card_pos.y,
+                    preview_card_size.x,
+                    preview_card_size.y,
+                ),
                 ship_icon_for(default_ship_kind),
                 default_ship_kind.display_name().to_string(),
                 default_ship_kind.role().to_string(),
@@ -166,7 +186,9 @@ impl Interactive for ShipSelectionPage {
             return Some(ShipSelectionPageEvent::BackButtonPressed);
         }
         if let Some(PreviewCardEvent::ActionButtonClicked) = self.preview_card.poll_event() {
-            return Some(ShipSelectionPageEvent::ShipConfirmed(self.selected_ship_kind));
+            return Some(ShipSelectionPageEvent::ShipConfirmed(
+                self.selected_ship_kind,
+            ));
         }
         None
     }
@@ -187,9 +209,15 @@ impl SelfEventHandler for ShipSelectionPage {
 
         // A ship-button click pins that ship as the preview subject. The page
         // knows which button fired, so selection lives here, not on the buttons.
-        let selected_ship = if matches!(self.vanguard_button.poll_event(), Some(ButtonEvents::Clicked)) {
+        let selected_ship = if matches!(
+            self.vanguard_button.poll_event(),
+            Some(ButtonEvents::Clicked)
+        ) {
             Some(ShipKind::Vanguard)
-        } else if matches!(self.sentinel_button.poll_event(), Some(ButtonEvents::Clicked)) {
+        } else if matches!(
+            self.sentinel_button.poll_event(),
+            Some(ButtonEvents::Clicked)
+        ) {
             Some(ShipKind::Sentinel)
         } else if matches!(self.viper_button.poll_event(), Some(ButtonEvents::Clicked)) {
             Some(ShipKind::Viper)

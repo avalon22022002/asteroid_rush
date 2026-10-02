@@ -1,4 +1,7 @@
-use macroquad::{math::{Rect, Vec2}, texture::Texture2D};
+use macroquad::{
+    math::{Rect, Vec2},
+    texture::Texture2D,
+};
 
 /// A sequence of sprite frames played back at a fixed rate. Repeats by
 /// default; call `.play_once()` at construction to freeze on the last frame
@@ -107,7 +110,7 @@ impl Animation {
     pub fn current_frame(&self) -> &Texture2D {
         &self.frames[self.current]
     }
-    
+
     pub fn frame_scale(&self) -> &Vec2 {
         &self.scale
     }

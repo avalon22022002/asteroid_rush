@@ -1,27 +1,24 @@
-pub mod traits;
-pub mod button_click;
-pub mod button_hover;
-pub mod gun_fire;
 pub mod asteroid_destruction;
 pub mod asteroid_hit;
-pub mod ship_destruction;
-pub mod ship_damage;
+pub mod button_click;
+pub mod button_hover;
 pub mod game_outcome;
+pub mod gun_fire;
+pub mod ship_damage;
+pub mod ship_destruction;
+pub mod traits;
 
 use std::sync::OnceLock;
 
 use futures::executor;
 
-use button_click::ButtonClickSounds;
-use button_hover::ButtonHoverSounds;
-use gun_fire::GunFireSounds;
-use asteroid_destruction::AsteroidDestructionSounds;
-use asteroid_hit::AsteroidHitSounds;
-use ship_destruction::ShipDestructionSounds;
-use ship_damage::ShipDamageSounds;
-use game_outcome::GameOutcomeSounds;
 use crate::game::asset_repository::{
-    audio_repository::traits::AudioClips,
+    audio_repository::{
+        asteroid_destruction::AsteroidDestructionSounds, asteroid_hit::AsteroidHitSounds,
+        button_click::ButtonClickSounds, button_hover::ButtonHoverSounds,
+        game_outcome::GameOutcomeSounds, gun_fire::GunFireSounds, ship_damage::ShipDamageSounds,
+        ship_destruction::ShipDestructionSounds, traits::AudioClips,
+    },
     traits::{Preloadable, Singleton},
 };
 

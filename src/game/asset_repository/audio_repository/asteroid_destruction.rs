@@ -1,6 +1,6 @@
+use crate::game::asset_repository::audio_repository::traits::AudioClips;
 use macroquad::audio::{self, Sound};
 use strum::EnumIter;
-use crate::game::asset_repository::audio_repository::traits::AudioClips;
 
 const LOG_PREFIX: &str = "[asteroid_destruction]";
 

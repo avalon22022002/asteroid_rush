@@ -1,7 +1,6 @@
 use crate::game::{
     asset_repository::sprite_repository::AsteroidV1Textures,
-    entities::asteroidfield::asteroid::asteroid_stats::AsteroidStats,
-    game_config::GameLevel,
+    entities::asteroidfield::asteroid::asteroid_stats::AsteroidStats, game_config::GameLevel,
     utils::MinMax,
 };
 
@@ -35,7 +34,7 @@ impl AsteroidKind {
         }
     }
 
-    pub fn stat_range(&self) -> MinMax<AsteroidStats>{
+    pub fn stat_range(&self) -> MinMax<AsteroidStats> {
         AsteroidStats::range_for(*self)
     }
 
@@ -60,9 +59,18 @@ impl AsteroidKind {
         let max_stats = self.stat_range().max;
         vec![
             ("Max speed".to_string(), format!("{}", max_stats.speed())),
-            ("Max rotation speed".to_string(), format!("{}", max_stats.rotation_speed())),
-            ("Max health".to_string(), format!("{}", max_stats.max_health())),
-            ("Max collision damage".to_string(), format!("{}", max_stats.damage_on_collision())),
+            (
+                "Max rotation speed".to_string(),
+                format!("{}", max_stats.rotation_speed()),
+            ),
+            (
+                "Max health".to_string(),
+                format!("{}", max_stats.max_health()),
+            ),
+            (
+                "Max collision damage".to_string(),
+                format!("{}", max_stats.damage_on_collision()),
+            ),
         ]
     }
 }

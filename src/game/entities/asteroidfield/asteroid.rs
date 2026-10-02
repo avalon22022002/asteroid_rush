@@ -6,15 +6,21 @@ use macroquad::prelude::*;
 use crate::game::{
     animation::Animation,
     asset_repository::{
-        sprite_repository::{SpriteRepository, traits::{SpriteBounds, SpriteTextures}}, traits::Singleton,
+        sprite_repository::{
+            SpriteRepository,
+            traits::{SpriteBounds, SpriteTextures},
+        },
+        traits::Singleton,
     },
     blink::Blink,
-    entities::asteroidfield::asteroid::{asteroid_kind::AsteroidKind, asteroid_stats::AsteroidStats},
+    entities::asteroidfield::asteroid::{
+        asteroid_kind::AsteroidKind, asteroid_stats::AsteroidStats,
+    },
     traits::{
-        damage::{Damageable, DamageResult},
+        damage::{DamageResult, Damageable},
         object::{HasBoundingBox, HasBoundingCircle},
         rendering::{Drawable, StateUpdatable},
-    }
+    },
 };
 
 /// How long an asteroid flashes for after taking damage, in seconds.
@@ -36,7 +42,9 @@ enum AsteroidStatus {
     /// Not yet on screen — counts `remaining` frames down to 0, then spawns
     /// (picks a fresh `x` and switches to `Active`). Used to stagger a
     /// freshly-created batch of asteroids so they don't all pop in at once.
-    Spawning { remaining: u32 },
+    Spawning {
+        remaining: u32,
+    },
     Active,
 }
 
@@ -45,7 +53,7 @@ pub struct Asteroid {
     /// The asteroid's on-screen box (`x`, `y`, `w`, `h` — position and size together)
     bounds: Rect,
     current_rotation: f32, // Current rotation in radians (matches `DrawTextureParams::rotation`)
-    kind: AsteroidKind, // The asteroid's kind
+    kind: AsteroidKind,    // The asteroid's kind
     scale: f32, // Scale factor for asteroid size variation, without needing separate art per size
     stats: AsteroidStats,
     animation: Animation,
@@ -59,12 +67,7 @@ impl Asteroid {
     /// that many frames instead of spawning it immediately — 0 (or less)
     /// spawns right away. Used to stagger a freshly-created batch of
     /// asteroids so they don't all pop in at once.
-    pub fn new(
-        pos: Vec2,
-        current_rotation: f32,
-        kind: AsteroidKind,
-        scale: f32,
-    ) -> Self {
+    pub fn new(pos: Vec2, current_rotation: f32, kind: AsteroidKind, scale: f32) -> Self {
         let asteroid_sprites = &SpriteRepository::get_instance().asteroid_v1_sprite;
         let stats = AsteroidStats::random_biased_by_scale_for(kind, scale);
         let size = kind.texture_kind().content_size_at_logical_unit_scale() * scale;
@@ -79,7 +82,9 @@ impl Asteroid {
                 1.0,
                 None,
             ),
-            status: AsteroidStatus::Spawning { remaining: jittered_spawn_delay(&stats) },
+            status: AsteroidStatus::Spawning {
+                remaining: jittered_spawn_delay(&stats),
+            },
             stats,
             blink: Blink::new(HIT_BLINK_INTERVAL),
         }
@@ -125,7 +130,9 @@ impl Asteroid {
     pub fn respawn(&mut self) {
         self.bounds.y = 0.0;
         self.bounds.x = rand::gen_range(0.0, screen_width());
-        self.status = AsteroidStatus::Spawning { remaining: jittered_spawn_delay(&self.stats) };
+        self.status = AsteroidStatus::Spawning {
+            remaining: jittered_spawn_delay(&self.stats),
+        };
         self.stats.reset_health();
     }
 
@@ -170,10 +177,13 @@ impl HasBoundingBox for Asteroid {
 impl Default for Asteroid {
     fn default() -> Self {
         Asteroid::new(
-            Vec2::new(rand::gen_range(0.0, screen_width()), rand::gen_range(0.0, screen_height())),
+            Vec2::new(
+                rand::gen_range(0.0, screen_width()),
+                rand::gen_range(0.0, screen_height()),
+            ),
             rand::gen_range(60.0, 220.0),
             AsteroidKind::MoltenDarkAsteroid,
-            rand::gen_range(0.5, 1.5)
+            rand::gen_range(0.5, 1.5),
         )
     }
 }

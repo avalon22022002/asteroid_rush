@@ -1,7 +1,15 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    BASE_HEIGHT, BASE_WIDTH, asset_repository::sprite_repository::traits::SpriteBounds, game_config::GameConfig, traits::interaction::{Interactive, SelfEventHandler}, traits::rendering::{Drawable, StateUpdatable}, ui::components::button::{Button, ButtonEvents, ButtonKind}, utils::aspect_size_from_fixed_width,
+    BASE_HEIGHT, BASE_WIDTH,
+    asset_repository::sprite_repository::traits::SpriteBounds,
+    game_config::GameConfig,
+    traits::{
+        interaction::{Interactive, SelfEventHandler},
+        rendering::{Drawable, StateUpdatable},
+    },
+    ui::components::button::{Button, ButtonEvents, ButtonKind},
+    utils::aspect_size_from_fixed_width,
 };
 
 /// Lines of the "how to play" body text, drawn top-to-bottom.
@@ -30,11 +38,10 @@ impl BriefingPage {
     pub fn new(game_config: GameConfig) -> Self {
         let button_kind = ButtonKind::Basic;
 
-        let start_button_size = aspect_size_from_fixed_width(BASE_WIDTH * 0.28, button_kind.aspect_ratio());
-        let start_button_pos = Vec2::new(
-            (BASE_WIDTH - start_button_size.x) / 2.0,
-            BASE_HEIGHT * 0.7,
-        );
+        let start_button_size =
+            aspect_size_from_fixed_width(BASE_WIDTH * 0.28, button_kind.aspect_ratio());
+        let start_button_pos =
+            Vec2::new((BASE_WIDTH - start_button_size.x) / 2.0, BASE_HEIGHT * 0.7);
 
         let back_button_size = aspect_size_from_fixed_width(90.0, button_kind.aspect_ratio());
         let back_button_pos = Vec2::new(BASE_WIDTH - back_button_size.x - 20.0, 15.0);
@@ -42,13 +49,23 @@ impl BriefingPage {
         Self {
             game_config,
             start_button: Button::new(
-                Rect::new(start_button_pos.x, start_button_pos.y, start_button_size.x, start_button_size.y),
+                Rect::new(
+                    start_button_pos.x,
+                    start_button_pos.y,
+                    start_button_size.x,
+                    start_button_size.y,
+                ),
                 "Start Game".to_string(),
                 28,
                 button_kind,
             ),
             back_button: Button::new(
-                Rect::new(back_button_pos.x, back_button_pos.y, back_button_size.x, back_button_size.y),
+                Rect::new(
+                    back_button_pos.x,
+                    back_button_pos.y,
+                    back_button_size.x,
+                    back_button_size.y,
+                ),
                 "Back".to_string(),
                 20,
                 button_kind,
@@ -67,14 +84,23 @@ impl BriefingPage {
             text,
             (BASE_WIDTH - ts.width) / 2.0,
             baseline_y,
-            TextParams { font_size, color, ..Default::default() },
+            TextParams {
+                font_size,
+                color,
+                ..Default::default()
+            },
         );
     }
 }
 
 impl Drawable for BriefingPage {
     fn draw(&self) {
-        Self::draw_text_centered("MISSION BRIEFING", BASE_HEIGHT * 0.16, 40, Color::new(0.4, 0.7, 1.0, 1.0));
+        Self::draw_text_centered(
+            "MISSION BRIEFING",
+            BASE_HEIGHT * 0.16,
+            40,
+            Color::new(0.4, 0.7, 1.0, 1.0),
+        );
         Self::draw_text_centered(
             &format!("Level {:?}", self.game_config.level()),
             BASE_HEIGHT * 0.24,

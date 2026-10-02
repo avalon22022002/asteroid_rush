@@ -56,10 +56,7 @@ pub(crate) use frame_sequence;
 /// even though the bytes are already resident (via `include_bytes!`) and
 /// decoding itself is synchronous.
 pub async fn load_frames(frames: &[(&str, &[u8])]) -> Vec<Texture2D> {
-    println!(
-        "{LOG_PREFIX} loading {} frame(s)...",
-        frames.len()
-    );
+    println!("{LOG_PREFIX} loading {} frame(s)...", frames.len());
 
     let frames = frames
         .iter()

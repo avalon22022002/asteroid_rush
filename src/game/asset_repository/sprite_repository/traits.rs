@@ -1,4 +1,7 @@
-use macroquad::{math::{Rect, Vec2}, texture::Texture2D};
+use macroquad::{
+    math::{Rect, Vec2},
+    texture::Texture2D,
+};
 use strum::IntoEnumIterator;
 
 use crate::game::utils::{aspect_size_from_fixed_height, aspect_size_from_fixed_width};

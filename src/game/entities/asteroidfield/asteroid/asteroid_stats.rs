@@ -52,16 +52,64 @@ impl AsteroidStats {
     pub fn range_for(kind: AsteroidKind) -> MinMax<AsteroidStats> {
         match kind {
             AsteroidKind::MoltenDarkAsteroid => MinMax {
-                min: AsteroidStats { speed: 50.0, rotation_speed: 1.6, max_health: 20, cur_health: 20, damage_on_collision: 10, spawn_delay_frames: 10, points_on_destruction: 10 },
-                max: AsteroidStats { speed: 120.0, rotation_speed: 4.2, max_health: 40, cur_health: 40, damage_on_collision: 25, spawn_delay_frames: 120, points_on_destruction: 50},
+                min: AsteroidStats {
+                    speed: 50.0,
+                    rotation_speed: 1.6,
+                    max_health: 20,
+                    cur_health: 20,
+                    damage_on_collision: 10,
+                    spawn_delay_frames: 10,
+                    points_on_destruction: 10,
+                },
+                max: AsteroidStats {
+                    speed: 120.0,
+                    rotation_speed: 4.2,
+                    max_health: 40,
+                    cur_health: 40,
+                    damage_on_collision: 25,
+                    spawn_delay_frames: 120,
+                    points_on_destruction: 50,
+                },
             },
             AsteroidKind::CryoflareAsteroid => MinMax {
-                min: AsteroidStats { speed: 65.0, rotation_speed: 2.0, max_health: 35, cur_health: 35, damage_on_collision: 18, spawn_delay_frames: 10, points_on_destruction: 20 },
-                max: AsteroidStats { speed: 150.0, rotation_speed: 5.0, max_health: 65, cur_health: 65, damage_on_collision: 35, spawn_delay_frames: 120, points_on_destruction: 80},
+                min: AsteroidStats {
+                    speed: 65.0,
+                    rotation_speed: 2.0,
+                    max_health: 35,
+                    cur_health: 35,
+                    damage_on_collision: 18,
+                    spawn_delay_frames: 10,
+                    points_on_destruction: 20,
+                },
+                max: AsteroidStats {
+                    speed: 150.0,
+                    rotation_speed: 5.0,
+                    max_health: 65,
+                    cur_health: 65,
+                    damage_on_collision: 35,
+                    spawn_delay_frames: 120,
+                    points_on_destruction: 80,
+                },
             },
             AsteroidKind::CrystalshardAsteroid => MinMax {
-                min: AsteroidStats { speed: 80.0, rotation_speed: 2.5, max_health: 50, cur_health: 50, damage_on_collision: 25, spawn_delay_frames: 10, points_on_destruction: 30 },
-                max: AsteroidStats { speed: 180.0, rotation_speed: 6.0, max_health: 90, cur_health: 90, damage_on_collision: 50, spawn_delay_frames: 120, points_on_destruction: 110},
+                min: AsteroidStats {
+                    speed: 80.0,
+                    rotation_speed: 2.5,
+                    max_health: 50,
+                    cur_health: 50,
+                    damage_on_collision: 25,
+                    spawn_delay_frames: 10,
+                    points_on_destruction: 30,
+                },
+                max: AsteroidStats {
+                    speed: 180.0,
+                    rotation_speed: 6.0,
+                    max_health: 90,
+                    cur_health: 90,
+                    damage_on_collision: 50,
+                    spawn_delay_frames: 120,
+                    points_on_destruction: 110,
+                },
             },
         }
     }
@@ -71,23 +119,58 @@ impl AsteroidStats {
     pub fn random_biased_by_scale_for(kind: AsteroidKind, scale: f32) -> AsteroidStats {
         let stat_range = AsteroidStats::range_for(kind);
         // Bigger asteroids take more hits to destroy: bias grows with size.
-        let max_health = biased_random_in_range(MinMax { min: stat_range.min.max_health as f32, max: stat_range.max.max_health as f32 }, scale) as u32;
+        let max_health = biased_random_in_range(
+            MinMax {
+                min: stat_range.min.max_health as f32,
+                max: stat_range.max.max_health as f32,
+            },
+            scale,
+        ) as u32;
 
         AsteroidStats {
             // Bigger asteroids are slower: flip the sign so growing size pulls toward min.
-            speed: biased_random_in_range(MinMax { min:stat_range.min.speed, max: stat_range.max.speed }, -scale),
+            speed: biased_random_in_range(
+                MinMax {
+                    min: stat_range.min.speed,
+                    max: stat_range.max.speed,
+                },
+                -scale,
+            ),
             // Bigger asteroids rotate slower: flip the sign so growing size pulls toward min.
-            rotation_speed: biased_random_in_range(MinMax { min: stat_range.min.rotation_speed, max: stat_range.max.rotation_speed }, -scale),
+            rotation_speed: biased_random_in_range(
+                MinMax {
+                    min: stat_range.min.rotation_speed,
+                    max: stat_range.max.rotation_speed,
+                },
+                -scale,
+            ),
             max_health,
             // Freshly rolled, so current health starts at max.
             cur_health: max_health,
             // Bigger asteroids deal more collision damage: bias grows with size.
-            damage_on_collision: biased_random_in_range(MinMax { min: stat_range.min.damage_on_collision as f32, max: stat_range.max.damage_on_collision as f32 }, scale) as u32,
+            damage_on_collision: biased_random_in_range(
+                MinMax {
+                    min: stat_range.min.damage_on_collision as f32,
+                    max: stat_range.max.damage_on_collision as f32,
+                },
+                scale,
+            ) as u32,
             // Bigger asteroids take longer to spawn: bias grows with scale.
-            spawn_delay_frames: biased_random_in_range(MinMax { min: stat_range.min.spawn_delay_frames as f32, max: stat_range.max.spawn_delay_frames as f32 }, scale) as u32,
+            spawn_delay_frames: biased_random_in_range(
+                MinMax {
+                    min: stat_range.min.spawn_delay_frames as f32,
+                    max: stat_range.max.spawn_delay_frames as f32,
+                },
+                scale,
+            ) as u32,
             // Bigger asteroids are worth more points: bias grows with size.
-            points_on_destruction: biased_random_in_range(MinMax { min: stat_range.min.points_on_destruction as f32, max: stat_range.max.points_on_destruction as f32 }, scale) as u32
-
+            points_on_destruction: biased_random_in_range(
+                MinMax {
+                    min: stat_range.min.points_on_destruction as f32,
+                    max: stat_range.max.points_on_destruction as f32,
+                },
+                scale,
+            ) as u32,
         }
     }
 }

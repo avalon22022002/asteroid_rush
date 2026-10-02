@@ -1,10 +1,10 @@
-use macroquad::texture::Texture2D;
-use strum::EnumIter;
 use crate::game::asset_repository::sprite_repository::{
-    utils::frames::{load_frames, frame_sequence},
-    traits::{SpriteTextures, Sprite, SpriteBounds},
+    traits::{Sprite, SpriteBounds, SpriteTextures},
+    utils::frames::{frame_sequence, load_frames},
 };
 use macroquad::prelude::*;
+use macroquad::texture::Texture2D;
+use strum::EnumIter;
 
 const LOG_PREFIX: &str = "[asteroid_v1]";
 
@@ -63,7 +63,11 @@ pub struct AsteroidV1 {
 
 impl AsteroidV1 {
     pub fn new() -> Self {
-        Self { molten_dark_texture: Vec::new(), cryoflare_texture: Vec::new(), crystalshard_texture: Vec::new() }
+        Self {
+            molten_dark_texture: Vec::new(),
+            cryoflare_texture: Vec::new(),
+            crystalshard_texture: Vec::new(),
+        }
     }
 }
 
@@ -78,9 +82,11 @@ impl SpriteTextures for AsteroidV1 {
                 if self.molten_dark_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.molten_dark_texture = load_frames(
-                        frame_sequence!("assets/animations/asteroid/asteroid_", ["0"])
-                    ).await;
+                    self.molten_dark_texture = load_frames(frame_sequence!(
+                        "assets/animations/asteroid/asteroid_",
+                        ["0"]
+                    ))
+                    .await;
 
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
@@ -90,9 +96,11 @@ impl SpriteTextures for AsteroidV1 {
                 if self.cryoflare_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.cryoflare_texture = load_frames(
-                        frame_sequence!("assets/animations/asteroid/asteroid_", ["1"])
-                    ).await;
+                    self.cryoflare_texture = load_frames(frame_sequence!(
+                        "assets/animations/asteroid/asteroid_",
+                        ["1"]
+                    ))
+                    .await;
 
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
@@ -102,9 +110,11 @@ impl SpriteTextures for AsteroidV1 {
                 if self.crystalshard_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.crystalshard_texture = load_frames(
-                        frame_sequence!("assets/animations/asteroid/asteroid_", ["3"])
-                    ).await;
+                    self.crystalshard_texture = load_frames(frame_sequence!(
+                        "assets/animations/asteroid/asteroid_",
+                        ["3"]
+                    ))
+                    .await;
 
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }

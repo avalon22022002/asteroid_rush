@@ -1,5 +1,5 @@
-use std::sync::atomic::{AtomicU64, Ordering};
 use macroquad::math::Vec2;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 /// A min/max pair, used instead of a tuple so callers don't have to remember
 /// `.0` vs `.1` to know which side is which.
@@ -76,12 +76,12 @@ pub fn get_next_unique_id() -> u64 {
 /// Note: the exact random values will differ on every call.
 /// ```
 pub fn biased_random_in_range(min_max: MinMax<f32>, bias: f32) -> f32 {
-    let (min, max)=(min_max.min, min_max.max);
+    let (min, max) = (min_max.min, min_max.max);
     // Keep bias within the expected [-1, 1] range.
     let bias = bias.clamp(-1.0, 1.0);
     // Start with a uniformly distributed random value across the full range.
     // This is our baseline before any bias is applied.
-    let random =  macroquad::rand::gen_range(min,max);
+    let random = macroquad::rand::gen_range(min, max);
     if bias > 0.0 {
         // Positive bias: shift `random` toward `max`.
         // `(max - random)` is the remaining distance to max, and `bias`
