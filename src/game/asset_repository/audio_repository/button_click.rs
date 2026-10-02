@@ -1,6 +1,6 @@
+use crate::game::asset_repository::audio_repository::traits::AudioClips;
 use macroquad::audio::{self, Sound};
 use strum::EnumIter;
-use crate::game::asset_repository::audio_repository::traits::AudioClips;
 
 const LOG_PREFIX: &str = "[button_click]";
 
@@ -15,6 +15,12 @@ pub enum ButtonClickSound {
 pub struct ButtonClickSounds {
     /// Clip for `ButtonClickSound::Basic`. Add a field here per new variant.
     basic_click: Option<Sound>,
+}
+
+impl Default for ButtonClickSounds {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ButtonClickSounds {

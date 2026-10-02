@@ -1,9 +1,9 @@
+use crate::game::asset_repository::sprite_repository::{
+    traits::{Sprite, SpriteBounds, SpriteTextures},
+    utils::frames::{frame_sequence, load_frames},
+};
 use macroquad::{math::Rect, texture::Texture2D};
 use strum::EnumIter;
-use crate::game::asset_repository::sprite_repository::{
-    utils::frames::{load_frames, frame_sequence},
-    traits::{SpriteTextures,Sprite,SpriteBounds}
-};
 
 const LOG_PREFIX: &str = "[button_v1]";
 
@@ -32,9 +32,17 @@ pub struct ButtonV1 {
     scifi_v1_texture: Vec<Texture2D>,
 }
 
+impl Default for ButtonV1 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ButtonV1 {
     pub fn new() -> Self {
-        Self { scifi_v1_texture: Vec::new() }
+        Self {
+            scifi_v1_texture: Vec::new(),
+        }
     }
 }
 
@@ -49,9 +57,11 @@ impl SpriteTextures for ButtonV1 {
                 if self.scifi_v1_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.scifi_v1_texture = load_frames(
-                        frame_sequence!("assets/ui/button/button-background_", ["00"])
-                    ).await;
+                    self.scifi_v1_texture = load_frames(frame_sequence!(
+                        "assets/ui/button/button-background_",
+                        ["00"]
+                    ))
+                    .await;
 
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }

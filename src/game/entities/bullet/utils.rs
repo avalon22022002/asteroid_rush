@@ -1,6 +1,6 @@
 pub mod laser {
     use macroquad::{
-        color::{ BLUE, RED, WHITE},
+        color::{BLUE, RED, WHITE},
         math::Rect,
         texture::{FilterMode, Texture2D},
     };
@@ -41,11 +41,7 @@ pub mod laser {
         for y in 0..height {
             for x in 0..width {
                 let i = (y * width + x) * 4;
-                let color = if x == 1 {
-                    WHITE
-                } else {
-                    primary_color
-                };
+                let color = if x == 1 { WHITE } else { primary_color };
 
                 pixels[i] = (color.r * 255.0) as u8;
                 pixels[i + 1] = (color.g * 255.0) as u8;

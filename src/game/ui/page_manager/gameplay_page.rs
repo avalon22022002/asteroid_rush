@@ -1,12 +1,25 @@
-use macroquad::prelude::*;
+use macroquad::{audio, prelude::*};
 
 use crate::game::{
-    BASE_HEIGHT, BASE_WIDTH, asset_repository::sprite_repository::traits::SpriteBounds, entities::{asteroidfield::AsteroidField, ship::Ship}, game_config::GameConfig, traits::damage::Damageable, traits::interaction::{Interactive, SelfEventHandler}, traits::rendering::{Drawable, StateUpdatable}, ui::components::{
+    BASE_HEIGHT, BASE_WIDTH,
+    asset_repository::{
+        audio_repository::{AudioRepository, game_outcome::GameOutcomeSound, traits::AudioClips},
+        sprite_repository::traits::SpriteBounds,
+        traits::Singleton,
+    },
+    entities::{asteroidfield::AsteroidField, ship::Ship},
+    game_config::GameConfig,
+    traits::{
+        damage::Damageable,
+        interaction::{Interactive, SelfEventHandler},
+        rendering::{Drawable, StateUpdatable},
+    },
+    ui::components::{
         button::{Button, ButtonEvents, ButtonKind},
         hud::{Hud, HudData},
         overlay_v1::{OverlayV1, OverlayV1Event},
     },
-    utils::{aspect_size_from_fixed_width, MinMax}
+    utils::{MinMax, aspect_size_from_fixed_width},
 };
 
 const LOG_PREFIX: &str = "[gameplay_page]";
@@ -26,7 +39,6 @@ enum GameOutcome {
 }
 
 pub struct GameplayPage {
-    game_config: GameConfig,
     /// Whether the game is currently paused.
     paused: bool,
     /// Set once the run ends; freezes gameplay like `paused`, but there's no resuming from it.
@@ -48,29 +60,37 @@ impl GameplayPage {
     pub fn new(game_config: GameConfig) -> Self {
         // Pause Button
         let pause_button_kind = ButtonKind::Basic;
-        let pause_button_size = aspect_size_from_fixed_width(90.0, pause_button_kind.aspect_ratio());
+        let pause_button_size =
+            aspect_size_from_fixed_width(90.0, pause_button_kind.aspect_ratio());
         let pause_button_pos = Vec2::new(BASE_WIDTH - pause_button_size.x - 20.0, 15.0);
 
         // Ship
         let ship_size = Vec2::new(120.0, 150.0);
-        let (pos_x, pos_y) = ((BASE_WIDTH - ship_size.x) / 2.0, (BASE_HEIGHT - ship_size.y) / 2.0);
+        let (pos_x, pos_y) = (
+            (BASE_WIDTH - ship_size.x) / 2.0,
+            (BASE_HEIGHT - ship_size.y) / 2.0,
+        );
         let ship_bounds = Rect::new(pos_x, pos_y, ship_size.x, ship_size.y);
         let ship_kind = game_config.ship_kind();
 
         // Asteroid Field
         let asteroid_count = 20;
         let asteroid_kind = game_config.asteroid_kind();
-        let asteroid_scale_limits = MinMax{min: 0.3, max: 2.0};
+        let asteroid_scale_limits = MinMax { min: 0.3, max: 2.0 };
 
         let time_remaining = game_config.level().duration_secs();
 
         Self {
-            game_config,
             paused: false,
             outcome: None,
             end_overlay: None,
             pause_button: Button::new(
-                Rect::new(pause_button_pos.x, pause_button_pos.y, pause_button_size.x, pause_button_size.y),
+                Rect::new(
+                    pause_button_pos.x,
+                    pause_button_pos.y,
+                    pause_button_size.x,
+                    pause_button_size.y,
+                ),
                 "Pause".to_string(),
                 20,
                 pause_button_kind,
@@ -82,7 +102,11 @@ impl GameplayPage {
                 "Return to Home".to_string(),
             ),
             ship: Ship::new(ship_bounds, ship_kind),
-            asteroid_field: AsteroidField::new(asteroid_count, asteroid_kind, asteroid_scale_limits),
+            asteroid_field: AsteroidField::new(
+                asteroid_count,
+                asteroid_kind,
+                asteroid_scale_limits,
+            ),
             score: 0,
             time_remaining,
             hud: Hud::new(),
@@ -107,6 +131,18 @@ impl GameplayPage {
         ));
         self.outcome = Some(outcome);
         println!("{LOG_PREFIX} Game ended: {outcome:?}");
+
+        // play the matching outcome sound
+        let outcome_sound = match outcome {
+            GameOutcome::Victory => GameOutcomeSound::Victory,
+            GameOutcome::Defeat => GameOutcomeSound::Defeat,
+        };
+        audio::play_sound_once(
+            AudioRepository::get_instance()
+                .game_outcome_sounds
+                .get_clip_for(&outcome_sound)
+                .unwrap_or_else(|| panic!("{LOG_PREFIX} outcome sound not loaded")),
+        );
     }
 }
 
@@ -156,7 +192,8 @@ impl StateUpdatable<()> for GameplayPage {
             // Resolve bullet <-> asteroid collisions
             // Note: bullets already in flight keep hitting asteroids
             // even after the ship that fired them has died.
-            self.ship.resolve_bullet_collisions(&mut self.asteroid_field, &mut self.score);
+            self.ship
+                .resolve_bullet_collisions(&mut self.asteroid_field, &mut self.score);
 
             self.time_remaining = (self.time_remaining - get_frame_time()).max(0.0);
 
@@ -182,14 +219,18 @@ impl Interactive for GameplayPage {
         if let Some(overlay) = &self.end_overlay {
             return match overlay.poll_event() {
                 Some(OverlayV1Event::Option1Clicked) => Some(GamplayPageEvent::RetryButtonPressed),
-                Some(OverlayV1Event::Option2Clicked) => Some(GamplayPageEvent::ReturnToHomeButtonPressed),
+                Some(OverlayV1Event::Option2Clicked) => {
+                    Some(GamplayPageEvent::ReturnToHomeButtonPressed)
+                }
                 None => None,
             };
         }
         if self.paused {
             return match self.pause_overlay.poll_event() {
                 Some(OverlayV1Event::Option1Clicked) => Some(GamplayPageEvent::ResumeButtonPressed),
-                Some(OverlayV1Event::Option2Clicked) => Some(GamplayPageEvent::ReturnToHomeButtonPressed),
+                Some(OverlayV1Event::Option2Clicked) => {
+                    Some(GamplayPageEvent::ReturnToHomeButtonPressed)
+                }
                 None => None,
             };
         }

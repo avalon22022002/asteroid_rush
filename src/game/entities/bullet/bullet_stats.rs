@@ -9,8 +9,14 @@ pub struct BulletStats {
 impl BulletStats {
     pub fn stats_for(bullet_kind: BulletKind) -> BulletStats {
         match bullet_kind {
-            BulletKind::BlueLaser => BulletStats{damage: 30, speed: 180.0},
-            BulletKind::RedLaser => BulletStats{damage: 40, speed: 200.0}
+            BulletKind::BlueLaser => BulletStats {
+                damage: 30,
+                speed: 180.0,
+            },
+            BulletKind::RedLaser => BulletStats {
+                damage: 40,
+                speed: 200.0,
+            },
         }
     }
 

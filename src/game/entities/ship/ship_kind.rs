@@ -3,7 +3,10 @@ use macroquad::math::Rect;
 use crate::game::{
     animation::Animation,
     asset_repository::{
-        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ShipV1Textures},
+        sprite_repository::{
+            ShipV1Textures, SpriteRepository,
+            traits::{SpriteBounds, SpriteTextures},
+        },
         traits::Singleton,
     },
     entities::bullet::bullet_kind::BulletKind,
@@ -85,7 +88,8 @@ impl ShipKind {
                     fitted_bounds.size(),
                     12.0,
                     Some(dead_sprite.content_bounds()),
-                ).play_once();
+                )
+                .play_once();
 
                 (alive, dead, fitted_bounds)
             }
@@ -107,7 +111,8 @@ impl ShipKind {
                     fitted_bounds.size(),
                     12.0,
                     Some(dead_sprite.content_bounds()),
-                ).play_once();
+                )
+                .play_once();
 
                 (alive, dead, fitted_bounds)
             }
@@ -129,7 +134,8 @@ impl ShipKind {
                     fitted_bounds.size(),
                     12.0,
                     Some(dead_sprite.content_bounds()),
-                ).play_once();
+                )
+                .play_once();
 
                 (alive, dead, fitted_bounds)
             }
@@ -138,9 +144,15 @@ impl ShipKind {
 
     fn fit_at_logical_scale(sprite: impl SpriteBounds, approx_bounds: Rect) -> Rect {
         let fitted = sprite.fit_centered_in(approx_bounds);
-        let relative_scale = sprite.content_size_at_logical_unit_scale().x / sprite.content_bounds().w;
+        let relative_scale =
+            sprite.content_size_at_logical_unit_scale().x / sprite.content_bounds().w;
         let center = fitted.center();
         let size = fitted.size() * relative_scale;
-        Rect::new(center.x - size.x / 2.0, center.y - size.y / 2.0, size.x, size.y)
+        Rect::new(
+            center.x - size.x / 2.0,
+            center.y - size.y / 2.0,
+            size.x,
+            size.y,
+        )
     }
 }

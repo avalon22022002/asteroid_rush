@@ -1,0 +1,53 @@
+# Pinned to a specific, tested Rust version instead of "latest"
+# so this doesn't silently change later and break things
+FROM rust:1.97.1
+
+# Where the project lives inside the container
+WORKDIR /workspace/asteroid_rush
+
+# Install the debugger, plus system libraries the game needs to show a
+# window, draw graphics, and play sound on Linux
+RUN apt-get update && \
+    apt-get install -y \
+      # Debugger, lets you step through Rust code
+      lldb \
+      # Helps the build find installed libraries
+      pkg-config \
+      # Opens the game window (X11)
+      libx11-dev \
+      # Mouse/input support for the window
+      libxi-dev \
+      # Mouse cursor support for the window
+      libxcursor-dev \
+      # Keyboard support for the window
+      libxkbcommon-dev \
+      libxkbcommon-x11-0 \
+      # Graphics rendering (OpenGL)
+      libgl1-mesa-dev \
+      # Sound support. The container has no real sound card, so these help to
+      # redirect audio to PulseAudio instead (see asound.conf below and
+      # PULSE_SERVER in docker-compose.yaml)
+      libasound2-dev \
+      libasound2-plugins \
+      # Command-line tools for checking the audio connection works
+      pulseaudio-utils && \
+    # Delete the downloaded package list, keeps the image smaller
+    rm -rf /var/lib/apt/lists/*
+
+# Route ALSA audio to PulseAudio
+# - The game speaks only ALSA
+# - The container has no real sound card
+# - PulseAudio forwards the sound to the host
+RUN printf '%s\n' \
+      'pcm.!default {' \
+      '    type pulse' \
+      '}' \
+      'ctl.!default {' \
+      '    type pulse' \
+      '}' \
+      > /etc/asound.conf
+
+# Print the Rust version every time a terminal opens, just a sanity check
+RUN echo 'echo "Rust: $(rustc --version) | Cargo: $(cargo --version)"' >> /root/.bashrc
+
+CMD ["bash"]

@@ -1,16 +1,22 @@
+mod briefing_page;
+mod gameplay_page;
 mod home_page;
 mod level_selection_page;
 mod ship_selection_page;
-mod briefing_page;
-mod gameplay_page;
 
 use crate::game::{
-    game_config::GameConfig, traits::interaction::{Interactive, SelfEventHandler}, traits::rendering::{Drawable, StateUpdatable}, ui::page_manager::{
+    entities::asteroidfield::asteroid::asteroid_kind::AsteroidKind,
+    game_config::GameConfig,
+    traits::{
+        interaction::{Interactive, SelfEventHandler},
+        rendering::{Drawable, StateUpdatable},
+    },
+    ui::page_manager::{
         briefing_page::{BriefingPage, BriefingPageEvent},
         gameplay_page::{GameplayPage, GamplayPageEvent},
-        home_page::{HomePage,HomePageEvent},
+        home_page::{HomePage, HomePageEvent},
         level_selection_page::{LevelSelectionPage, LevelSelectionPageEvent},
-        ship_selection_page::{ShipSelectionPage, ShipSelectionPageEvent}
+        ship_selection_page::{ShipSelectionPage, ShipSelectionPageEvent},
     },
 };
 
@@ -21,7 +27,7 @@ pub enum Pages {
     ShipSelectionPage(ShipSelectionPage),
     LevelSelectionPage(LevelSelectionPage),
     BriefingPage(BriefingPage),
-    GameplayPage(GameplayPage)
+    GameplayPage(GameplayPage),
 }
 
 pub enum PageEvents {
@@ -29,7 +35,7 @@ pub enum PageEvents {
     ShipSelectionPageEvent(ship_selection_page::ShipSelectionPageEvent),
     LevelSelectionPageEvent(level_selection_page::LevelSelectionPageEvent),
     BriefingPageEvent(briefing_page::BriefingPageEvent),
-    GamplayPageEvent(gameplay_page::GamplayPageEvent)
+    GamplayPageEvent(gameplay_page::GamplayPageEvent),
 }
 
 pub struct PageManager {
@@ -47,7 +53,7 @@ impl PageManager {
     pub fn new() -> Self {
         Self {
             current_page: Pages::HomePage(HomePage::new()),
-            game_config: GameConfig::default()
+            game_config: GameConfig::default(),
         }
     }
 }
@@ -67,7 +73,7 @@ impl Drawable for PageManager {
             Pages::BriefingPage(briefing_page) => {
                 briefing_page.draw();
             }
-            Pages::GameplayPage(gameplay_page) =>{
+            Pages::GameplayPage(gameplay_page) => {
                 gameplay_page.draw();
             }
         }
@@ -89,7 +95,7 @@ impl StateUpdatable<()> for PageManager {
             Pages::BriefingPage(briefing_page) => {
                 briefing_page.update_state(data);
             }
-            Pages::GameplayPage(gameplay_page)=>{
+            Pages::GameplayPage(gameplay_page) => {
                 gameplay_page.update_state(data);
             }
         }
@@ -100,9 +106,7 @@ impl Interactive for PageManager {
     type Event = Option<PageEvents>;
     fn poll_event(&self) -> Self::Event {
         match &self.current_page {
-            Pages::HomePage(home_page) => home_page
-                .poll_event()
-                .map(PageEvents::HomePageEvent),
+            Pages::HomePage(home_page) => home_page.poll_event().map(PageEvents::HomePageEvent),
             Pages::ShipSelectionPage(ship_selection_page) => ship_selection_page
                 .poll_event()
                 .map(PageEvents::ShipSelectionPageEvent),
@@ -112,9 +116,9 @@ impl Interactive for PageManager {
             Pages::BriefingPage(briefing_page) => briefing_page
                 .poll_event()
                 .map(PageEvents::BriefingPageEvent),
-            Pages::GameplayPage(gameplay_page)=> gameplay_page
-                .poll_event()
-                .map(PageEvents::GamplayPageEvent),
+            Pages::GameplayPage(gameplay_page) => {
+                gameplay_page.poll_event().map(PageEvents::GamplayPageEvent)
+            }
         }
     }
 }
@@ -160,7 +164,10 @@ impl SelfEventHandler for PageManager {
                     Some(LevelSelectionPageEvent::LevelConfirmed(level)) => {
                         println!("{LOG_PREFIX}[LevelSelectionPage] Level {level:#?} confirmed");
                         self.game_config.set_level(level);
-                        self.current_page = Pages::BriefingPage(BriefingPage::new(self.game_config.clone()));
+                        self.game_config
+                            .set_asteroid_kind(AsteroidKind::asteroid_kind_from_level(&level));
+                        self.current_page =
+                            Pages::BriefingPage(BriefingPage::new(self.game_config.clone()));
                     }
                     Some(LevelSelectionPageEvent::BackButtonPressed) => {
                         println!("{LOG_PREFIX}[LevelSelectionPage] Back clicked");
@@ -176,7 +183,9 @@ impl SelfEventHandler for PageManager {
                 match briefing_page_event {
                     Some(BriefingPageEvent::StartGame) => {
                         println!("{LOG_PREFIX}[BriefingPage] Start Game clicked");
-                        self.current_page = Pages::GameplayPage(GameplayPage::new(briefing_page.game_config().clone()));
+                        self.current_page = Pages::GameplayPage(GameplayPage::new(
+                            briefing_page.game_config().clone(),
+                        ));
                     }
                     Some(BriefingPageEvent::BackButtonPressed) => {
                         println!("{LOG_PREFIX}[BriefingPage] Back clicked");
@@ -185,7 +194,7 @@ impl SelfEventHandler for PageManager {
                     None => {}
                 }
             }
-            Pages::GameplayPage(gameplay_page) =>{
+            Pages::GameplayPage(gameplay_page) => {
                 let gameplay_page_event = gameplay_page.poll_event();
                 gameplay_page.handle_self_event(gameplay_page_event);
 
@@ -202,7 +211,8 @@ impl SelfEventHandler for PageManager {
                     }
                     Some(GamplayPageEvent::RetryButtonPressed) => {
                         println!("{LOG_PREFIX}[GameplayPage] Retry clicked");
-                        self.current_page = Pages::GameplayPage(GameplayPage::new(self.game_config.clone()))
+                        self.current_page =
+                            Pages::GameplayPage(GameplayPage::new(self.game_config.clone()))
                     }
                     None => {}
                 }

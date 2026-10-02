@@ -40,13 +40,19 @@ pub struct SpriteRepository {
     pub ship_v1_sprite: ShipV1,
 }
 
+impl Default for SpriteRepository {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SpriteRepository {
     pub fn new() -> Self {
         Self {
             asteroid_v1_sprite: AsteroidV1::new(),
             banner_v1_sprite: BannerV1::new(),
             button_v1_sprite: ButtonV1::new(),
-            ship_v1_sprite: ShipV1::new()
+            ship_v1_sprite: ShipV1::new(),
         }
     }
 }

@@ -1,20 +1,23 @@
 use macroquad::{audio, prelude::*};
 
 use crate::game::{
-    asset_repository::{
-        traits::Singleton,
-        sprite_repository::{traits::{SpriteTextures, SpriteBounds}, SpriteRepository, ButtonV1Textures},
-        audio_repository::{
-            AudioRepository,
-            traits::AudioClips,
-            button_click::ButtonClickSound,
-            button_hover::ButtonHoverSound,
-        },
-    },
     animation::Animation,
-    traits::interaction::{Interactive, SelfEventHandler},
-    traits::object::HasId,
-    traits::rendering::{Drawable, StateUpdatable},
+    asset_repository::{
+        audio_repository::{
+            AudioRepository, button_click::ButtonClickSound, button_hover::ButtonHoverSound,
+            traits::AudioClips,
+        },
+        sprite_repository::{
+            ButtonV1Textures, SpriteRepository,
+            traits::{SpriteBounds, SpriteTextures},
+        },
+        traits::Singleton,
+    },
+    traits::{
+        interaction::{Interactive, SelfEventHandler},
+        object::HasId,
+        rendering::{Drawable, StateUpdatable},
+    },
     ui::components::utils::additive_glow,
     utils,
 };
@@ -189,7 +192,12 @@ impl Button {
 
 impl Default for Button {
     fn default() -> Self {
-        Button::new(Rect::new(0.0, 0.0, 50.0, 25.0), "Default Button".to_string(), 10, ButtonKind::Basic)
+        Button::new(
+            Rect::new(0.0, 0.0, 50.0, 25.0),
+            "Default Button".to_string(),
+            10,
+            ButtonKind::Basic,
+        )
     }
 }
 

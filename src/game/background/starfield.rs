@@ -1,4 +1,6 @@
-use crate::game::{background::starfield::star::*, traits::rendering::Drawable, traits::rendering::StateUpdatable};
+use crate::game::{
+    background::starfield::star::*, traits::rendering::Drawable, traits::rendering::StateUpdatable,
+};
 
 pub mod star;
 

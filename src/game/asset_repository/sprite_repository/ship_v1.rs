@@ -1,11 +1,14 @@
-use macroquad::{math::{Rect, Vec2}, texture::Texture2D};
-use strum::EnumIter;
 use crate::game::asset_repository::sprite_repository::{
-    utils::frames::{load_frames, frame_sequence},
-    traits::{SpriteTextures,Sprite,SpriteBounds},
+    traits::{Sprite, SpriteBounds, SpriteTextures},
+    utils::frames::{frame_sequence, load_frames},
 };
+use macroquad::{
+    math::{Rect, Vec2},
+    texture::Texture2D,
+};
+use strum::EnumIter;
 
-pub const SHIP_V1_SPRITE: &str="ShipV1Sprite";
+pub const SHIP_V1_SPRITE: &str = "ShipV1Sprite";
 const LOG_PREFIX: &str = "[ship_v1]";
 
 /// Identifies a named texture group for `ShipV1`.
@@ -68,8 +71,13 @@ pub struct ShipV1 {
     vanguard_dead_texture: Vec<Texture2D>,
     viper_alive_texture: Vec<Texture2D>,
     viper_dead_texture: Vec<Texture2D>,
-
     // Add field pair here per new variant in ShipV1Textures.
+}
+
+impl Default for ShipV1 {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ShipV1 {
@@ -89,16 +97,17 @@ impl SpriteTextures for ShipV1 {
     type Kind = ShipV1Textures;
 
     async fn load_textures_for(&mut self, texture_kind: &ShipV1Textures) {
-        
         // Perform Exhaustive match.
         match texture_kind {
             ShipV1Textures::SentinelAlive => {
                 if self.sentinel_alive_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.sentinel_alive_texture = load_frames(
-                        frame_sequence!("assets/animations/ships/sentinel/alive/sentinel_", ["00","01","02","03", "04","05","06","07"])
-                    ).await;
+                    self.sentinel_alive_texture = load_frames(frame_sequence!(
+                        "assets/animations/ships/sentinel/alive/sentinel_",
+                        ["00", "01", "02", "03", "04", "05", "06", "07"]
+                    ))
+                    .await;
 
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
@@ -108,9 +117,11 @@ impl SpriteTextures for ShipV1 {
                 if self.sentinel_dead_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.sentinel_dead_texture = load_frames(
-                        frame_sequence!("assets/animations/ships/sentinel/dead/sentinel_dead_", ["00","01","02","03","04"])
-                    ).await;
+                    self.sentinel_dead_texture = load_frames(frame_sequence!(
+                        "assets/animations/ships/sentinel/dead/sentinel_dead_",
+                        ["00", "01", "02", "03", "04"]
+                    ))
+                    .await;
 
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
@@ -120,9 +131,11 @@ impl SpriteTextures for ShipV1 {
                 if self.vanguard_alive_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.vanguard_alive_texture = load_frames(
-                        frame_sequence!("assets/animations/ships/vanguard/alive/vanguard_", ["00","01","02"])
-                    ).await;
+                    self.vanguard_alive_texture = load_frames(frame_sequence!(
+                        "assets/animations/ships/vanguard/alive/vanguard_",
+                        ["00", "01", "02"]
+                    ))
+                    .await;
 
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
@@ -132,9 +145,11 @@ impl SpriteTextures for ShipV1 {
                 if self.vanguard_dead_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.vanguard_dead_texture = load_frames(
-                        frame_sequence!("assets/animations/ships/vanguard/dead/vanguard_dead_", ["00","01","02","03","04"])
-                    ).await;
+                    self.vanguard_dead_texture = load_frames(frame_sequence!(
+                        "assets/animations/ships/vanguard/dead/vanguard_dead_",
+                        ["00", "01", "02", "03", "04"]
+                    ))
+                    .await;
 
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
@@ -144,9 +159,11 @@ impl SpriteTextures for ShipV1 {
                 if self.viper_alive_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.viper_alive_texture = load_frames(
-                        frame_sequence!("assets/animations/ships/viper/alive/viper_", ["00","01","02","03"])
-                    ).await;
+                    self.viper_alive_texture = load_frames(frame_sequence!(
+                        "assets/animations/ships/viper/alive/viper_",
+                        ["00", "01", "02", "03"]
+                    ))
+                    .await;
 
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }
@@ -156,9 +173,11 @@ impl SpriteTextures for ShipV1 {
                 if self.viper_dead_texture.is_empty() {
                     println!("{LOG_PREFIX} loading {texture_kind:?}...");
 
-                    self.viper_dead_texture = load_frames(
-                        frame_sequence!("assets/animations/ships/viper/dead/viper_dead_", ["00","01","02","03","04"])
-                    ).await;
+                    self.viper_dead_texture = load_frames(frame_sequence!(
+                        "assets/animations/ships/viper/dead/viper_dead_",
+                        ["00", "01", "02", "03", "04"]
+                    ))
+                    .await;
 
                     println!("{LOG_PREFIX} {texture_kind:?} load complete");
                 }

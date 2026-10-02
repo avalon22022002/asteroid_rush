@@ -61,6 +61,58 @@ around headers.
 
 ### Option 2: Dev Container
 
-Running a Dev Container works fine, but
-since this is a UI app, one will need extra UI-related setup on the host OS
-(e.g. an X server on Windows) to see the window.
+Running a Dev Container works fine, but since this is a UI app with sound,
+you'll need some extra setup on the host OS to actually see the window and
+hear audio since the container has no display or sound device of its own.
+
+**On Windows:**
+
+- **Display** : install [VcXsrv](https://sourceforge.net/projects/vcxsrv/)
+  - Launch it with XLaunch
+  - On the last page, enable **"Disable access control"**
+  - That's it, the container connects to it automatically
+- **Audio** : works out of the box on Windows 11 with WSL2, nothing to
+  install or configure
+  - The container has no sound card, so audio is routed through WSLg
+    (Windows' built-in Linux GUI support), which runs a real audio
+    server inside one of your WSL distros
+  - The dev container auto-detects which distro that is (see
+    `detect-wsl-distro.ps1`), no manual setup needed
+
+> **Note:** audio and input aren't talking to real hardware directly here,
+> they're forwarded over TCP/WSLg. Expect a bit more lag and occasional
+> audio glitches versus running natively. Fine for development, not how
+> the game actually feels to play.
+
+**On macOS/Linux:**
+- The container always builds and runs fine
+- Display/audio default to the Windows setup above, so they won't work
+  out of the box
+- Both are overridable in `.devcontainer/.env`:
+  - `CONTAINER_DISPLAY` : set to `:0` to use your own X server, via the
+    X11 socket already mounted in `docker-compose.yaml`
+  - `WSLG_PULSE_SOURCE` : point at your own PulseAudio socket (e.g.
+    `/run/user/1000/pulse/native` on most Linux desktops)
+- Not tested on either platform
+
+## Releases
+
+- Prebuilt binaries live in [`releases/`](releases/), one subfolder per
+  platform
+- Sprites and audio are embedded into the binary at compile time (via
+  `include_bytes!`), so each one is fully standalone, no extra files
+  needed alongside it
+- **Windows:** [`releases/windows/`](releases/windows/) : download the
+  latest `.exe` and run it directly
+
+### Building a new Windows release
+
+```powershell
+cargo build --release
+New-Item -ItemType Directory -Force -Path releases\windows | Out-Null
+Move-Item target\release\asteroid_rush.exe "releases\windows\asteroid_rush_windows_$([DateTime]::UtcNow.ToString('yyyyMMdd')).exe"
+```
+
+- Builds the optimized binary
+- Drops it into `releases/windows/`
+- Names it with today's date (UTC), e.g. `asteroid_rush_windows_20261002.exe`

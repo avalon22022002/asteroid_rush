@@ -3,10 +3,10 @@ pub mod asset_repository;
 pub mod background;
 pub mod blink;
 pub mod entities;
+pub mod game_config;
 pub mod traits;
 pub mod ui;
 pub mod utils;
-pub mod game_config;
 
 use crate::game::traits::rendering::{Drawable, StateUpdatable};
 use macroquad::prelude::*;
@@ -15,7 +15,6 @@ use macroquad::prelude::*;
 pub const BASE_WIDTH: f32 = 960.0;
 /// Game window reference height, in logical pixels.
 pub const BASE_HEIGHT: f32 = 540.0;
-
 
 pub struct Game {
     background: background::Background,

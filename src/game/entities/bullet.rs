@@ -8,7 +8,9 @@ use macroquad::prelude::*;
 
 use crate::game::{
     animation::Animation,
-    entities::bullet::{bullet_direction::BulletDirection, bullet_kind::BulletKind, bullet_stats::BulletStats},
+    entities::bullet::{
+        bullet_direction::BulletDirection, bullet_kind::BulletKind, bullet_stats::BulletStats,
+    },
     traits::{
         object::{HasBoundingBox, HasBoundingCircle},
         rendering::{Drawable, StateUpdatable},
@@ -17,11 +19,10 @@ use crate::game::{
 
 pub struct Bullet {
     bounds: Rect,
-    kind: BulletKind,
     /// 12:00 clock => 0 or 360 degree, facing upwards, 6:00 clock => 180 degree, facing downwards
     direction: f32,
     stats: BulletStats,
-    animation: Animation
+    animation: Animation,
 }
 
 impl Bullet {
@@ -31,10 +32,14 @@ impl Bullet {
         let animation = kind.animation();
         let size = *animation.frame_scale();
         Self {
-            bounds: Rect { x: pos.x, y: pos.y, w: size.x, h: size.y },
+            bounds: Rect {
+                x: pos.x,
+                y: pos.y,
+                w: size.x,
+                h: size.y,
+            },
             stats: BulletStats::stats_for(kind),
             animation,
-            kind,
             direction: direction.degrees(),
         }
     }
@@ -46,7 +51,7 @@ impl Bullet {
 
     /// Moves the bullet by `stats.speed() * dt` along `direction`.
     fn apply_movement(&mut self, dt: f32) {
-        let dir_angle_in_degrees= self.direction;
+        let dir_angle_in_degrees = self.direction;
         let dir_in_radians = dir_angle_in_degrees.to_radians();
         // On a unit circle, θ gives x = sin(θ) and y = cos(θ).
         // Negate y to account for screen coordinates increasing downward.

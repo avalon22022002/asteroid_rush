@@ -2,7 +2,7 @@ use macroquad::math::Rect;
 
 use crate::game::entities::{
     bullet::bullet_stats::BulletStats,
-    ship::{ship_kind::ShipKind, guns::Guns},
+    ship::{guns::Guns, ship_kind::ShipKind},
 };
 
 #[derive(Debug, Clone)]

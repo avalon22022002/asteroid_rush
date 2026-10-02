@@ -1,7 +1,12 @@
 use macroquad::prelude::*;
 
 use crate::game::{
-    animation::Animation, traits::interaction::{Interactive, SelfEventHandler}, traits::rendering::{Drawable, StateUpdatable}, ui::components::{button::{Button, ButtonEvents, ButtonKind}},
+    animation::Animation,
+    traits::{
+        interaction::{Interactive, SelfEventHandler},
+        rendering::{Drawable, StateUpdatable},
+    },
+    ui::components::button::{Button, ButtonEvents, ButtonKind},
 };
 
 /// Height of one stat row in the scrollable list, in logical pixels.
@@ -104,7 +109,7 @@ impl PreviewCard {
             label_value_pairs,
             action_button: Button::new(layout.button, action_label, 24, ButtonKind::Basic),
             layout,
-            scroll_offset: 0.0
+            scroll_offset: 0.0,
         }
     }
 
@@ -114,7 +119,7 @@ impl PreviewCard {
         art: Animation,
         title: String,
         subtitle: String,
-        label_value_pairs: Vec<(String, String)>
+        label_value_pairs: Vec<(String, String)>,
     ) {
         self.art = art;
         self.title = title;
@@ -213,13 +218,17 @@ impl PreviewCard {
                 continue;
             }
             let baseline_y = row_top + ROW_HEIGHT * 0.7;
-            
+
             // draw label(key) from label_value_pairs in self.label_value_pairs
             draw_text_ex(
                 label,
                 viewport.x,
                 baseline_y,
-                TextParams { font_size: LABEL_SIZE, color: WHITE, ..Default::default() },
+                TextParams {
+                    font_size: LABEL_SIZE,
+                    color: WHITE,
+                    ..Default::default()
+                },
             );
 
             // draw value from label_value_pairs in self.label_value_pairs
@@ -229,7 +238,11 @@ impl PreviewCard {
                 value,
                 value_pos_x,
                 baseline_y,
-                TextParams { font_size: LABEL_SIZE, color: VALUE_COLOR, ..Default::default() },
+                TextParams {
+                    font_size: LABEL_SIZE,
+                    color: VALUE_COLOR,
+                    ..Default::default()
+                },
             );
         }
     }
@@ -249,7 +262,13 @@ impl PreviewCard {
 
         // Track: dim strip spanning the full viewport height, right-aligned.
         let track_x = viewport.right() - SCROLLBAR_WIDTH;
-        draw_rectangle(track_x, viewport.y, SCROLLBAR_WIDTH, viewport.h, Color::new(1.0, 1.0, 1.0, 0.15));
+        draw_rectangle(
+            track_x,
+            viewport.y,
+            SCROLLBAR_WIDTH,
+            viewport.h,
+            Color::new(1.0, 1.0, 1.0, 0.15),
+        );
 
         // Handle height = the fraction of content currently visible (viewport / content),
         // scaled to pixels. Floored at 14px so it's never too small to see/click.
@@ -257,14 +276,24 @@ impl PreviewCard {
 
         // Scroll progress as a 0.0-1.0 fraction: 0 = top of content, 1 = bottom.
         let max_offset = content_h - viewport.h;
-        let t = if max_offset > 0.0 { self.scroll_offset / max_offset } else { 0.0 };
+        let t = if max_offset > 0.0 {
+            self.scroll_offset / max_offset
+        } else {
+            0.0
+        };
 
         // Handle's own height eats into its travel range, so its position is
         // t applied to (track height - handle height), not the full track.
         let handle_y = viewport.y + t * (viewport.h - handle_h);
 
         // Handle: brighter and more opaque than the track so it stands out.
-        draw_rectangle(track_x, handle_y, SCROLLBAR_WIDTH, handle_h, Color::new(0.4, 0.7, 1.0, 0.85));
+        draw_rectangle(
+            track_x,
+            handle_y,
+            SCROLLBAR_WIDTH,
+            handle_h,
+            Color::new(0.4, 0.7, 1.0, 0.85),
+        );
     }
 
     /// Draws `text` horizontally centered in the card at `baseline_y`.

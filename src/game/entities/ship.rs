@@ -3,11 +3,18 @@ pub mod ship_kind;
 pub mod ship_stats;
 mod utils;
 
-use macroquad::prelude::*;
+use macroquad::{audio, prelude::*};
 
 use crate::game::{
     BASE_HEIGHT, BASE_WIDTH,
     animation::Animation,
+    asset_repository::{
+        audio_repository::{
+            AudioRepository, ship_damage::ShipDamageSound, ship_destruction::ShipDestructionSound,
+            traits::AudioClips,
+        },
+        traits::Singleton,
+    },
     blink::Blink,
     entities::{
         asteroidfield::AsteroidField,
@@ -19,11 +26,13 @@ use crate::game::{
         },
     },
     traits::{
-        damage::{Damageable, DamageResult},
+        damage::{DamageResult, Damageable},
         object::{HasBoundingBox, HasBoundingCircle},
         rendering::{Drawable, StateUpdatable},
     },
 };
+
+const LOG_PREFIX: &str = "[ship]";
 
 /// How long a ship flashes for after collision, in seconds.
 const HIT_BLINK_DURATION: f32 = 0.6;
@@ -100,10 +109,14 @@ impl Ship {
     /// `asteroid_field`, damaging whichever asteroid each bullet hits and
     /// removing that bullet. Destroyed asteroids add their point value to
     /// `score`.
-    pub fn resolve_bullet_collisions(&mut self, asteroid_field: &mut AsteroidField, score: &mut u32) {
+    pub fn resolve_bullet_collisions(
+        &mut self,
+        asteroid_field: &mut AsteroidField,
+        score: &mut u32,
+    ) {
         self.guns.resolve_collisions(asteroid_field, score);
     }
- 
+
     /// Moves the ship by this frame's arrow-key input at `ship_stats.speed`
     /// units/second, clamped so it can't drift outside the game's logical
     /// `BASE_WIDTH`x`BASE_HEIGHT` bounds. Only `bounds`' position moves —
@@ -156,9 +169,27 @@ impl Damageable for Ship {
         self.ship_stats.apply_damage(amount);
         if self.ship_stats.cur_health() == 0 {
             self.is_alive = false;
+
+            // play the ship destruction sound
+            audio::play_sound_once(
+                AudioRepository::get_instance()
+                    .ship_destruction_sounds
+                    .get_clip_for(&ShipDestructionSound::Basic)
+                    .unwrap_or_else(|| panic!("{LOG_PREFIX} ship destruction sound not loaded")),
+            );
+
             DamageResult::Destroyed
         } else {
             self.blink.trigger(HIT_BLINK_DURATION);
+
+            // play the ship damage sound
+            audio::play_sound_once(
+                AudioRepository::get_instance()
+                    .ship_damage_sounds
+                    .get_clip_for(&ShipDamageSound::Basic)
+                    .unwrap_or_else(|| panic!("{LOG_PREFIX} ship damage sound not loaded")),
+            );
+
             DamageResult::Alive
         }
     }

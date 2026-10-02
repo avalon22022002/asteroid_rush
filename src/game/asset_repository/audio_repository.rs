@@ -1,15 +1,24 @@
-pub mod traits;
+pub mod asteroid_destruction;
+pub mod asteroid_hit;
 pub mod button_click;
 pub mod button_hover;
+pub mod game_outcome;
+pub mod gun_fire;
+pub mod ship_damage;
+pub mod ship_destruction;
+pub mod traits;
 
 use std::sync::OnceLock;
 
 use futures::executor;
 
-use button_click::ButtonClickSounds;
-use button_hover::ButtonHoverSounds;
 use crate::game::asset_repository::{
-    audio_repository::traits::AudioClips,
+    audio_repository::{
+        asteroid_destruction::AsteroidDestructionSounds, asteroid_hit::AsteroidHitSounds,
+        button_click::ButtonClickSounds, button_hover::ButtonHoverSounds,
+        game_outcome::GameOutcomeSounds, gun_fire::GunFireSounds, ship_damage::ShipDamageSounds,
+        ship_destruction::ShipDestructionSounds, traits::AudioClips,
+    },
     traits::{Preloadable, Singleton},
 };
 
@@ -29,6 +38,18 @@ use crate::game::asset_repository::{
 pub struct AudioRepository {
     pub button_click_sounds: ButtonClickSounds,
     pub button_hover_sounds: ButtonHoverSounds,
+    pub gun_fire_sounds: GunFireSounds,
+    pub asteroid_destruction_sounds: AsteroidDestructionSounds,
+    pub asteroid_hit_sounds: AsteroidHitSounds,
+    pub ship_destruction_sounds: ShipDestructionSounds,
+    pub ship_damage_sounds: ShipDamageSounds,
+    pub game_outcome_sounds: GameOutcomeSounds,
+}
+
+impl Default for AudioRepository {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl AudioRepository {
@@ -36,6 +57,12 @@ impl AudioRepository {
         Self {
             button_click_sounds: ButtonClickSounds::new(),
             button_hover_sounds: ButtonHoverSounds::new(),
+            gun_fire_sounds: GunFireSounds::new(),
+            asteroid_destruction_sounds: AsteroidDestructionSounds::new(),
+            asteroid_hit_sounds: AsteroidHitSounds::new(),
+            ship_destruction_sounds: ShipDestructionSounds::new(),
+            ship_damage_sounds: ShipDamageSounds::new(),
+            game_outcome_sounds: GameOutcomeSounds::new(),
         }
     }
 }
@@ -64,6 +91,12 @@ impl Preloadable for AudioRepository {
         futures::join!(
             self.button_click_sounds.load_all_clips(),
             self.button_hover_sounds.load_all_clips(),
+            self.gun_fire_sounds.load_all_clips(),
+            self.asteroid_destruction_sounds.load_all_clips(),
+            self.asteroid_hit_sounds.load_all_clips(),
+            self.ship_destruction_sounds.load_all_clips(),
+            self.ship_damage_sounds.load_all_clips(),
+            self.game_outcome_sounds.load_all_clips(),
         );
     }
 }

@@ -1,7 +1,6 @@
 use crate::game::{
     asset_repository::sprite_repository::AsteroidV1Textures,
-    entities::asteroidfield::asteroid::asteroid_stats::AsteroidStats,
-    game_config::GameLevel,
+    entities::asteroidfield::asteroid::asteroid_stats::AsteroidStats, game_config::GameLevel,
     utils::MinMax,
 };
 
@@ -11,14 +10,18 @@ use crate::game::{
 pub enum AsteroidKind {
     /// Dark rock veined with glowing molten cracks.
     MoltenDarkAsteroid,
+    /// Dark rock wreathed in cold blue flame, veined with purple energy.
+    CryoflareAsteroid,
+    /// Grey rock studded with jagged blue crystal shards, veined with electric cracks.
+    CrystalshardAsteroid,
 }
 
 impl AsteroidKind {
     pub fn asteroid_kind_from_level(level: &GameLevel) -> AsteroidKind {
         match level {
             GameLevel::Level1 => AsteroidKind::MoltenDarkAsteroid,
-            GameLevel::Level2 => AsteroidKind::MoltenDarkAsteroid,
-            GameLevel::Level3 => AsteroidKind::MoltenDarkAsteroid,
+            GameLevel::Level2 => AsteroidKind::CryoflareAsteroid,
+            GameLevel::Level3 => AsteroidKind::CrystalshardAsteroid,
         }
     }
 
@@ -26,22 +29,28 @@ impl AsteroidKind {
     pub fn texture_kind(&self) -> AsteroidV1Textures {
         match self {
             AsteroidKind::MoltenDarkAsteroid => AsteroidV1Textures::MoltenDark,
+            AsteroidKind::CryoflareAsteroid => AsteroidV1Textures::Cryoflare,
+            AsteroidKind::CrystalshardAsteroid => AsteroidV1Textures::Crystalshard,
         }
     }
 
-    pub fn stat_range(&self) -> MinMax<AsteroidStats>{
+    pub fn stat_range(&self) -> MinMax<AsteroidStats> {
         AsteroidStats::range_for(*self)
     }
 
     pub fn display_name(&self) -> &'static str {
         match self {
-            Self::MoltenDarkAsteroid => "Molten Dark Asteroid"
+            Self::MoltenDarkAsteroid => "Molten Dark Asteroid",
+            Self::CryoflareAsteroid => "Cryoflare Asteroid",
+            Self::CrystalshardAsteroid => "Crystalshard Asteroid",
         }
     }
 
     pub fn difficulty_label(&self) -> &'static str {
         match self {
-            Self::MoltenDarkAsteroid => "Beginner Level Asteroid"
+            Self::MoltenDarkAsteroid => "Beginner Level Asteroid",
+            Self::CryoflareAsteroid => "Intermediate Level Asteroid",
+            Self::CrystalshardAsteroid => "Advanced Level Asteroid",
         }
     }
 
@@ -50,9 +59,18 @@ impl AsteroidKind {
         let max_stats = self.stat_range().max;
         vec![
             ("Max speed".to_string(), format!("{}", max_stats.speed())),
-            ("Max rotation speed".to_string(), format!("{}", max_stats.rotation_speed())),
-            ("Max health".to_string(), format!("{}", max_stats.max_health())),
-            ("Max collision damage".to_string(), format!("{}", max_stats.damage_on_collision())),
+            (
+                "Max rotation speed".to_string(),
+                format!("{}", max_stats.rotation_speed()),
+            ),
+            (
+                "Max health".to_string(),
+                format!("{}", max_stats.max_health()),
+            ),
+            (
+                "Max collision damage".to_string(),
+                format!("{}", max_stats.damage_on_collision()),
+            ),
         ]
     }
 }

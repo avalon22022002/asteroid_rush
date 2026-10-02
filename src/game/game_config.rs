@@ -1,19 +1,21 @@
-use crate::game::entities::{asteroidfield::asteroid::asteroid_kind::AsteroidKind, ship::ship_kind::ShipKind};
+use crate::game::entities::{
+    asteroidfield::asteroid::asteroid_kind::AsteroidKind, ship::ship_kind::ShipKind,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GameLevel {
     Level1,
     Level2,
-    Level3
+    Level3,
 }
 
 impl GameLevel {
     /// Time allotted to complete this level, in seconds, counted down by the HUD's timer.
     pub fn duration_secs(&self) -> f32 {
         match self {
-            GameLevel::Level1 => 30.0,
-            GameLevel::Level2 => 90.0,
-            GameLevel::Level3 => 180.0,
+            GameLevel::Level1 => 60.0,
+            GameLevel::Level2 => 120.0,
+            GameLevel::Level3 => 210.0,
         }
     }
 
@@ -28,15 +30,15 @@ impl GameLevel {
 pub struct GameConfig {
     level: GameLevel,
     ship_kind: ShipKind,
-    asteroid_kind: AsteroidKind
+    asteroid_kind: AsteroidKind,
 }
 
 impl Default for GameConfig {
     fn default() -> Self {
-        GameConfig { 
+        GameConfig {
             level: GameLevel::Level1,
             ship_kind: ShipKind::Sentinel,
-            asteroid_kind: AsteroidKind::MoltenDarkAsteroid
+            asteroid_kind: AsteroidKind::MoltenDarkAsteroid,
         }
     }
 }
@@ -61,7 +63,7 @@ impl GameConfig {
         self.asteroid_kind
     }
 
-    pub fn set_asteroid_kind(&mut self, kind: AsteroidKind ){
-        self.asteroid_kind=kind;
+    pub fn set_asteroid_kind(&mut self, kind: AsteroidKind) {
+        self.asteroid_kind = kind;
     }
 }

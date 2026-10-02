@@ -1,6 +1,6 @@
+use crate::game::asset_repository::audio_repository::traits::AudioClips;
 use macroquad::audio::{self, Sound};
 use strum::EnumIter;
-use crate::game::asset_repository::audio_repository::traits::AudioClips;
 
 const LOG_PREFIX: &str = "[button_hover]";
 
@@ -15,6 +15,12 @@ pub enum ButtonHoverSound {
 pub struct ButtonHoverSounds {
     /// Clip for `ButtonHoverSound::Basic`. Add a field here per new variant.
     basic_hover: Option<Sound>,
+}
+
+impl Default for ButtonHoverSounds {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ButtonHoverSounds {
