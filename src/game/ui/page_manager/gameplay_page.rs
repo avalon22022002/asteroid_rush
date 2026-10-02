@@ -39,7 +39,6 @@ enum GameOutcome {
 }
 
 pub struct GameplayPage {
-    game_config: GameConfig,
     /// Whether the game is currently paused.
     paused: bool,
     /// Set once the run ends; freezes gameplay like `paused`, but there's no resuming from it.
@@ -82,7 +81,6 @@ impl GameplayPage {
         let time_remaining = game_config.level().duration_secs();
 
         Self {
-            game_config,
             paused: false,
             outcome: None,
             end_overlay: None,

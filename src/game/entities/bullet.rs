@@ -19,7 +19,6 @@ use crate::game::{
 
 pub struct Bullet {
     bounds: Rect,
-    kind: BulletKind,
     /// 12:00 clock => 0 or 360 degree, facing upwards, 6:00 clock => 180 degree, facing downwards
     direction: f32,
     stats: BulletStats,
@@ -41,7 +40,6 @@ impl Bullet {
             },
             stats: BulletStats::stats_for(kind),
             animation,
-            kind,
             direction: direction.degrees(),
         }
     }

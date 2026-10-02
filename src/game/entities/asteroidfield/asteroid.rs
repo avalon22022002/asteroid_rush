@@ -53,8 +53,6 @@ pub struct Asteroid {
     /// The asteroid's on-screen box (`x`, `y`, `w`, `h` — position and size together)
     bounds: Rect,
     current_rotation: f32, // Current rotation in radians (matches `DrawTextureParams::rotation`)
-    kind: AsteroidKind,    // The asteroid's kind
-    scale: f32, // Scale factor for asteroid size variation, without needing separate art per size
     stats: AsteroidStats,
     animation: Animation,
     status: AsteroidStatus,
@@ -74,8 +72,6 @@ impl Asteroid {
         Self {
             bounds: Rect::new(pos.x, pos.y, size.x, size.y),
             current_rotation,
-            kind,
-            scale,
             animation: Animation::new(
                 asteroid_sprites.get_textures_for(&kind.texture_kind()),
                 size,
