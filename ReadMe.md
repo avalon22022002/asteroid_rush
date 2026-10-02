@@ -2,6 +2,11 @@
 
 A classic space asteroid shooter game where you pilot a spaceship and shoot down asteroids.
 
+## Demo
+
+- [Watch on YouTube](https://youtu.be/hFXr7JuFGW0)
+- Local video file: [`demo/asteroid_rush_game_demo.mp4`](./demo/asteroid_rush_game_demo.mp4)
+
 ## Tech Stack
 
 - [Rust](https://doc.rust-lang.org/book/) : systems programming language
