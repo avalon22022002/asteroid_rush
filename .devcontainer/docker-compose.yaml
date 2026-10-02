@@ -1,0 +1,61 @@
+services:
+  asteroid-rush-dev:
+    container_name: asteroid-rush-dev
+    build:
+      context: .
+      dockerfile: ./Dockerfile.rust
+    volumes:
+      # Repo root (this file lives in <repo>/.devcontainer)
+      - ../:/workspace/asteroid_rush
+
+      # Cache VS Code Server
+      # - Reused across rebuilds
+      # - Clear this volume if extensions stop installing correctly
+      - vscode-server:/root/.vscode-server
+
+      # Cache Cargo registry (downloaded crates)
+      - cargo-registry:/usr/local/cargo/registry
+
+      # Cache Cargo git dependencies
+      - cargo-git:/usr/local/cargo/git
+
+      # X11 socket for GUI display
+      # - Real and useful on native Linux, or a WSL2 shell with WSLg
+      # - Just an empty, harmless directory everywhere else
+      # - Not used by the default Windows/VcXsrv setup below (that's TCP)
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+
+      # WSLg's PulseAudio socket - Windows' only audio path in, since
+      # the container has no sound device of its own (no /dev/snd)
+      # - WSLG_PULSE_SOURCE is auto-detected by detect-wsl-distro.ps1
+      #   (devcontainer.json's initializeCommand), nothing to edit here
+      # - Default below is a harmless placeholder for non-Windows hosts
+      #   (or if detection didn't run), so this mount never breaks
+      #   `docker compose up` - audio just won't be there
+      - ${WSLG_PULSE_SOURCE:-./pulse-fallback}:/mnt/wslg/PulseServer
+    environment:
+      # Where ALSA's pulse plugin connects (see Dockerfile.rust)
+      # - Always redirects to pulse, even on a host with real ALSA
+      #   hardware passed through - fine for the Windows setup this is
+      #   built for, a real limitation if you're relying on that instead
+      - PULSE_SERVER=unix:/mnt/wslg/PulseServer
+
+      # Defaults to VcXsrv (XLaunch) on a Windows host, over TCP
+      # - Not a bare `${DISPLAY:-...}`: inheriting the host shell's own
+      #   DISPLAY is unreliable (a stray value like "1" passes right
+      #   through and breaks XOpenDisplay) - see CONTAINER_DISPLAY below
+      # - On native Linux or WSLg instead: set CONTAINER_DISPLAY=:0 in
+      #   `.devcontainer/.env` to use the X11 socket mounted above
+      - DISPLAY=${CONTAINER_DISPLAY:-host.docker.internal:0.0}
+    extra_hosts:
+      # Resolves host.docker.internal for the DISPLAY default above -
+      # automatic on Docker Desktop (Windows/Mac), but native Linux's
+      # Docker Engine needs this pinned explicitly or it won't resolve
+      - "host.docker.internal:host-gateway"
+    stdin_open: true    # Keeps the container's STDIN open so it doesn't exit immediately
+    tty: true           # Allocates a pseudo-terminal, enabling interactive terminal features like color and command input
+
+volumes:
+  vscode-server:
+  cargo-registry:
+  cargo-git:

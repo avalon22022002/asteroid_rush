@@ -1,0 +1,11 @@
+# Normalize line endings
+# Actively normalizes(converts) all text files to LF (Linux-style) line endings
+# helps prevent annoying line diffs when going from windows to linux
+* text=auto eol=lf
+
+# Binary assets: never touch line endings, never diff as text.
+*.png binary
+*.wav binary
+*.ttf binary
+*.otf binary
+*.sb3 binary
