@@ -94,3 +94,25 @@ hear audio since the container has no display or sound device of its own.
   - `WSLG_PULSE_SOURCE` : point at your own PulseAudio socket (e.g.
     `/run/user/1000/pulse/native` on most Linux desktops)
 - Not tested on either platform
+
+## Releases
+
+- Prebuilt binaries live in [`releases/`](releases/), one subfolder per
+  platform
+- Sprites and audio are embedded into the binary at compile time (via
+  `include_bytes!`), so each one is fully standalone, no extra files
+  needed alongside it
+- **Windows:** [`releases/windows/`](releases/windows/) : download the
+  latest `.exe` and run it directly
+
+### Building a new Windows release
+
+```powershell
+cargo build --release
+New-Item -ItemType Directory -Force -Path releases\windows | Out-Null
+Move-Item target\release\asteroid_rush.exe "releases\windows\asteroid_rush_windows_$([DateTime]::UtcNow.ToString('yyyyMMdd')).exe"
+```
+
+- Builds the optimized binary
+- Drops it into `releases/windows/`
+- Names it with today's date (UTC), e.g. `asteroid_rush_windows_20261002.exe`
