@@ -1,6 +1,9 @@
 use crate::game::{
     asset_repository::{
-        audio_repository::{AudioRepository, asteroid_destruction::AsteroidDestructionSound, traits::AudioClips},
+        audio_repository::{
+            AudioRepository, asteroid_destruction::AsteroidDestructionSound,
+            asteroid_hit::AsteroidHitSound, traits::AudioClips,
+        },
         traits::Singleton,
     },
     entities::asteroidfield::asteroid::{Asteroid, asteroid_kind::AsteroidKind},
@@ -85,6 +88,14 @@ impl AsteroidField {
                     );
                 } else {
                     println!("{LOG_PREFIX} resolved a bullet collision, dealt {bullet_damage} damage");
+
+                    // play the asteroid hit sound
+                    audio::play_sound_once(
+                        AudioRepository::get_instance()
+                            .asteroid_hit_sounds
+                            .get_clip_for(&AsteroidHitSound::Tick)
+                            .unwrap_or_else(|| panic!("{LOG_PREFIX} asteroid hit sound not loaded")),
+                    );
                 }
                 return true;
             }
