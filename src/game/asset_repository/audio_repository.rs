@@ -6,6 +6,7 @@ pub mod asteroid_destruction;
 pub mod asteroid_hit;
 pub mod ship_destruction;
 pub mod ship_damage;
+pub mod game_outcome;
 
 use std::sync::OnceLock;
 
@@ -18,6 +19,7 @@ use asteroid_destruction::AsteroidDestructionSounds;
 use asteroid_hit::AsteroidHitSounds;
 use ship_destruction::ShipDestructionSounds;
 use ship_damage::ShipDamageSounds;
+use game_outcome::GameOutcomeSounds;
 use crate::game::asset_repository::{
     audio_repository::traits::AudioClips,
     traits::{Preloadable, Singleton},
@@ -44,6 +46,7 @@ pub struct AudioRepository {
     pub asteroid_hit_sounds: AsteroidHitSounds,
     pub ship_destruction_sounds: ShipDestructionSounds,
     pub ship_damage_sounds: ShipDamageSounds,
+    pub game_outcome_sounds: GameOutcomeSounds,
 }
 
 impl AudioRepository {
@@ -56,6 +59,7 @@ impl AudioRepository {
             asteroid_hit_sounds: AsteroidHitSounds::new(),
             ship_destruction_sounds: ShipDestructionSounds::new(),
             ship_damage_sounds: ShipDamageSounds::new(),
+            game_outcome_sounds: GameOutcomeSounds::new(),
         }
     }
 }
@@ -89,6 +93,7 @@ impl Preloadable for AudioRepository {
             self.asteroid_hit_sounds.load_all_clips(),
             self.ship_destruction_sounds.load_all_clips(),
             self.ship_damage_sounds.load_all_clips(),
+            self.game_outcome_sounds.load_all_clips(),
         );
     }
 }

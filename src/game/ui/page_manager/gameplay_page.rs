@@ -1,7 +1,13 @@
-use macroquad::prelude::*;
+use macroquad::{audio, prelude::*};
 
 use crate::game::{
-    BASE_HEIGHT, BASE_WIDTH, asset_repository::sprite_repository::traits::SpriteBounds, entities::{asteroidfield::AsteroidField, ship::Ship}, game_config::GameConfig, traits::damage::Damageable, traits::interaction::{Interactive, SelfEventHandler}, traits::rendering::{Drawable, StateUpdatable}, ui::components::{
+    BASE_HEIGHT, BASE_WIDTH,
+    asset_repository::{
+        audio_repository::{AudioRepository, game_outcome::GameOutcomeSound, traits::AudioClips},
+        sprite_repository::traits::SpriteBounds,
+        traits::Singleton,
+    },
+    entities::{asteroidfield::AsteroidField, ship::Ship}, game_config::GameConfig, traits::damage::Damageable, traits::interaction::{Interactive, SelfEventHandler}, traits::rendering::{Drawable, StateUpdatable}, ui::components::{
         button::{Button, ButtonEvents, ButtonKind},
         hud::{Hud, HudData},
         overlay_v1::{OverlayV1, OverlayV1Event},
@@ -107,6 +113,18 @@ impl GameplayPage {
         ));
         self.outcome = Some(outcome);
         println!("{LOG_PREFIX} Game ended: {outcome:?}");
+
+        // play the matching outcome sound
+        let outcome_sound = match outcome {
+            GameOutcome::Victory => GameOutcomeSound::Victory,
+            GameOutcome::Defeat => GameOutcomeSound::Defeat,
+        };
+        audio::play_sound_once(
+            AudioRepository::get_instance()
+                .game_outcome_sounds
+                .get_clip_for(&outcome_sound)
+                .unwrap_or_else(|| panic!("{LOG_PREFIX} outcome sound not loaded")),
+        );
     }
 }
 
