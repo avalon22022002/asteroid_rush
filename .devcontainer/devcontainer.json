@@ -5,13 +5,15 @@
   "workspaceFolder": "/workspace/asteroid_rush",
   // Auto-detect WSL distro for audio (see docker-compose.yaml)
   // - Windows only
-  // - "|| true" makes it a no-op on Mac/Linux (no `powershell`)
-  "initializeCommand": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${localWorkspaceFolder}/.devcontainer/detect-wsl-distro.ps1\" || true",
+  // - Path is unquoted: VS Code passes embedded quotes through literally, breaking -File
+  // - Assumes the workspace path has no spaces
+  // - "|| cd ." is a no-op fallback elsewhere (cmd.exe doesn't know "|| true")
+  "initializeCommand": "powershell -NoProfile -ExecutionPolicy Bypass -File ${localWorkspaceFolder}\\.devcontainer\\detect-wsl-distro.ps1 || cd .",
   "customizations": {
     "vscode": {
       "extensions": [
         "rust-lang.rust-analyzer", // for rust intellisense
-        "vadimcn.vscode-lldb"  // for debugging via lldb
+        "vadimcn.vscode-lldb" // for debugging via lldb
       ],
       "settings": {
         "editor.formatOnSave": true,
