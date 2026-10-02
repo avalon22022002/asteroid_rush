@@ -1,9 +1,13 @@
 use crate::game::{
+    asset_repository::{
+        audio_repository::{AudioRepository, asteroid_destruction::AsteroidDestructionSound, traits::AudioClips},
+        traits::Singleton,
+    },
     entities::asteroidfield::asteroid::{Asteroid, asteroid_kind::AsteroidKind},
     traits::{damage::{Damageable, DamageResult}, object::HasBoundingCircle, rendering::{Drawable, StateUpdatable}},
     utils::MinMax,
 };
-use macroquad::{math::Vec2, window::{screen_width}};
+use macroquad::{audio, math::Vec2, window::{screen_width}};
 
 pub mod asteroid;
 
@@ -71,6 +75,14 @@ impl AsteroidField {
                     let points = asteroid.points_on_destruction();
                     *score += points;
                     println!("{LOG_PREFIX} resolved a bullet collision, destroyed asteroid worth {points} points");
+
+                    // play the asteroid destruction sound
+                    audio::play_sound_once(
+                        AudioRepository::get_instance()
+                            .asteroid_destruction_sounds
+                            .get_clip_for(&AsteroidDestructionSound::Retro)
+                            .unwrap_or_else(|| panic!("{LOG_PREFIX} asteroid destruction sound not loaded")),
+                    );
                 } else {
                     println!("{LOG_PREFIX} resolved a bullet collision, dealt {bullet_damage} damage");
                 }

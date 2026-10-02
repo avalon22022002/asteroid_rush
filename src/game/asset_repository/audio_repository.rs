@@ -2,6 +2,7 @@ pub mod traits;
 pub mod button_click;
 pub mod button_hover;
 pub mod gun_fire;
+pub mod asteroid_destruction;
 
 use std::sync::OnceLock;
 
@@ -10,6 +11,7 @@ use futures::executor;
 use button_click::ButtonClickSounds;
 use button_hover::ButtonHoverSounds;
 use gun_fire::GunFireSounds;
+use asteroid_destruction::AsteroidDestructionSounds;
 use crate::game::asset_repository::{
     audio_repository::traits::AudioClips,
     traits::{Preloadable, Singleton},
@@ -32,6 +34,7 @@ pub struct AudioRepository {
     pub button_click_sounds: ButtonClickSounds,
     pub button_hover_sounds: ButtonHoverSounds,
     pub gun_fire_sounds: GunFireSounds,
+    pub asteroid_destruction_sounds: AsteroidDestructionSounds,
 }
 
 impl AudioRepository {
@@ -40,6 +43,7 @@ impl AudioRepository {
             button_click_sounds: ButtonClickSounds::new(),
             button_hover_sounds: ButtonHoverSounds::new(),
             gun_fire_sounds: GunFireSounds::new(),
+            asteroid_destruction_sounds: AsteroidDestructionSounds::new(),
         }
     }
 }
@@ -69,6 +73,7 @@ impl Preloadable for AudioRepository {
             self.button_click_sounds.load_all_clips(),
             self.button_hover_sounds.load_all_clips(),
             self.gun_fire_sounds.load_all_clips(),
+            self.asteroid_destruction_sounds.load_all_clips(),
         );
     }
 }
