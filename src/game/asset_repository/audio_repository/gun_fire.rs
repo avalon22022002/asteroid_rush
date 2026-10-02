@@ -17,6 +17,12 @@ pub struct GunFireSounds {
     laser: Option<Sound>,
 }
 
+impl Default for GunFireSounds {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl GunFireSounds {
     pub fn new() -> Self {
         Self { laser: None }

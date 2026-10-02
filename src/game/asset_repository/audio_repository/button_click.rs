@@ -17,6 +17,12 @@ pub struct ButtonClickSounds {
     basic_click: Option<Sound>,
 }
 
+impl Default for ButtonClickSounds {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ButtonClickSounds {
     pub fn new() -> Self {
         Self { basic_click: None }

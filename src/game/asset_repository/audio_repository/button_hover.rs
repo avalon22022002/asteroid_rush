@@ -17,6 +17,12 @@ pub struct ButtonHoverSounds {
     basic_hover: Option<Sound>,
 }
 
+impl Default for ButtonHoverSounds {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ButtonHoverSounds {
     pub fn new() -> Self {
         Self { basic_hover: None }

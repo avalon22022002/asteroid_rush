@@ -46,6 +46,12 @@ pub struct AudioRepository {
     pub game_outcome_sounds: GameOutcomeSounds,
 }
 
+impl Default for AudioRepository {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AudioRepository {
     pub fn new() -> Self {
         Self {

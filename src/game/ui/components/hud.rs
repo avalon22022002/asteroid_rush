@@ -19,6 +19,12 @@ pub struct Hud {
     data: HudData,
 }
 
+impl Default for Hud {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Hud {
     pub fn new() -> Self {
         Self {

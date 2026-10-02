@@ -38,6 +38,12 @@ pub struct BannerV1 {
     ship_selection_page_main_texture: Vec<Texture2D>,
 }
 
+impl Default for BannerV1 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl BannerV1 {
     pub fn new() -> Self {
         Self {

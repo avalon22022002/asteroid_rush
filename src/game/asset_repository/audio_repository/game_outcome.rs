@@ -20,6 +20,12 @@ pub struct GameOutcomeSounds {
     defeat: Option<Sound>,
 }
 
+impl Default for GameOutcomeSounds {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl GameOutcomeSounds {
     pub fn new() -> Self {
         Self {

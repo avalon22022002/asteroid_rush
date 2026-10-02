@@ -17,6 +17,12 @@ pub struct AsteroidDestructionSounds {
     retro: Option<Sound>,
 }
 
+impl Default for AsteroidDestructionSounds {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AsteroidDestructionSounds {
     pub fn new() -> Self {
         Self { retro: None }

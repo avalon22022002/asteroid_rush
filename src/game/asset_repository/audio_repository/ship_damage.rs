@@ -17,6 +17,12 @@ pub struct ShipDamageSounds {
     basic: Option<Sound>,
 }
 
+impl Default for ShipDamageSounds {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ShipDamageSounds {
     pub fn new() -> Self {
         Self { basic: None }

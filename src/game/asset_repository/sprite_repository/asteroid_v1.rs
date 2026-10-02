@@ -61,6 +61,12 @@ pub struct AsteroidV1 {
     crystalshard_texture: Vec<Texture2D>,
 }
 
+impl Default for AsteroidV1 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AsteroidV1 {
     pub fn new() -> Self {
         Self {

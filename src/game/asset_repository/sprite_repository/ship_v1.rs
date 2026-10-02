@@ -74,6 +74,12 @@ pub struct ShipV1 {
     // Add field pair here per new variant in ShipV1Textures.
 }
 
+impl Default for ShipV1 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ShipV1 {
     pub fn new() -> Self {
         Self {

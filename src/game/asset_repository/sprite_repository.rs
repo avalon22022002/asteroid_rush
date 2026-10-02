@@ -40,6 +40,12 @@ pub struct SpriteRepository {
     pub ship_v1_sprite: ShipV1,
 }
 
+impl Default for SpriteRepository {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SpriteRepository {
     pub fn new() -> Self {
         Self {

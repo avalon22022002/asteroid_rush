@@ -32,6 +32,12 @@ pub struct ButtonV1 {
     scifi_v1_texture: Vec<Texture2D>,
 }
 
+impl Default for ButtonV1 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ButtonV1 {
     pub fn new() -> Self {
         Self {

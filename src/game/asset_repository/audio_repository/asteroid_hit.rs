@@ -17,6 +17,12 @@ pub struct AsteroidHitSounds {
     tick: Option<Sound>,
 }
 
+impl Default for AsteroidHitSounds {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AsteroidHitSounds {
     pub fn new() -> Self {
         Self { tick: None }
