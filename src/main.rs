@@ -12,7 +12,7 @@ use macroquad::prelude::*;
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    println!("Moving star field with Home Page!");
+    println!("AsteroRush: classic space shooter game");
 
     // Both repositories build (and, via Singleton::new, fully load) on this
     // first `get_instance` call, so every sound/texture is decoded here,
